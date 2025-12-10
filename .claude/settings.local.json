@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(wc:*)",
+      "Bash(go mod tidy:*)",
+      "Bash(go build:*)",
+      "Bash(\"C:/Program Files/Go/bin/go.exe\" build ./...)",
+      "Bash(\"C:/Program Files/Go/bin/go.exe\" test ./...)",
+      "Bash(\"C:/Program Files/Go/bin/go.exe\" test -v ./internal/service/...)",
+      "Bash(dir:*)",
+      "Bash(npm install)",
+      "Bash(npm run build:*)",
+      "Bash(npm run check:*)",
+      "Bash(go test:*)",
+      "Bash(\"/c/Program Files/Go/bin/go.exe\" build ./...)",
+      "Bash(\"/c/Program Files/Go/bin/go.exe\" test ./...)",
+      "Bash(ls -la \"C:\\code\\vacayv2\\vacaytracker-frontend\\src\"\" 2>/dev/null || ls -R \"C:codevacayv2vacaytracker-frontend \")",
+      "Bash(find:*)",
+      "Bash(docker compose config:*)",
+      "Bash(docker compose:*)",
+      "Bash(curl:*)",
+      "Bash(\"/c/Program Files/Go/bin/go.exe\" test ./internal/service/... -v)",
+      "Bash(npm install:*)",
+      "Bash(xargs cat:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:melt-ui.com)",
+      "Bash(\"C:/Program Files/Go/bin/go.exe\" test ./internal/service/... -v)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

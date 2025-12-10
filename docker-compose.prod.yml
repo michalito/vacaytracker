@@ -1,0 +1,38 @@
+# VacayTracker Production Docker Compose
+# Usage: docker compose -f docker-compose.prod.yml up --build
+
+services:
+  api:
+    build: ./vacaytracker-api
+    ports:
+      - "0:3000"  # Random host port -> container 3000
+    environment:
+      - PORT=3000
+      - ENV=production
+      - DB_PATH=/app/data/vacaytracker.db
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@company.com}
+      - ADMIN_NAME=${ADMIN_NAME:-Captain Admin}
+    volumes:
+      - vacaytracker-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  frontend:
+    build: ./vacaytracker-frontend
+    ports:
+      - "0:3000"  # Random host port -> container 3000
+    environment:
+      - ORIGIN=http://localhost:3000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  vacaytracker-data:

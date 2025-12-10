@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+
+@theme {
+	/* Beach/Ocean Theme Colors - Brand Palette */
+	/* Based on: #18C8D3, #15ABCB, #0D83A2, #00384F, #F2F2F2 */
+	--color-ocean-50: #e6f7f9;
+	--color-ocean-100: #cceff3;
+	--color-ocean-200: #99dfe7;
+	--color-ocean-300: #18C8D3;  /* Light cyan from logo */
+	--color-ocean-400: #15ABCB;  /* Medium teal from logo */
+	--color-ocean-500: #0D83A2;  /* Primary teal from logo */
+	--color-ocean-600: #0a6a84;
+	--color-ocean-700: #075266;
+	--color-ocean-800: #00384F;  /* Dark navy from logo */
+	--color-ocean-900: #002535;
+
+	/* Neutral from logo */
+	--color-neutral: #F2F2F2;
+
+	/* Coral/Peach Accent (from logo umbrella) */
+	--color-coral-400: #f4a574;
+	--color-coral-500: #f08c4f;
+	--color-coral-600: #e57328;
+
+	/* Sand Colors */
+	--color-sand-50: oklch(0.98 0.01 80);
+	--color-sand-100: oklch(0.95 0.02 80);
+	--color-sand-200: oklch(0.9 0.04 80);
+	--color-sand-300: oklch(0.85 0.06 80);
+	--color-sand-400: oklch(0.75 0.08 80);
+	--color-sand-500: oklch(0.65 0.1 80);
+
+	/* Semantic Colors */
+	--color-success: oklch(0.65 0.2 145);
+	--color-warning: oklch(0.75 0.18 85);
+	--color-error: oklch(0.6 0.22 25);
+	--color-info: oklch(0.65 0.15 250);
+
+	/* Status Colors */
+	--color-pending: oklch(0.75 0.15 85);
+	--color-approved: oklch(0.65 0.2 145);
+	--color-rejected: oklch(0.6 0.22 25);
+
+	/* Typography */
+	--font-family-sans: 'Inter', system-ui, sans-serif;
+	--font-family-display: 'Cal Sans', var(--font-family-sans);
+
+	/* Border Radius */
+	--radius-sm: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--radius-full: 9999px;
+
+	/* Shadows */
+	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Base Styles */
+html {
+	font-family: var(--font-family-sans);
+}
+
+body {
+	@apply bg-sand-50 text-ocean-900;
+}
+
+/* Focus Styles */
+*:focus-visible {
+	@apply outline-2 outline-offset-2 outline-ocean-500;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+	@apply w-2;
+}
+
+::-webkit-scrollbar-track {
+	@apply bg-sand-100;
+}
+
+::-webkit-scrollbar-thumb {
+	@apply bg-ocean-300 rounded-full;
+}
+
+/* ============================================
+   Animation Utilities
+   ============================================ */
+
+/* Fade in animation */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Slide down animation */
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Scale in animation */
+@keyframes scaleIn {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* Animation classes */
+.animate-fade-in {
+	animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slide-up {
+	animation: slideUp 0.3s ease-out;
+}
+
+.animate-slide-down {
+	animation: slideDown 0.3s ease-out;
+}
+
+.animate-scale-in {
+	animation: scaleIn 0.2s ease-out;
+}
+
+/* Transition utilities */
+.transition-base {
+	@apply transition-all duration-200 ease-in-out;
+}
+
+.transition-fast {
+	@apply transition-all duration-150 ease-in-out;
+}
+
+.transition-slow {
+	@apply transition-all duration-300 ease-in-out;
+}
+
+/* Hover effects for cards */
+.hover-lift {
+	@apply transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md;
+}
+
+/* Modal backdrop animation */
+.backdrop-fade {
+	animation: fadeIn 0.15s ease-out;
+}
+
+/* Modal content animation */
+.modal-enter {
+	animation: scaleIn 0.2s ease-out;
+}
+
+/* Wave animation for login page */
+@keyframes wave {
+	0%, 100% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(-25px);
+	}
+}
+
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+@keyframes shake {
+	0%, 100% {
+		transform: translateX(0);
+	}
+	10%, 30%, 50%, 70%, 90% {
+		transform: translateX(-4px);
+	}
+	20%, 40%, 60%, 80% {
+		transform: translateX(4px);
+	}
+}
+
+.animate-wave {
+	animation: wave 8s ease-in-out infinite;
+}
+
+.animate-float {
+	animation: float 6s ease-in-out infinite;
+}
+
+.animate-shake {
+	animation: shake 0.5s ease-in-out;
+}
+
+/* Sign in button */
+.btn-wave {
+	background: var(--color-ocean-500);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.btn-wave:hover {
+	background: var(--color-ocean-600);
+	box-shadow: 0 4px 12px -2px rgba(13, 131, 162, 0.4);
+}
+
+.btn-wave:active {
+	transform: scale(0.98);
+}
