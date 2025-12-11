@@ -13,7 +13,7 @@
 	// Redirect if already authenticated
 	$effect(() => {
 		if (auth.isAuthenticated) {
-			goto(auth.isAdmin ? '/admin' : '/employee');
+			goto('/dashboard');
 		}
 	});
 
@@ -50,7 +50,7 @@
 		try {
 			await auth.login(email, password);
 			toast.success('Welcome back!');
-			goto(auth.isAdmin ? '/admin' : '/employee');
+			goto('/dashboard');
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Login failed');
 			hasError = true;

@@ -2,6 +2,7 @@
 	import type { VacationRequest } from '$lib/types';
 	import { vacation } from '$lib/stores/vacation.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
+	import { formatDateMedium } from '$lib/utils/date';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { Calendar, Trash2 } from 'lucide-svelte';
@@ -13,15 +14,6 @@
 	let { request }: Props = $props();
 
 	let isCancelling = $state(false);
-
-	function formatDate(dateStr: string): string {
-		const date = new Date(dateStr);
-		return date.toLocaleDateString('en-GB', {
-			day: 'numeric',
-			month: 'short',
-			year: 'numeric'
-		});
-	}
 
 	async function handleCancel() {
 		if (!confirm('Are you sure you want to cancel this request?')) return;
@@ -45,7 +37,7 @@
 		</div>
 		<div>
 			<p class="font-medium text-ocean-800">
-				{formatDate(request.startDate)} - {formatDate(request.endDate)}
+				{formatDateMedium(request.startDate)} - {formatDateMedium(request.endDate)}
 			</p>
 			<p class="text-sm text-ocean-500">
 				{request.totalDays} day{request.totalDays !== 1 ? 's' : ''}

@@ -1,19 +1,11 @@
 <script lang="ts">
 	import { auth } from '$lib/stores/auth.svelte';
+	import { formatDateLong } from '$lib/utils/date';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Avatar from '$lib/components/ui/Avatar.svelte';
 	import PasswordChange from '$lib/components/features/auth/PasswordChange.svelte';
 	import EmailPreferences from '$lib/components/features/auth/EmailPreferences.svelte';
 	import { User, Calendar, Briefcase } from 'lucide-svelte';
-
-	function formatDate(dateStr: string | undefined): string {
-		if (!dateStr) return 'Not set';
-		return new Date(dateStr).toLocaleDateString('en-GB', {
-			day: 'numeric',
-			month: 'long',
-			year: 'numeric'
-		});
-	}
 </script>
 
 <svelte:head>
@@ -53,7 +45,7 @@
 					</div>
 					<div>
 						<p class="text-sm text-ocean-500">Start Date</p>
-						<p class="font-medium text-ocean-800">{formatDate(auth.user?.startDate)}</p>
+						<p class="font-medium text-ocean-800">{formatDateLong(auth.user?.startDate)}</p>
 					</div>
 				</div>
 			</div>

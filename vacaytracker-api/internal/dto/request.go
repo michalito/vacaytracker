@@ -93,3 +93,17 @@ type NewsletterConfigRequest struct {
 	Frequency  *string `json:"frequency,omitempty" binding:"omitempty,oneof=weekly monthly"`
 	DayOfMonth *int    `json:"dayOfMonth,omitempty" binding:"omitempty,min=1,max=28"`
 }
+
+// ============================================
+// Email Test Requests (Admin)
+// ============================================
+
+// TestEmailRequest represents a request to send a test email
+type TestEmailRequest struct {
+	Template string `json:"template" binding:"required,oneof=welcome request_submitted request_approved request_rejected admin_notification newsletter"`
+}
+
+// PreviewEmailRequest represents a request to preview an email template
+type PreviewEmailRequest struct {
+	Template string `json:"template" binding:"required,oneof=welcome request_submitted request_approved request_rejected admin_notification newsletter"`
+}

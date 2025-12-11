@@ -25,7 +25,9 @@
       "Bash(xargs cat:*)",
       "Bash(ls:*)",
       "WebFetch(domain:melt-ui.com)",
-      "Bash(\"C:/Program Files/Go/bin/go.exe\" test ./internal/service/... -v)"
+      "Bash(\"C:/Program Files/Go/bin/go.exe\" test ./internal/service/... -v)",
+      "WebFetch(domain:resend.com)",
+      "Bash(docker ps:*)"
     ],
     "deny": [],
     "ask": []

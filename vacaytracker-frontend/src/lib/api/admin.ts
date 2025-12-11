@@ -7,7 +7,10 @@ import type {
 	CreateUserForm,
 	UpdateUserForm,
 	NewsletterPreview,
-	NewsletterSendResponse
+	NewsletterSendResponse,
+	TestEmailResponse,
+	EmailTemplateType,
+	EmailPreviewResponse
 } from '$lib/types';
 
 export const adminApi = {
@@ -101,5 +104,20 @@ export const adminApi = {
 
 	getNewsletterPreview: (): Promise<NewsletterPreview> => {
 		return request('/admin/newsletter/preview');
+	},
+
+	// Email Testing
+	sendTestEmail: (template: EmailTemplateType): Promise<TestEmailResponse> => {
+		return request('/admin/email/test', {
+			method: 'POST',
+			body: JSON.stringify({ template })
+		});
+	},
+
+	previewEmail: (template: EmailTemplateType): Promise<EmailPreviewResponse> => {
+		return request('/admin/email/preview', {
+			method: 'POST',
+			body: JSON.stringify({ template })
+		});
 	}
 };

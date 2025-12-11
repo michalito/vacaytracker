@@ -1,14 +1,9 @@
 <script lang="ts">
 	import { auth } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
-	import EmployeeHeader from '$lib/components/layout/EmployeeHeader.svelte';
-	import type { Snippet } from 'svelte';
+	import UnifiedHeader from '$lib/components/layout/UnifiedHeader.svelte';
 
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
+	let { children } = $props();
 
 	$effect(() => {
 		if (!auth.isLoading && !auth.isAuthenticated) {
@@ -19,7 +14,7 @@
 
 {#if auth.isAuthenticated}
 	<div class="min-h-screen bg-sand-50">
-		<EmployeeHeader />
+		<UnifiedHeader />
 		<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 			{@render children()}
 		</main>

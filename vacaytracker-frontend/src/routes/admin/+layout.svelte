@@ -1,15 +1,9 @@
 <script lang="ts">
 	import { auth } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
-	import AdminSidebar from '$lib/components/layout/AdminSidebar.svelte';
-	import AdminHeader from '$lib/components/layout/AdminHeader.svelte';
-	import type { Snippet } from 'svelte';
+	import UnifiedHeader from '$lib/components/layout/UnifiedHeader.svelte';
 
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
+	let { children } = $props();
 
 	$effect(() => {
 		if (!auth.isLoading && (!auth.isAuthenticated || !auth.isAdmin)) {
@@ -19,13 +13,10 @@
 </script>
 
 {#if auth.isAuthenticated && auth.isAdmin}
-	<div class="min-h-screen bg-sand-50 flex">
-		<AdminSidebar />
-		<div class="flex-1 flex flex-col">
-			<AdminHeader />
-			<main class="flex-1 p-6">
-				{@render children()}
-			</main>
-		</div>
+	<div class="min-h-screen bg-sand-50">
+		<UnifiedHeader />
+		<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+			{@render children()}
+		</main>
 	</div>
 {/if}

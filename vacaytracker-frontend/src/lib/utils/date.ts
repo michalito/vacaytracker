@@ -185,3 +185,76 @@ export function getMonthsForWeek(date: Date): { month: number; year: number }[] 
 
 	return months;
 }
+
+// ============================================
+// UI Display Formatting Functions
+// ============================================
+
+/**
+ * Format date string to short display format: "15 Jan"
+ * @param dateStr - ISO date string (YYYY-MM-DD) or any valid date string
+ * @param locale - Locale for formatting (default: 'en-GB')
+ */
+export function formatDateShort(dateStr: string, locale = 'en-GB'): string {
+	return new Date(dateStr).toLocaleDateString(locale, {
+		day: 'numeric',
+		month: 'short'
+	});
+}
+
+/**
+ * Format date string to medium display format: "15 Jan 2025"
+ * @param dateStr - ISO date string (YYYY-MM-DD) or any valid date string
+ * @param locale - Locale for formatting (default: 'en-GB')
+ */
+export function formatDateMedium(dateStr: string, locale = 'en-GB'): string {
+	return new Date(dateStr).toLocaleDateString(locale, {
+		day: 'numeric',
+		month: 'short',
+		year: 'numeric'
+	});
+}
+
+/**
+ * Format date string to long display format: "15 January 2025"
+ * @param dateStr - ISO date string (YYYY-MM-DD) or any valid date string
+ * @param locale - Locale for formatting (default: 'en-GB')
+ */
+export function formatDateLong(dateStr: string | undefined, locale = 'en-GB'): string {
+	if (!dateStr) return 'Not set';
+	return new Date(dateStr).toLocaleDateString(locale, {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric'
+	});
+}
+
+/**
+ * Format date range to display format: "15 Jan - 20 Jan"
+ * @param startDate - Start date string
+ * @param endDate - End date string
+ * @param locale - Locale for formatting (default: 'en-GB')
+ */
+export function formatDateRangeShort(startDate: string, endDate: string, locale = 'en-GB'): string {
+	const startStr = formatDateShort(startDate, locale);
+	const endStr = formatDateShort(endDate, locale);
+	return `${startStr} - ${endStr}`;
+}
+
+/**
+ * Convert HTML date input (YYYY-MM-DD) to EU API format (DD/MM/YYYY)
+ * @param dateStr - Date in YYYY-MM-DD format (from HTML date input)
+ */
+export function toApiDateFormat(dateStr: string): string {
+	const [year, month, day] = dateStr.split('-');
+	return `${day}/${month}/${year}`;
+}
+
+/**
+ * Convert EU format (DD/MM/YYYY) to ISO format (YYYY-MM-DD)
+ * @param dateStr - Date in DD/MM/YYYY format
+ */
+export function fromApiDateFormat(dateStr: string): string {
+	const [day, month, year] = dateStr.split('/');
+	return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}

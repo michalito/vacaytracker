@@ -143,3 +143,26 @@ export interface NewsletterSendResponse {
 	recipientCount: number;
 	message: string;
 }
+
+// Email Testing Types
+export type EmailTemplateType =
+	| 'welcome'
+	| 'request_submitted'
+	| 'request_approved'
+	| 'request_rejected'
+	| 'admin_notification'
+	| 'newsletter';
+
+export interface TestEmailResponse {
+	success: boolean;
+	template: string;
+	sentTo: string;
+	message: string;
+}
+
+export interface EmailPreviewResponse {
+	template: string;
+	subject: string;
+	htmlBody: string;
+	textBody: string;
+}

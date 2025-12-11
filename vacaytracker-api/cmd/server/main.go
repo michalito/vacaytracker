@@ -73,7 +73,7 @@ func main() {
 	healthHandler := handler.NewHealthHandler()
 	authHandler := handler.NewAuthHandler(authService)
 	vacationHandler := handler.NewVacationHandler(vacationService, vacationRepo, userRepo, emailService)
-	adminHandler := handler.NewAdminHandler(userService, userRepo, vacationService, vacationRepo, settingsRepo, emailService, newsletterService)
+	adminHandler := handler.NewAdminHandler(cfg, userService, userRepo, vacationService, vacationRepo, settingsRepo, emailService, newsletterService)
 
 	// Create Gin router
 	router := gin.New()
@@ -165,6 +165,10 @@ func main() {
 			// Newsletter
 			admin.POST("/newsletter/send", adminHandler.SendNewsletter)
 			admin.GET("/newsletter/preview", adminHandler.PreviewNewsletter)
+
+			// Email Testing
+			admin.POST("/email/test", adminHandler.SendTestEmail)
+			admin.POST("/email/preview", adminHandler.PreviewEmail)
 		}
 	}
 

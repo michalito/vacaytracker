@@ -177,6 +177,22 @@ type NewsletterPreviewResponse struct {
 	RecipientCount int      `json:"recipientCount"`
 }
 
+// TestEmailResponse represents the result of sending a test email
+type TestEmailResponse struct {
+	Success  bool   `json:"success"`
+	Template string `json:"template"`
+	SentTo   string `json:"sentTo"`
+	Message  string `json:"message"`
+}
+
+// EmailPreviewResponse represents a preview of an email template
+type EmailPreviewResponse struct {
+	Template string `json:"template"`
+	Subject  string `json:"subject"`
+	HTMLBody string `json:"htmlBody"`
+	TextBody string `json:"textBody"`
+}
+
 // ============================================
 // Balance Reset Response
 // ============================================

@@ -46,11 +46,19 @@ make test-coverage         # Test with coverage report
 make lint                  # golangci-lint run
 make migrate               # Run database migrations
 
-# Run a single test file
-go test -v ./internal/service/vacation_test.go ./internal/service/vacation.go
+# Run tests for a specific package
+go test -v ./internal/service/...
 
 # Run specific test function
 go test -v -run TestFunctionName ./internal/service/...
+```
+
+**Docker (from project root):**
+```bash
+docker compose up --build          # Start full stack
+docker compose down                # Stop containers
+docker compose logs -f frontend    # Follow frontend logs
+docker compose logs -f api         # Follow API logs
 ```
 
 ## Architecture

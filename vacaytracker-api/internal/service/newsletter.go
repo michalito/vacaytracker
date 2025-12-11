@@ -154,13 +154,13 @@ func (s *NewsletterService) GeneratePreview(ctx context.Context) (*dto.Newslette
 		return nil, fmt.Errorf("failed to build newsletter data: %w", err)
 	}
 
-	// Render templates
-	htmlBody, err := s.emailService.renderTemplate(newsletterHTML, data)
+	// Render templates using pre-compiled newsletter templates
+	htmlBody, err := s.emailService.RenderNewsletterHTML(data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to render HTML template: %w", err)
 	}
 
-	textBody, err := s.emailService.renderTemplate(newsletterText, data)
+	textBody, err := s.emailService.RenderNewsletterText(data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to render text template: %w", err)
 	}
@@ -201,21 +201,25 @@ func (s *NewsletterService) Send(ctx context.Context) (int, error) {
 			continue
 		}
 
-		// Render templates
-		htmlBody, err := s.emailService.renderTemplate(newsletterHTML, data)
+		// Render templates using pre-compiled newsletter templates
+		htmlBody, err := s.emailService.RenderNewsletterHTML(data)
 		if err != nil {
 			log.Printf("[NEWSLETTER ERROR] Failed to render HTML for %s: %v", recipient.Email, err)
 			continue
 		}
 
-		textBody, err := s.emailService.renderTemplate(newsletterText, data)
+		textBody, err := s.emailService.RenderNewsletterText(data)
 		if err != nil {
 			log.Printf("[NEWSLETTER ERROR] Failed to render text for %s: %v", recipient.Email, err)
 			continue
 		}
 
-		// Send email (non-blocking)
-		s.emailService.SendAsync(recipient.Email, newsletterSubject, htmlBody, textBody)
+		// Send email (non-blocking) with newsletter-specific options
+		opts := &SendOptions{
+			IdempotencyKey: generateIdempotencyKey(recipient.Email, newsletterSubject, data.Period),
+			Tags:           []string{"newsletter", "monthly-summary"},
+		}
+		s.emailService.SendAsync(recipient.Email, newsletterSubject, htmlBody, textBody, opts)
 		sentCount++
 	}
 

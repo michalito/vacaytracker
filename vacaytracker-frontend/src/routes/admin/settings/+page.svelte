@@ -6,6 +6,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import WeekendPolicy from '$lib/components/features/admin/WeekendPolicy.svelte';
 	import NewsletterSettings from '$lib/components/features/admin/NewsletterSettings.svelte';
+	import EmailTestPanel from '$lib/components/features/admin/EmailTestPanel.svelte';
 	import { Settings, Save, RotateCcw, AlertTriangle } from 'lucide-svelte';
 	import type { WeekendPolicy as WeekendPolicyType, NewsletterConfig } from '$lib/types';
 
@@ -194,6 +195,9 @@
 			markChanged();
 		}}
 	/>
+
+	<!-- Email Test Panel -->
+	<EmailTestPanel />
 </div>
 
 <!-- Reset Confirmation Modal -->

@@ -2,8 +2,10 @@
 	import type { VacationRequest } from '$lib/types';
 	import { adminApi } from '$lib/api/admin';
 	import { toast } from '$lib/stores/toast.svelte';
+	import { formatDateShort } from '$lib/utils/date';
 	import Avatar from '$lib/components/ui/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { Check, X, Clock } from 'lucide-svelte';
 
 	interface Props {
@@ -17,13 +19,6 @@
 	let rejectionReason = $state('');
 	let showRejectModal = $state(false);
 	let rejectingId = $state<string | null>(null);
-
-	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-GB', {
-			day: 'numeric',
-			month: 'short'
-		});
-	}
 
 	async function approve(id: string) {
 		processingId = id;
@@ -63,10 +58,7 @@
 </script>
 
 {#if requests.length === 0}
-	<div class="py-8 text-center">
-		<Clock class="w-12 h-12 mx-auto text-ocean-300 mb-2" />
-		<p class="text-ocean-500">No pending requests</p>
-	</div>
+	<EmptyState icon={Clock} message="No pending requests" iconSize="lg" />
 {:else}
 	<div class="divide-y divide-sand-200">
 		{#each requests as request (request.id)}
@@ -76,7 +68,7 @@
 					<div>
 						<p class="font-medium text-ocean-800">{request.userName}</p>
 						<p class="text-sm text-ocean-500">
-							{formatDate(request.startDate)} - {formatDate(request.endDate)}
+							{formatDateShort(request.startDate)} - {formatDateShort(request.endDate)}
 							({request.totalDays} days)
 						</p>
 						{#if request.reason}

@@ -6,7 +6,7 @@
 	interface Props {
 		title: string;
 		value: number | string;
-		icon: typeof SvelteComponent<IconProps>;
+		icon?: typeof SvelteComponent<IconProps>;
 		color?: 'ocean' | 'green' | 'yellow' | 'red';
 	}
 
@@ -22,9 +22,11 @@
 
 <div class="bg-white rounded-lg shadow-md border border-sand-200 p-4">
 	<div class="flex items-center gap-3">
-		<div class={clsx('p-2 rounded-lg', colorStyles[color])}>
-			<Icon class="w-6 h-6" />
-		</div>
+		{#if Icon}
+			<div class={clsx('p-2 rounded-lg', colorStyles[color])}>
+				<Icon class="w-6 h-6" />
+			</div>
+		{/if}
 		<div>
 			<p class="text-2xl font-bold text-ocean-900">{value}</p>
 			<p class="text-sm text-ocean-500">{title}</p>

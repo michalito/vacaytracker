@@ -62,7 +62,7 @@
 			<!-- Menu Items -->
 			<div class="py-1">
 				<a
-					href="/employee/settings"
+					href="/settings"
 					onclick={() => (isOpen = false)}
 					class="flex items-center gap-3 px-4 py-2 text-ocean-700 hover:bg-sand-50 transition-colors"
 				>
@@ -70,7 +70,7 @@
 					<span>Profile</span>
 				</a>
 				<a
-					href="/employee/settings"
+					href="/settings"
 					onclick={() => (isOpen = false)}
 					class="flex items-center gap-3 px-4 py-2 text-ocean-700 hover:bg-sand-50 transition-colors"
 				>

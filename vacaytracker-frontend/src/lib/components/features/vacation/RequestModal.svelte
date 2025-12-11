@@ -2,6 +2,7 @@
 	import { vacation } from '$lib/stores/vacation.svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
+	import { toApiDateFormat } from '$lib/utils/date';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { X, Palmtree } from 'lucide-svelte';
@@ -51,12 +52,6 @@
 		return Object.keys(errors).length === 0;
 	}
 
-	// Convert YYYY-MM-DD to DD/MM/YYYY for API
-	function formatDateForApi(dateStr: string): string {
-		const [year, month, day] = dateStr.split('-');
-		return `${day}/${month}/${year}`;
-	}
-
 	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
 
@@ -66,8 +61,8 @@
 
 		try {
 			await vacation.createRequest({
-				startDate: formatDateForApi(startDate),
-				endDate: formatDateForApi(endDate),
+				startDate: toApiDateFormat(startDate),
+				endDate: toApiDateFormat(endDate),
 				reason: reason || undefined
 			});
 

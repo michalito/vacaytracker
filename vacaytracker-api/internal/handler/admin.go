@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"vacaytracker-api/internal/config"
 	"vacaytracker-api/internal/domain"
 	"vacaytracker-api/internal/dto"
 	"vacaytracker-api/internal/middleware"
@@ -17,6 +18,7 @@ import (
 
 // AdminHandler handles admin management endpoints
 type AdminHandler struct {
+	cfg               *config.Config
 	userService       *service.UserService
 	userRepo          *sqlite.UserRepository
 	vacationService   *service.VacationService
@@ -28,6 +30,7 @@ type AdminHandler struct {
 
 // NewAdminHandler creates a new AdminHandler
 func NewAdminHandler(
+	cfg *config.Config,
 	userService *service.UserService,
 	userRepo *sqlite.UserRepository,
 	vacationService *service.VacationService,
@@ -37,6 +40,7 @@ func NewAdminHandler(
 	newsletterService *service.NewsletterService,
 ) *AdminHandler {
 	return &AdminHandler{
+		cfg:               cfg,
 		userService:       userService,
 		userRepo:          userRepo,
 		vacationService:   vacationService,
@@ -518,4 +522,222 @@ func (h *AdminHandler) PreviewNewsletter(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, preview)
+}
+
+// ============================================
+// Email Test Endpoints
+// ============================================
+
+// SendTestEmail handles POST /api/admin/email/test
+// Sends a test email to the requesting admin
+func (h *AdminHandler) SendTestEmail(c *gin.Context) {
+	var req dto.TestEmailRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    dto.ErrValidation,
+			Message: "Invalid request: " + err.Error(),
+		})
+		return
+	}
+
+	// Get current admin user
+	userID := middleware.GetUserID(c)
+	admin, err := h.userRepo.GetByID(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    dto.ErrInternal,
+			Message: "Failed to get user: " + err.Error(),
+		})
+		return
+	}
+
+	// Create mock vacation request for testing
+	mockVacation := &domain.VacationRequest{
+		ID:        "test-vacation-123",
+		UserID:    admin.ID,
+		StartDate: "15/01/2025",
+		EndDate:   "22/01/2025",
+		TotalDays: 6,
+		Status:    domain.StatusPending,
+		Reason:    stringPtr("Test vacation request - beach getaway!"),
+	}
+
+	// Send the appropriate test email based on template type
+	var templateName string
+	switch req.Template {
+	case "welcome":
+		templateName = "Welcome Email"
+		h.emailService.SendWelcome(admin, "TestPassword123!")
+
+	case "request_submitted":
+		templateName = "Request Submitted"
+		// Temporarily enable vacation updates for this test
+		originalPref := admin.EmailPreferences.VacationUpdates
+		admin.EmailPreferences.VacationUpdates = true
+		h.emailService.SendRequestSubmitted(admin, mockVacation)
+		admin.EmailPreferences.VacationUpdates = originalPref
+
+	case "request_approved":
+		templateName = "Request Approved"
+		originalPref := admin.EmailPreferences.VacationUpdates
+		admin.EmailPreferences.VacationUpdates = true
+		h.emailService.SendRequestApproved(admin, mockVacation)
+		admin.EmailPreferences.VacationUpdates = originalPref
+
+	case "request_rejected":
+		templateName = "Request Rejected"
+		originalPref := admin.EmailPreferences.VacationUpdates
+		admin.EmailPreferences.VacationUpdates = true
+		h.emailService.SendRequestRejected(admin, mockVacation, "This is a test rejection reason for demonstration purposes.")
+		admin.EmailPreferences.VacationUpdates = originalPref
+
+	case "admin_notification":
+		templateName = "Admin Notification"
+		// Create a mock requester
+		mockRequester := &domain.User{
+			ID:    "test-user-456",
+			Name:  "Test Employee",
+			Email: "test.employee@example.com",
+		}
+		// Temporarily enable team notifications for this test
+		originalPref := admin.EmailPreferences.TeamNotifications
+		admin.EmailPreferences.TeamNotifications = true
+		h.emailService.SendAdminNewRequest([]*domain.User{admin}, mockRequester, mockVacation)
+		admin.EmailPreferences.TeamNotifications = originalPref
+
+	case "newsletter":
+		templateName = "Newsletter"
+		// Send newsletter to just this admin
+		count, err := h.newsletterService.Send(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Code:    dto.ErrInternal,
+				Message: "Failed to send newsletter: " + err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, dto.TestEmailResponse{
+			Success:  true,
+			Template: templateName,
+			SentTo:   admin.Email,
+			Message:  fmt.Sprintf("Newsletter sent to %d recipients", count),
+		})
+		return
+
+	default:
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    dto.ErrValidation,
+			Message: "Invalid template type",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.TestEmailResponse{
+		Success:  true,
+		Template: templateName,
+		SentTo:   admin.Email,
+		Message:  fmt.Sprintf("Test email '%s' sent to %s", templateName, admin.Email),
+	})
+}
+
+// PreviewEmail handles POST /api/admin/email/preview
+// Returns a preview of an email template without sending
+func (h *AdminHandler) PreviewEmail(c *gin.Context) {
+	var req dto.PreviewEmailRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    dto.ErrValidation,
+			Message: "Invalid request: " + err.Error(),
+		})
+		return
+	}
+
+	// Get current admin user for personalization
+	userID := middleware.GetUserID(c)
+	admin, err := h.userRepo.GetByID(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    dto.ErrInternal,
+			Message: "Failed to get user: " + err.Error(),
+		})
+		return
+	}
+
+	// Mock data for previews
+	mockStartDate := "15/01/2025"
+	mockEndDate := "22/01/2025"
+	mockTotalDays := 6
+	mockReason := "This is a test rejection reason for demonstration purposes."
+	mockRequestReason := "Beach vacation with family"
+
+	var preview *service.EmailPreview
+	var templateName string
+
+	switch req.Template {
+	case "welcome":
+		templateName = "Welcome Email"
+		preview, err = h.emailService.PreviewWelcome(admin.Name, admin.Email, "TestPassword123!", h.cfg.AppURL)
+
+	case "request_submitted":
+		templateName = "Request Submitted"
+		preview, err = h.emailService.PreviewRequestSubmitted(admin.Name, mockStartDate, mockEndDate, mockTotalDays, h.cfg.AppURL)
+
+	case "request_approved":
+		templateName = "Request Approved"
+		preview, err = h.emailService.PreviewRequestApproved(admin.Name, mockStartDate, mockEndDate, mockTotalDays, h.cfg.AppURL)
+
+	case "request_rejected":
+		templateName = "Request Rejected"
+		preview, err = h.emailService.PreviewRequestRejected(admin.Name, mockStartDate, mockEndDate, mockTotalDays, mockReason, h.cfg.AppURL)
+
+	case "admin_notification":
+		templateName = "Admin Notification"
+		preview, err = h.emailService.PreviewAdminNewRequest("Test Employee", mockStartDate, mockEndDate, mockTotalDays, mockRequestReason, h.cfg.AppURL)
+
+	case "newsletter":
+		templateName = "Newsletter"
+		// Use the existing newsletter preview
+		newsletterPreview, previewErr := h.newsletterService.GeneratePreview(c.Request.Context())
+		if previewErr != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Code:    dto.ErrInternal,
+				Message: "Failed to generate newsletter preview: " + previewErr.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, dto.EmailPreviewResponse{
+			Template: templateName,
+			Subject:  newsletterPreview.Subject,
+			HTMLBody: newsletterPreview.HTMLBody,
+			TextBody: newsletterPreview.TextBody,
+		})
+		return
+
+	default:
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    dto.ErrValidation,
+			Message: "Invalid template type",
+		})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    dto.ErrInternal,
+			Message: "Failed to generate preview: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.EmailPreviewResponse{
+		Template: templateName,
+		Subject:  preview.Subject,
+		HTMLBody: preview.HTMLBody,
+		TextBody: preview.TextBody,
+	})
+}
+
+// stringPtr returns a pointer to a string
+func stringPtr(s string) *string {
+	return &s
 }

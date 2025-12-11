@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { User } from '$lib/types';
+	import { formatDateMedium } from '$lib/utils/date';
 	import Avatar from '$lib/components/ui/Avatar.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -13,13 +14,8 @@
 
 	let { users, onEdit, onDelete }: Props = $props();
 
-	function formatDate(dateStr: string | undefined): string {
-		if (!dateStr) return '-';
-		return new Date(dateStr).toLocaleDateString('en-GB', {
-			day: 'numeric',
-			month: 'short',
-			year: 'numeric'
-		});
+	function displayDate(dateStr: string | undefined): string {
+		return dateStr ? formatDateMedium(dateStr) : '-';
 	}
 </script>
 
@@ -56,7 +52,7 @@
 						<span class="text-ocean-500"> days</span>
 					</td>
 					<td class="py-3 px-4 text-ocean-600">
-						{formatDate(user.startDate)}
+						{displayDate(user.startDate)}
 					</td>
 					<td class="py-3 px-4">
 						<div class="flex items-center justify-end gap-2">
