@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { createPopover, createCheckbox, melt } from '@melt-ui/svelte';
+	import { createPopover, melt } from '@melt-ui/svelte';
 	import { clsx } from 'clsx';
 	import { calendar, type UserInfo } from '$lib/stores/calendar.svelte';
 	import { getUserColor } from '$lib/utils/colors';
-	import { Filter, X, Check } from 'lucide-svelte';
+	import { Filter, X } from 'lucide-svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 
 	interface Props {
 		users: UserInfo[];
@@ -33,12 +34,6 @@
 		if (selectedCount === 0) return 'Filter (None)';
 		return `Filter (${selectedCount})`;
 	});
-
-	// Check if a user is visually selected
-	function isUserSelected(userId: string): boolean {
-		if (showAll) return true;
-		return selectedUserIds.has(userId);
-	}
 
 	// Handlers
 	function handleSelectAll() {
@@ -115,31 +110,20 @@
 				<div class="max-h-48 overflow-y-auto space-y-1">
 					{#each users as user (user.id)}
 						{@const color = getUserColor(user.id)}
-						{@const selected = isUserSelected(user.id)}
-						{@const checkbox = createCheckbox({ defaultChecked: selected })}
-						<button
-							use:melt={checkbox.elements.root}
-							onclick={() => handleToggleUser(user.id)}
+						{@const isSelected = showAll || selectedUserIds.has(user.id)}
+						<label
 							class={clsx(
-								'w-full flex items-center gap-2 p-2 rounded cursor-pointer transition-colors text-left',
-								selected ? 'bg-ocean-50' : 'hover:bg-sand-50 opacity-60'
+								'w-full flex items-center gap-2 p-2 rounded cursor-pointer transition-colors',
+								isSelected ? 'bg-ocean-50' : 'hover:bg-sand-50 opacity-60'
 							)}
 						>
-							<span
-								class={clsx(
-									'h-5 w-5 shrink-0 rounded border-2 flex items-center justify-center transition-all duration-200',
-									selected
-										? 'border-ocean-500 bg-ocean-500'
-										: 'border-ocean-400 bg-white'
-								)}
-							>
-								{#if selected}
-									<Check class="h-3.5 w-3.5 text-white" />
-								{/if}
-							</span>
+							<Checkbox
+								checked={isSelected}
+								onchange={() => handleToggleUser(user.id)}
+							/>
 							<span class={clsx('w-3 h-3 rounded-full flex-shrink-0', color.background)}></span>
 							<span class="text-sm text-ocean-700 truncate">{user.name}</span>
-						</button>
+						</label>
 					{/each}
 				</div>
 			{/if}

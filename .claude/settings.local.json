@@ -34,7 +34,8 @@
       "Bash(go get:*)",
       "WebFetch(domain:www.melt-ui.com)",
       "WebFetch(domain:next.melt-ui.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(npx svelte-check:*)"
     ],
     "deny": [],
     "ask": []

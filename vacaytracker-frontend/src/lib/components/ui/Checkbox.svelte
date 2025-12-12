@@ -27,10 +27,9 @@
 	});
 
 	// Sync external checked prop with internal state
-	$effect(() => {
-		if (checked !== ($checkedState === true)) {
-			checkedState.set(checked);
-		}
+	$effect.pre(() => {
+		// Always update internal state when external checked prop changes
+		checkedState.set(checked);
 	});
 
 	// Sync disabled prop reactively

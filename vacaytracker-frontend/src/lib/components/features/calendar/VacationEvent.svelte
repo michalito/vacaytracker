@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createTooltip, melt } from '@melt-ui/svelte';
 	import { clsx } from 'clsx';
 	import type { TeamVacation } from '$lib/types';
 	import { getUserColor } from '$lib/utils/colors';
@@ -36,12 +37,20 @@
 		}
 	});
 
-	const title = $derived(
-		`${vacation.userName}: ${vacation.startDate} - ${vacation.endDate} (${vacation.totalDays} days)`
-	);
+	// Melt-UI tooltip for accessible, styled hover info
+	const {
+		elements: { trigger, content, arrow },
+		states: { open }
+	} = createTooltip({
+		positioning: { placement: 'top' },
+		openDelay: 300,
+		closeDelay: 100,
+		group: 'calendar-events'
+	});
 </script>
 
 <div
+	use:melt={$trigger}
 	class={clsx(
 		color.combined,
 		borderRadius,
@@ -49,9 +58,24 @@
 		'truncate cursor-default',
 		className
 	)}
-	{title}
 >
 	{#if showName}
 		{vacation.userName}
 	{/if}
 </div>
+
+{#if $open}
+	<div
+		use:melt={$content}
+		class="z-50 rounded-lg bg-ocean-800 text-white px-3 py-2 text-sm shadow-lg max-w-xs"
+	>
+		<div use:melt={$arrow} class="z-50"></div>
+		<div class="font-medium">{vacation.userName}</div>
+		<div class="text-ocean-200 text-xs mt-1">
+			{vacation.startDate} - {vacation.endDate}
+		</div>
+		<div class="text-ocean-300 text-xs">
+			{vacation.totalDays} day{vacation.totalDays !== 1 ? 's' : ''}
+		</div>
+	</div>
+{/if}

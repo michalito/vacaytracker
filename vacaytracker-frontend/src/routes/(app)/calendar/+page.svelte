@@ -6,7 +6,7 @@
 	import WeekView from '$lib/components/features/calendar/WeekView.svelte';
 	import MonthView from '$lib/components/features/calendar/MonthView.svelte';
 	import FilterPanel from '$lib/components/features/calendar/FilterPanel.svelte';
-	import { Calendar as CalendarIcon, Users, RefreshCw, X } from 'lucide-svelte';
+	import { Calendar as CalendarIcon, RefreshCw } from 'lucide-svelte';
 
 	// Fetch data when component mounts and when view/date changes
 	$effect(() => {
@@ -53,17 +53,6 @@
 						</Button>
 					</div>
 				</div>
-			{:else if calendar.filteredVacations.length === 0 && calendar.availableUsers.length > 0}
-				<div class="py-12 text-center text-ocean-500">
-					<Users class="w-8 h-8 mx-auto mb-2" />
-					<p>No vacations match your filter</p>
-					<div class="mt-4 flex justify-center">
-						<Button variant="outline" size="sm" onclick={() => calendar.clearFilters()}>
-							<X class="w-4 h-4 mr-2" />
-							Clear filters
-						</Button>
-					</div>
-				</div>
 			{:else}
 				{#if calendar.viewType === 'week'}
 					<WeekView currentDate={calendar.currentDate} vacations={calendar.filteredVacations} />
@@ -73,13 +62,6 @@
 						month={calendar.currentMonth}
 						vacations={calendar.filteredVacations}
 					/>
-				{/if}
-
-				{#if calendar.filteredVacations.length === 0}
-					<div class="mt-4 py-8 text-center text-ocean-500">
-						<Users class="w-8 h-8 mx-auto mb-2" />
-						<p>No team vacations scheduled for this period</p>
-					</div>
 				{/if}
 			{/if}
 		</div>

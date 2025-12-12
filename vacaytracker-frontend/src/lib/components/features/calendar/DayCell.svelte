@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createTooltip, melt } from '@melt-ui/svelte';
 	import { clsx } from 'clsx';
 	import type { TeamVacation } from '$lib/types';
 	import type { CalendarDay } from '$lib/utils/date';
@@ -24,6 +25,18 @@
 
 	const visibleVacations = $derived(vacations.slice(0, maxEvents));
 	const hiddenCount = $derived(Math.max(0, vacations.length - maxEvents));
+	const hiddenVacations = $derived(vacations.slice(maxEvents));
+
+	// Melt-UI tooltip for overflow indicator
+	const {
+		elements: { trigger: overflowTrigger, content: overflowContent, arrow: overflowArrow },
+		states: { open: overflowOpen }
+	} = createTooltip({
+		positioning: { placement: 'top' },
+		openDelay: 200,
+		closeDelay: 100,
+		group: 'calendar-events'
+	});
 
 	function getEventPosition(vacation: TeamVacation): EventPosition {
 		const isStart = day.dateString === vacation.startDate;
@@ -68,7 +81,24 @@
 				/>
 			{/each}
 			{#if hiddenCount > 0}
-				<div class="text-xs text-ocean-500 pl-1">+{hiddenCount} more</div>
+				<div
+					use:melt={$overflowTrigger}
+					class="text-xs text-ocean-500 pl-1 cursor-default"
+				>
+					+{hiddenCount} more
+				</div>
+				{#if $overflowOpen}
+					<div
+						use:melt={$overflowContent}
+						class="z-50 rounded-lg bg-ocean-800 text-white px-3 py-2 text-sm shadow-lg max-w-xs"
+					>
+						<div use:melt={$overflowArrow} class="z-50"></div>
+						<div class="font-medium text-xs text-ocean-200 mb-1">Also on this day:</div>
+						{#each hiddenVacations as v (v.id)}
+							<div class="text-xs">{v.userName}</div>
+						{/each}
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/if}
