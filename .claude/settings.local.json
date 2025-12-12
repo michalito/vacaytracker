@@ -27,7 +27,11 @@
       "WebFetch(domain:melt-ui.com)",
       "Bash(\"C:/Program Files/Go/bin/go.exe\" test ./internal/service/... -v)",
       "WebFetch(domain:resend.com)",
-      "Bash(docker ps:*)"
+      "Bash(docker ps:*)",
+      "WebSearch",
+      "Bash(go doc:*)",
+      "Bash(go list:*)",
+      "Bash(go get:*)"
     ],
     "deny": [],
     "ask": []
