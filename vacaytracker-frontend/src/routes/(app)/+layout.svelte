@@ -2,6 +2,7 @@
 	import { auth } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
 	import UnifiedHeader from '$lib/components/layout/UnifiedHeader.svelte';
+	import Footer from '$lib/components/layout/Footer.svelte';
 
 	let { children } = $props();
 
@@ -13,10 +14,11 @@
 </script>
 
 {#if auth.isAuthenticated}
-	<div class="min-h-screen bg-sand-50">
+	<div class="min-h-screen flex flex-col bg-sand-50">
 		<UnifiedHeader />
-		<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+		<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 w-full">
 			{@render children()}
 		</main>
+		<Footer />
 	</div>
 {/if}
