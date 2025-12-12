@@ -77,15 +77,19 @@
 		{#if vacation.isLoading}
 			<ListSkeleton count={3} variant="simple" />
 		{:else if vacation.requests.length === 0}
-			<EmptyState icon={Umbrella} message="No vacation requests yet" iconSize="lg">
-				{#if onRequestVacation}
-					<Button variant="outline" onclick={onRequestVacation}>
-						Request Your First Vacation
-					</Button>
-				{/if}
-			</EmptyState>
+			<div class="content-fade-in">
+				<EmptyState icon={Umbrella} message="No vacation requests yet" iconSize="lg">
+					{#if onRequestVacation}
+						<Button variant="outline" onclick={onRequestVacation}>
+							Request Your First Vacation
+						</Button>
+					{/if}
+				</EmptyState>
+			</div>
 		{:else}
-			<RequestList requests={vacation.requests} />
+			<div class="content-fade-in">
+				<RequestList requests={vacation.requests} />
+			</div>
 		{/if}
 	</Card>
 </div>

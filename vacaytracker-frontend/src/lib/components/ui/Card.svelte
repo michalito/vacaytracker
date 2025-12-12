@@ -20,7 +20,11 @@
 	};
 
 	const cardClasses = $derived(
-		clsx('bg-white rounded-lg shadow-md border border-sand-200', className)
+		clsx(
+			'bg-white/90 backdrop-blur-sm rounded-xl shadow-md border border-white/40',
+			'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
+			className
+		)
 	);
 
 	const contentClasses = $derived(paddingStyles[padding]);
@@ -28,7 +32,7 @@
 
 <div class={cardClasses}>
 	{#if header}
-		<div class="px-4 py-3 border-b border-sand-200">
+		<div class="px-4 py-3 border-b border-ocean-100/50">
 			{@render header()}
 		</div>
 	{/if}
@@ -38,7 +42,7 @@
 	</div>
 
 	{#if footer}
-		<div class="px-4 py-3 border-t border-sand-200 bg-sand-50 rounded-b-lg">
+		<div class="px-4 py-3 border-t border-ocean-100/50 bg-ocean-50/30 rounded-b-xl">
 			{@render footer()}
 		</div>
 	{/if}

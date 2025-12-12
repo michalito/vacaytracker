@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { auth } from '$lib/stores/auth.svelte';
-	import { Calendar, LayoutDashboard, Settings } from 'lucide-svelte';
+	import { Calendar, LayoutDashboard } from 'lucide-svelte';
 	import UserMenu from './UserMenu.svelte';
 	import AdminDropdown from './AdminDropdown.svelte';
 	import { clsx } from 'clsx';
 
 	const navItems = [
 		{ href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-		{ href: '/calendar', icon: Calendar, label: 'Calendar' },
-		{ href: '/settings', icon: Settings, label: 'Settings' }
+		{ href: '/calendar', icon: Calendar, label: 'Calendar' }
 	];
 
 	function isActive(href: string, exact = false): boolean {
@@ -20,12 +19,12 @@
 	}
 </script>
 
-<header class="bg-white shadow-sm border-b border-sand-200">
+<header class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-white/30 shadow-sm">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex items-center justify-between h-16">
 			<!-- Logo -->
-			<a href="/dashboard" class="flex items-center gap-2">
-				<img src="/logo.png" alt="VacayTracker" class="w-8 h-8" />
+			<a href="/dashboard" class="flex items-center gap-2 group">
+				<img src="/logo.png" alt="VacayTracker" class="w-8 h-8 transition-transform group-hover:scale-105" />
 				<span class="text-xl font-bold text-ocean-700">VacayTracker</span>
 			</a>
 
@@ -36,10 +35,10 @@
 					<a
 						href={item.href}
 						class={clsx(
-							'flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors',
+							'flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200',
 							active
-								? 'bg-ocean-50 text-ocean-700'
-								: 'text-ocean-600 hover:text-ocean-800 hover:bg-sand-50'
+								? 'bg-ocean-500/15 text-ocean-700 shadow-sm'
+								: 'text-ocean-600 hover:text-ocean-800 hover:bg-ocean-500/10'
 						)}
 					>
 						<item.icon class="w-4 h-4" />
@@ -59,15 +58,17 @@
 	</div>
 
 	<!-- Mobile Navigation -->
-	<nav class="md:hidden border-t border-sand-200">
+	<nav class="md:hidden border-t border-ocean-200/30 bg-white/50 backdrop-blur-sm">
 		<div class="flex justify-around py-2">
 			{#each navItems as item}
 				{@const active = isActive(item.href, item.exact)}
 				<a
 					href={item.href}
 					class={clsx(
-						'flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
-						active ? 'text-ocean-700' : 'text-ocean-500 hover:text-ocean-700'
+						'flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200',
+						active
+							? 'text-ocean-700 bg-ocean-500/10'
+							: 'text-ocean-500 hover:text-ocean-700 hover:bg-ocean-500/5'
 					)}
 				>
 					<item.icon class="w-5 h-5" />
@@ -78,10 +79,10 @@
 				<a
 					href="/admin/users"
 					class={clsx(
-						'flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+						'flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200',
 						$page.url.pathname.startsWith('/admin')
-							? 'text-ocean-700'
-							: 'text-ocean-500 hover:text-ocean-700'
+							? 'text-ocean-700 bg-ocean-500/10'
+							: 'text-ocean-500 hover:text-ocean-700 hover:bg-ocean-500/5'
 					)}
 				>
 					<svg

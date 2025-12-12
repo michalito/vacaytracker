@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { WeekendPolicy } from '$lib/types';
 	import Card from '$lib/components/ui/Card.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import { Calendar } from 'lucide-svelte';
 
 	interface Props {
@@ -53,12 +54,7 @@
 		</p>
 
 		<label class="flex items-center gap-3 cursor-pointer">
-			<input
-				type="checkbox"
-				checked={policy.excludeWeekends}
-				onchange={toggleExcludeWeekends}
-				class="w-5 h-5 rounded border-sand-300 text-ocean-500 focus:ring-ocean-500"
-			/>
+			<Checkbox checked={policy.excludeWeekends} onchange={toggleExcludeWeekends} />
 			<div>
 				<p class="font-medium text-ocean-800">Exclude weekends from vacation days</p>
 				<p class="text-sm text-ocean-500">
@@ -79,11 +75,9 @@
 								? 'bg-ocean-50 border-ocean-200'
 								: ''}"
 						>
-							<input
-								type="checkbox"
+							<Checkbox
 								checked={policy.excludedDays.includes(day.value)}
 								onchange={() => toggleDay(day.value)}
-								class="w-4 h-4 rounded border-sand-300 text-ocean-500 focus:ring-ocean-500"
 							/>
 							<span class="text-sm text-ocean-700">{day.label}</span>
 						</label>

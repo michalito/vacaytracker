@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createDialog, melt } from '@melt-ui/svelte';
 	import { vacation } from '$lib/stores/vacation.svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
@@ -13,25 +14,35 @@
 
 	let { open = $bindable(false) }: Props = $props();
 
+	// Create Melt-UI dialog with controlled state
+	const {
+		elements: { overlay, content, title, close, portalled },
+		states: { open: dialogOpen }
+	} = createDialog({
+		forceVisible: true,
+		onOpenChange: ({ next }) => {
+			open = next;
+			if (!next) resetForm();
+			return next;
+		}
+	});
+
+	// Sync external open prop with dialog state
+	$effect(() => {
+		dialogOpen.set(open);
+	});
+
 	let startDate = $state('');
 	let endDate = $state('');
 	let reason = $state('');
 	let isSubmitting = $state(false);
 	let errors = $state<{ startDate?: string; endDate?: string }>({});
 
-	// Get today's date in YYYY-MM-DD format for min attribute
-	const today = new Date().toISOString().split('T')[0];
-
 	function resetForm() {
 		startDate = '';
 		endDate = '';
 		reason = '';
 		errors = {};
-	}
-
-	function handleClose() {
-		open = false;
-		resetForm();
 	}
 
 	function validate(): boolean {
@@ -67,10 +78,7 @@
 			});
 
 			toast.success('Vacation request submitted!');
-			handleClose();
-
-			// Refresh user to get updated balance
-			// Note: Balance is only deducted when approved, so we don't update here
+			dialogOpen.set(false);
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to submit request');
 		} finally {
@@ -89,31 +97,39 @@
 </script>
 
 {#if open}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="fixed inset-0 z-50">
+	<div use:melt={$portalled}>
 		<!-- Overlay -->
-		<div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick={handleClose}></div>
+		<div
+			use:melt={$overlay}
+			class="fixed inset-0 z-50 bg-ocean-900/50 backdrop-blur-sm transition-opacity duration-200
+				data-[state=open]:opacity-100 data-[state=closed]:opacity-0"
+		></div>
 
-		<!-- Content -->
-		<div class="fixed inset-0 flex items-center justify-center p-4">
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div class="bg-white rounded-xl shadow-xl w-full max-w-md" onclick={(e) => e.stopPropagation()}>
+		<!-- Content Container -->
+		<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+			<div
+				use:melt={$content}
+				class="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 w-full max-w-md
+					transition-all duration-200 data-[state=open]:opacity-100 data-[state=open]:scale-100
+					data-[state=closed]:opacity-0 data-[state=closed]:scale-95"
+			>
 				<!-- Header -->
-				<div class="flex items-center justify-between p-4 border-b border-sand-200">
+				<div class="flex items-center justify-between p-4 border-b border-ocean-100/50">
 					<div class="flex items-center gap-2">
 						<Palmtree class="w-5 h-5 text-ocean-500" />
-						<h2 class="text-lg font-semibold text-ocean-800">Request Vacation</h2>
+						<h2 use:melt={$title} class="text-lg font-semibold text-ocean-800">Request Vacation</h2>
 					</div>
-					<button type="button" onclick={handleClose} class="text-ocean-400 hover:text-ocean-600">
+					<button
+						use:melt={$close}
+						class="p-1 rounded-lg text-ocean-400 hover:text-ocean-600 hover:bg-ocean-500/10 transition-all duration-200 cursor-pointer"
+					>
 						<X class="w-5 h-5" />
 					</button>
 				</div>
 
 				<!-- Body -->
 				<form onsubmit={handleSubmit} class="p-4 space-y-4">
-					<div class="grid grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<Input
 							type="date"
 							label="Start Date"
@@ -131,20 +147,20 @@
 					</div>
 
 					<div>
-						<label for="reason" class="block text-sm font-medium text-ocean-700 mb-1">
+						<label for="reason" class="block text-sm font-semibold text-ocean-800 mb-1.5">
 							Reason (optional)
 						</label>
 						<textarea
 							id="reason"
 							bind:value={reason}
-							class="w-full px-3 py-2 rounded-md border border-sand-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent resize-none"
+							class="w-full px-4 py-2.5 rounded-lg border-2 border-ocean-500/40 bg-white text-ocean-900 placeholder-ocean-500/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean-500/30 focus:border-ocean-500 hover:border-ocean-500 resize-none"
 							rows="3"
 							placeholder="Family vacation, personal time, etc."
 						></textarea>
 					</div>
 
 					<!-- Balance Info -->
-					<div class="bg-ocean-50 rounded-lg p-3 space-y-1">
+					<div class="bg-ocean-500/10 rounded-xl p-4 space-y-1">
 						<div class="flex justify-between text-sm">
 							<span class="text-ocean-700">Current Balance:</span>
 							<span class="font-medium text-ocean-900">{auth.user?.vacationBalance ?? 0} days</span>
@@ -162,7 +178,7 @@
 
 					<!-- Actions -->
 					<div class="flex gap-3 pt-2">
-						<Button type="button" variant="outline" class="flex-1" onclick={handleClose}>
+						<Button type="button" variant="outline" class="flex-1" onclick={() => dialogOpen.set(false)}>
 							Cancel
 						</Button>
 						<Button type="submit" variant="primary" class="flex-1" loading={isSubmitting}>

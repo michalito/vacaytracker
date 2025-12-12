@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import UnifiedHeader from '$lib/components/layout/UnifiedHeader.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import DecorativeBackground from '$lib/components/layout/DecorativeBackground.svelte';
 
 	let { children } = $props();
 
@@ -14,11 +15,19 @@
 </script>
 
 {#if auth.isAuthenticated && auth.isAdmin}
-	<div class="min-h-screen flex flex-col bg-sand-50">
+	<div class="min-h-screen flex flex-col bg-sand-50 relative">
+		<!-- Decorative Background Elements -->
+		<DecorativeBackground variant="standard" />
+
+		<!-- Header -->
 		<UnifiedHeader />
-		<main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 w-full">
+
+		<!-- Main Content -->
+		<main class="relative z-10 flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-56 w-full">
 			{@render children()}
 		</main>
+
+		<!-- Footer with Waves -->
 		<Footer />
 	</div>
 {/if}

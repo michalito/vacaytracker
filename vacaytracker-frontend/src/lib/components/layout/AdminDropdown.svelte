@@ -1,9 +1,17 @@
 <script lang="ts">
+	import { createDropdownMenu, melt } from '@melt-ui/svelte';
 	import { page } from '$app/stores';
 	import { Shield, ChevronDown, Users, Wallet, Settings } from 'lucide-svelte';
 	import { clsx } from 'clsx';
 
-	let isOpen = $state(false);
+	// Create Melt-UI dropdown menu
+	const {
+		elements: { trigger, menu, item },
+		states: { open }
+	} = createDropdownMenu({
+		forceVisible: true,
+		positioning: { placement: 'bottom-end' }
+	});
 
 	const adminNavItems = [
 		{ href: '/admin/users', icon: Users, label: 'Users' },
@@ -14,66 +22,43 @@
 	function isActive(href: string): boolean {
 		return $page.url.pathname.startsWith(href);
 	}
-
-	function handleClickOutside(event: MouseEvent) {
-		const target = event.target as Element;
-		if (!target.closest('.admin-dropdown')) {
-			isOpen = false;
-		}
-	}
-
-	function handleKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			isOpen = false;
-		}
-	}
-
-	$effect(() => {
-		if (isOpen) {
-			document.addEventListener('click', handleClickOutside);
-			document.addEventListener('keydown', handleKeyDown);
-		}
-		return () => {
-			document.removeEventListener('click', handleClickOutside);
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	});
 </script>
 
-<div class="relative admin-dropdown">
+<div class="relative">
 	<button
-		type="button"
-		onclick={() => (isOpen = !isOpen)}
+		use:melt={$trigger}
 		class={clsx(
-			'flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors',
+			'flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer',
 			$page.url.pathname.startsWith('/admin')
-				? 'bg-ocean-50 text-ocean-700'
-				: 'text-ocean-600 hover:text-ocean-800 hover:bg-sand-50'
+				? 'bg-ocean-500/15 text-ocean-700 shadow-sm'
+				: 'text-ocean-600 hover:text-ocean-800 hover:bg-ocean-500/10'
 		)}
 	>
 		<Shield class="w-4 h-4" />
 		<span>Admin</span>
-		<ChevronDown class="w-4 h-4 transition-transform {isOpen ? 'rotate-180' : ''}" />
+		<ChevronDown class="w-4 h-4 transition-transform {$open ? 'rotate-180' : ''}" />
 	</button>
 
-	{#if isOpen}
+	{#if $open}
 		<div
-			class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-sand-200 py-1 z-50"
+			use:melt={$menu}
+			class="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-white/30 py-1 z-50
+				transition-all duration-200 data-[state=open]:animate-scale-in"
 		>
-			{#each adminNavItems as item}
-				{@const active = isActive(item.href)}
+			{#each adminNavItems as navItem}
+				{@const active = isActive(navItem.href)}
 				<a
-					href={item.href}
-					onclick={() => (isOpen = false)}
+					use:melt={$item}
+					href={navItem.href}
 					class={clsx(
-						'flex items-center gap-3 px-4 py-2 transition-colors',
+						'flex items-center gap-3 px-4 py-2 transition-all duration-200',
 						active
-							? 'bg-ocean-50 text-ocean-700'
-							: 'text-ocean-600 hover:bg-sand-50 hover:text-ocean-800'
+							? 'bg-ocean-500/15 text-ocean-700'
+							: 'text-ocean-600 data-[highlighted]:bg-ocean-500/10 data-[highlighted]:text-ocean-800'
 					)}
 				>
-					<item.icon class="w-4 h-4" />
-					<span>{item.label}</span>
+					<navItem.icon class="w-4 h-4" />
+					<span>{navItem.label}</span>
 				</a>
 			{/each}
 		</div>

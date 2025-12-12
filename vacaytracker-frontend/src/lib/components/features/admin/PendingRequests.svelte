@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createDialog, melt } from '@melt-ui/svelte';
 	import type { VacationRequest } from '$lib/types';
 	import { adminApi } from '$lib/api/admin';
 	import { toast } from '$lib/stores/toast.svelte';
@@ -17,8 +18,15 @@
 
 	let processingId = $state<string | null>(null);
 	let rejectionReason = $state('');
-	let showRejectModal = $state(false);
 	let rejectingId = $state<string | null>(null);
+
+	// Rejection Dialog
+	const {
+		elements: { overlay, content, title, close },
+		states: { open: rejectDialogOpen }
+	} = createDialog({
+		forceVisible: true
+	});
 
 	async function approve(id: string) {
 		processingId = id;
@@ -36,7 +44,7 @@
 	function openRejectModal(id: string) {
 		rejectingId = id;
 		rejectionReason = '';
-		showRejectModal = true;
+		rejectDialogOpen.set(true);
 	}
 
 	async function confirmReject() {
@@ -46,7 +54,7 @@
 		try {
 			await adminApi.reviewRequest(rejectingId, 'rejected', rejectionReason || undefined);
 			toast.success('Request rejected');
-			showRejectModal = false;
+			rejectDialogOpen.set(false);
 			onUpdate();
 		} catch (error) {
 			toast.error('Failed to reject request');
@@ -103,41 +111,43 @@
 	</div>
 {/if}
 
-<!-- Rejection Modal -->
-{#if showRejectModal}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="fixed inset-0 z-50">
-		<div class="fixed inset-0 bg-black/50" onclick={() => (showRejectModal = false)}></div>
-		<div class="fixed inset-0 flex items-center justify-center p-4">
-			<div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6" onclick={(e) => e.stopPropagation()}>
-				<h3 class="text-lg font-semibold text-ocean-800 mb-4">Reject Request</h3>
-				<div class="mb-4">
-					<label for="rejectionReason" class="block text-sm font-medium text-ocean-700 mb-1">
-						Reason (optional)
-					</label>
-					<textarea
-						id="rejectionReason"
-						bind:value={rejectionReason}
-						class="w-full px-3 py-2 rounded-md border border-sand-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent resize-none"
-						rows="3"
-						placeholder="Enter reason for rejection..."
-					></textarea>
-				</div>
-				<div class="flex gap-3">
-					<Button variant="outline" class="flex-1" onclick={() => (showRejectModal = false)}>
-						Cancel
-					</Button>
-					<Button
-						variant="primary"
-						class="flex-1 !bg-error hover:!bg-red-600"
-						onclick={confirmReject}
-						loading={processingId !== null}
-					>
-						Reject Request
-					</Button>
-				</div>
-			</div>
+<!-- Rejection Dialog -->
+{#if $rejectDialogOpen}
+	<div use:melt={$overlay} class="fixed inset-0 z-50 bg-ocean-900/50 backdrop-blur-sm"></div>
+	<div
+		use:melt={$content}
+		class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 w-full max-w-md p-6"
+	>
+		<div class="flex items-center justify-between mb-4">
+			<h3 use:melt={$title} class="text-lg font-semibold text-ocean-800">Reject Request</h3>
+			<button use:melt={$close} class="p-1 rounded-lg text-ocean-400 hover:text-ocean-600 hover:bg-ocean-500/10 transition-all cursor-pointer">
+				<X class="w-5 h-5" />
+			</button>
+		</div>
+		<div class="mb-4">
+			<label for="rejectionReason" class="block text-sm font-semibold text-ocean-800 mb-1.5">
+				Reason (optional)
+			</label>
+			<textarea
+				id="rejectionReason"
+				bind:value={rejectionReason}
+				class="w-full px-4 py-2.5 rounded-lg border-2 border-ocean-500/40 bg-white text-ocean-900 placeholder-ocean-500/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean-500/30 focus:border-ocean-500 hover:border-ocean-500 resize-none"
+				rows="3"
+				placeholder="Enter reason for rejection..."
+			></textarea>
+		</div>
+		<div class="flex gap-3">
+			<Button variant="outline" class="flex-1" onclick={() => rejectDialogOpen.set(false)}>
+				Cancel
+			</Button>
+			<Button
+				variant="primary"
+				class="flex-1 !bg-error hover:!bg-red-600"
+				onclick={confirmReject}
+				loading={processingId !== null}
+			>
+				Reject Request
+			</Button>
 		</div>
 	</div>
 {/if}

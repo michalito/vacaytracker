@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from './Button.svelte';
+	import { createPagination, melt } from '@melt-ui/svelte';
 	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
 
 	interface Props {
@@ -10,51 +10,66 @@
 
 	let { page, totalPages, onPageChange }: Props = $props();
 
-	const visiblePages = $derived(() => {
-		const pages: (number | 'ellipsis')[] = [];
-		const delta = 2;
-
-		for (let i = 1; i <= totalPages; i++) {
-			if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
-				pages.push(i);
-			} else if (pages[pages.length - 1] !== 'ellipsis') {
-				pages.push('ellipsis');
-			}
+	// Create Melt-UI pagination - note: count/perPage are reactive via derived
+	const {
+		elements: { root, pageTrigger, prevButton, nextButton },
+		states: { pages, page: currentPage },
+		options: { count }
+	} = createPagination({
+		count: 1,
+		perPage: 1,
+		defaultPage: 1,
+		siblingCount: 2,
+		onPageChange: ({ next }) => {
+			onPageChange(next);
+			return next;
 		}
+	});
 
-		return pages;
+	// Sync external totalPages prop with count option
+	$effect(() => {
+		count.set(totalPages);
+	});
+
+	// Sync external page prop with internal state
+	$effect(() => {
+		if (page !== $currentPage) {
+			currentPage.set(page);
+		}
 	});
 </script>
 
 {#if totalPages > 1}
-	<div class="flex items-center justify-center gap-1">
-		<Button variant="ghost" size="sm" onclick={() => onPageChange(page - 1)} disabled={page <= 1}>
+	<nav use:melt={$root} class="flex items-center justify-center gap-1">
+		<button
+			use:melt={$prevButton}
+			class="p-2 rounded-lg text-ocean-600 hover:bg-sand-100 transition-colors cursor-pointer
+				disabled:opacity-50 disabled:cursor-not-allowed"
+		>
 			<ChevronLeft class="w-4 h-4" />
-		</Button>
+		</button>
 
-		{#each visiblePages() as p, i}
-			{#if p === 'ellipsis'}
+		{#each $pages as p}
+			{#if p.type === 'ellipsis'}
 				<span class="px-2 text-ocean-400">...</span>
 			{:else}
 				<button
-					type="button"
-					onclick={() => onPageChange(p)}
-					class="w-8 h-8 rounded-md text-sm font-medium transition-colors {p === page
-						? 'bg-ocean-500 text-white'
-						: 'text-ocean-700 hover:bg-sand-100'}"
+					use:melt={$pageTrigger(p)}
+					class="w-8 h-8 rounded-md text-sm font-medium transition-colors cursor-pointer
+						text-ocean-700 hover:bg-sand-100
+						data-[selected]:bg-ocean-500 data-[selected]:text-white data-[selected]:hover:bg-ocean-600"
 				>
-					{p}
+					{p.value}
 				</button>
 			{/if}
 		{/each}
 
-		<Button
-			variant="ghost"
-			size="sm"
-			onclick={() => onPageChange(page + 1)}
-			disabled={page >= totalPages}
+		<button
+			use:melt={$nextButton}
+			class="p-2 rounded-lg text-ocean-600 hover:bg-sand-100 transition-colors cursor-pointer
+				disabled:opacity-50 disabled:cursor-not-allowed"
 		>
 			<ChevronRight class="w-4 h-4" />
-		</Button>
-	</div>
+		</button>
+	</nav>
 {/if}

@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { createPopover, createCheckbox, melt } from '@melt-ui/svelte';
 	import { clsx } from 'clsx';
 	import { calendar, type UserInfo } from '$lib/stores/calendar.svelte';
 	import { getUserColor } from '$lib/utils/colors';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { Filter, X } from 'lucide-svelte';
+	import { Filter, X, Check } from 'lucide-svelte';
 
 	interface Props {
 		users: UserInfo[];
@@ -12,74 +12,101 @@
 
 	let { users, class: className = '' }: Props = $props();
 
-	let isExpanded = $state(false);
+	// Popover for the filter dropdown
+	const {
+		elements: { trigger, content, close },
+		states: { open }
+	} = createPopover({
+		forceVisible: true,
+		positioning: { placement: 'bottom-end' }
+	});
 
-	const selectedCount = $derived(calendar.selectedUserIds.size);
-	const hasFilters = $derived(selectedCount > 0);
+	// Derive filter display state from store
+	const showAll = $derived(calendar.showAll);
+	const selectedUserIds = $derived(calendar.selectedUserIds);
+	const selectedCount = $derived(selectedUserIds.size);
 
+	// For trigger button display
+	const hasActiveFilter = $derived(!showAll);
+	const filterLabel = $derived.by(() => {
+		if (showAll) return 'Filter';
+		if (selectedCount === 0) return 'Filter (None)';
+		return `Filter (${selectedCount})`;
+	});
+
+	// Check if a user is visually selected
 	function isUserSelected(userId: string): boolean {
-		// If no filters are set, all users are effectively "selected"
-		if (calendar.selectedUserIds.size === 0) return true;
-		return calendar.selectedUserIds.has(userId);
+		if (showAll) return true;
+		return selectedUserIds.has(userId);
 	}
 
-	function handleToggle(userId: string) {
-		calendar.toggleUserFilter(userId);
-	}
-
+	// Handlers
 	function handleSelectAll() {
 		calendar.clearFilters();
 	}
 
 	function handleSelectNone() {
-		// Select all users first, then they can toggle individually
-		calendar.selectAllUsers();
+		calendar.selectNone();
+	}
+
+	function handleToggleUser(userId: string) {
+		calendar.toggleUserFilter(userId);
 	}
 </script>
 
 <div class={clsx('relative', className)}>
-	<Button
-		variant={hasFilters ? 'primary' : 'outline'}
-		size="sm"
-		onclick={() => (isExpanded = !isExpanded)}
+	<button
+		use:melt={$trigger}
+		class={clsx(
+			'inline-flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer',
+			hasActiveFilter
+				? 'bg-ocean-500 text-white hover:bg-ocean-600'
+				: 'border-2 border-ocean-500/40 text-ocean-700 hover:border-ocean-500 hover:bg-ocean-50'
+		)}
 	>
-		<Filter class="w-4 h-4 mr-1" />
-		Filter
-		{#if hasFilters}
-			<span class="ml-1">({selectedCount})</span>
-		{/if}
-	</Button>
+		<Filter class="w-4 h-4" />
+		{filterLabel}
+	</button>
 
-	{#if isExpanded}
-		<!-- Backdrop -->
-		<button
-			class="fixed inset-0 z-10"
-			onclick={() => (isExpanded = false)}
-			aria-label="Close filter panel"
-		></button>
-
-		<!-- Panel -->
+	{#if $open}
 		<div
-			class="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-sand-200 p-3 z-20"
+			use:melt={$content}
+			class="absolute right-0 mt-2 z-50 w-64 bg-white rounded-lg shadow-lg border border-sand-200 p-3"
 		>
-			<div class="flex items-center justify-between mb-2">
+			<div class="flex items-center justify-between mb-3">
 				<span class="text-sm font-medium text-ocean-700">Filter by User</span>
 				<button
-					onclick={() => (isExpanded = false)}
-					class="text-ocean-400 hover:text-ocean-600 p-1"
+					use:melt={$close}
+					class="text-ocean-400 hover:text-ocean-600 p-1 cursor-pointer"
 				>
 					<X class="w-4 h-4" />
 				</button>
 			</div>
 
-			<div class="flex gap-2 mb-3">
-				<Button variant="ghost" size="sm" onclick={handleSelectAll}>All</Button>
-				<Button variant="ghost" size="sm" onclick={handleSelectNone}>None</Button>
-				{#if hasFilters}
-					<Button variant="ghost" size="sm" onclick={() => calendar.clearFilters()}>
-						Clear
-					</Button>
-				{/if}
+			<!-- Mode toggle buttons -->
+			<div class="flex gap-1 mb-3 p-1 bg-sand-100 rounded-lg">
+				<button
+					onclick={handleSelectAll}
+					class={clsx(
+						'flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer',
+						showAll
+							? 'bg-white text-ocean-700 shadow-sm'
+							: 'text-ocean-500 hover:text-ocean-700'
+					)}
+				>
+					All
+				</button>
+				<button
+					onclick={handleSelectNone}
+					class={clsx(
+						'flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer',
+						!showAll && selectedCount === 0
+							? 'bg-white text-ocean-700 shadow-sm'
+							: 'text-ocean-500 hover:text-ocean-700'
+					)}
+				>
+					None
+				</button>
 			</div>
 
 			{#if users.length === 0}
@@ -89,21 +116,30 @@
 					{#each users as user (user.id)}
 						{@const color = getUserColor(user.id)}
 						{@const selected = isUserSelected(user.id)}
-						<label
+						{@const checkbox = createCheckbox({ defaultChecked: selected })}
+						<button
+							use:melt={checkbox.elements.root}
+							onclick={() => handleToggleUser(user.id)}
 							class={clsx(
-								'flex items-center gap-2 p-2 rounded cursor-pointer transition-colors',
+								'w-full flex items-center gap-2 p-2 rounded cursor-pointer transition-colors text-left',
 								selected ? 'bg-ocean-50' : 'hover:bg-sand-50 opacity-60'
 							)}
 						>
-							<input
-								type="checkbox"
-								checked={selected}
-								onchange={() => handleToggle(user.id)}
-								class="rounded border-ocean-300 text-ocean-500 focus:ring-ocean-500"
-							/>
+							<span
+								class={clsx(
+									'h-5 w-5 shrink-0 rounded border-2 flex items-center justify-center transition-all duration-200',
+									selected
+										? 'border-ocean-500 bg-ocean-500'
+										: 'border-ocean-400 bg-white'
+								)}
+							>
+								{#if selected}
+									<Check class="h-3.5 w-3.5 text-white" />
+								{/if}
+							</span>
 							<span class={clsx('w-3 h-3 rounded-full flex-shrink-0', color.background)}></span>
 							<span class="text-sm text-ocean-700 truncate">{user.name}</span>
-						</label>
+						</button>
 					{/each}
 				</div>
 			{/if}

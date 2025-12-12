@@ -1,10 +1,17 @@
 <script lang="ts">
+	import { createDialog, melt } from '@melt-ui/svelte';
 	import type { User, Role } from '$lib/types';
 	import { admin } from '$lib/stores/admin.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
+	import Select from '$lib/components/ui/Select.svelte';
 	import { X, UserPlus, Edit } from 'lucide-svelte';
+
+	const roleOptions = [
+		{ value: 'employee', label: 'Employee' },
+		{ value: 'admin', label: 'Admin' }
+	];
 
 	interface Props {
 		open: boolean;
@@ -13,6 +20,27 @@
 	}
 
 	let { open = $bindable(false), user = null, onClose }: Props = $props();
+
+	// Create Melt-UI dialog with controlled state
+	const {
+		elements: { overlay, content, title, close, portalled },
+		states: { open: dialogOpen }
+	} = createDialog({
+		forceVisible: true,
+		onOpenChange: ({ next }) => {
+			open = next;
+			if (!next) {
+				resetForm();
+				onClose();
+			}
+			return next;
+		}
+	});
+
+	// Sync external open prop with dialog state
+	$effect(() => {
+		dialogOpen.set(open);
+	});
 
 	let name = $state('');
 	let email = $state('');
@@ -47,12 +75,6 @@
 		vacationBalance = 25;
 		startDate = '';
 		errors = {};
-	}
-
-	function handleClose() {
-		open = false;
-		resetForm();
-		onClose();
 	}
 
 	function validate(): boolean {
@@ -105,7 +127,7 @@
 				});
 				toast.success('User created');
 			}
-			handleClose();
+			dialogOpen.set(false);
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to save user');
 		} finally {
@@ -115,27 +137,37 @@
 </script>
 
 {#if open}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="fixed inset-0 z-50">
-		<div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick={handleClose}></div>
-		<div class="fixed inset-0 flex items-center justify-center p-4">
+	<div use:melt={$portalled}>
+		<!-- Overlay -->
+		<div
+			use:melt={$overlay}
+			class="fixed inset-0 z-50 bg-ocean-900/50 backdrop-blur-sm transition-opacity duration-200
+				data-[state=open]:opacity-100 data-[state=closed]:opacity-0"
+		></div>
+
+		<!-- Content Container -->
+		<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 			<div
-				class="bg-white rounded-xl shadow-xl w-full max-w-md"
-				onclick={(e) => e.stopPropagation()}
+				use:melt={$content}
+				class="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 w-full max-w-md
+					transition-all duration-200 data-[state=open]:opacity-100 data-[state=open]:scale-100
+					data-[state=closed]:opacity-0 data-[state=closed]:scale-95"
 			>
 				<!-- Header -->
-				<div class="flex items-center justify-between p-4 border-b border-sand-200">
+				<div class="flex items-center justify-between p-4 border-b border-ocean-100/50">
 					<div class="flex items-center gap-2">
 						{#if isEditing}
 							<Edit class="w-5 h-5 text-ocean-500" />
-							<h2 class="text-lg font-semibold text-ocean-800">Edit User</h2>
+							<h2 use:melt={$title} class="text-lg font-semibold text-ocean-800">Edit User</h2>
 						{:else}
 							<UserPlus class="w-5 h-5 text-ocean-500" />
-							<h2 class="text-lg font-semibold text-ocean-800">Create User</h2>
+							<h2 use:melt={$title} class="text-lg font-semibold text-ocean-800">Create User</h2>
 						{/if}
 					</div>
-					<button type="button" onclick={handleClose} class="text-ocean-400 hover:text-ocean-600">
+					<button
+						use:melt={$close}
+						class="p-1 rounded-lg text-ocean-400 hover:text-ocean-600 hover:bg-ocean-500/10 transition-all duration-200 cursor-pointer"
+					>
 						<X class="w-5 h-5" />
 					</button>
 				</div>
@@ -164,21 +196,15 @@
 						/>
 					{/if}
 
-					<div>
-						<label for="role" class="block text-sm font-medium text-ocean-700 mb-1">Role</label>
-						<select
-							id="role"
-							bind:value={role}
-							class="w-full px-3 py-2 rounded-md border border-sand-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-						>
-							<option value="employee">Employee</option>
-							<option value="admin">Admin</option>
-						</select>
-					</div>
+					<Select
+						label="Role"
+						bind:value={role}
+						options={roleOptions}
+					/>
 
-					<div class="grid grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div>
-							<label for="vacationBalance" class="block text-sm font-medium text-ocean-700 mb-1">
+							<label for="vacationBalance" class="block text-sm font-semibold text-ocean-800 mb-1.5">
 								Vacation Balance
 							</label>
 							<input
@@ -187,7 +213,7 @@
 								bind:value={vacationBalance}
 								min="0"
 								max="365"
-								class="w-full px-3 py-2 rounded-md border border-sand-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+								class="w-full px-4 py-2.5 rounded-lg border-2 border-ocean-500/40 bg-white text-ocean-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean-500/30 focus:border-ocean-500 hover:border-ocean-500"
 							/>
 						</div>
 						<Input type="date" label="Start Date" bind:value={startDate} />
@@ -195,7 +221,7 @@
 
 					<!-- Actions -->
 					<div class="flex gap-3 pt-2">
-						<Button type="button" variant="outline" class="flex-1" onclick={handleClose}>
+						<Button type="button" variant="outline" class="flex-1" onclick={() => dialogOpen.set(false)}>
 							Cancel
 						</Button>
 						<Button type="submit" variant="primary" class="flex-1" loading={isSubmitting}>

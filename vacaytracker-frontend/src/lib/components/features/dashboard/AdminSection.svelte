@@ -25,15 +25,17 @@
 		{#if isLoading}
 			<StatsCardSkeleton count={4} />
 		{:else}
-			<StatsCard title="Total Crew" value={admin.pagination.total} icon={Users} color="ocean" />
-			<StatsCard
-				title="Pending Requests"
-				value={admin.pendingRequests.length}
-				icon={Clock}
-				color="yellow"
-			/>
-			<StatsCard title="Approved Today" value={approvedToday} icon={CheckCircle} color="green" />
-			<StatsCard title="Rejected Today" value={rejectedToday} icon={XCircle} color="red" />
+			<div class="contents content-fade-in">
+				<StatsCard title="Total Crew" value={admin.pagination.total} icon={Users} color="ocean" />
+				<StatsCard
+					title="Pending Requests"
+					value={admin.pendingRequests.length}
+					icon={Clock}
+					color="yellow"
+				/>
+				<StatsCard title="Approved Today" value={approvedToday} icon={CheckCircle} color="green" />
+				<StatsCard title="Rejected Today" value={rejectedToday} icon={XCircle} color="red" />
+			</div>
 		{/if}
 	</div>
 
@@ -48,7 +50,9 @@
 		{#if isLoading}
 			<ListSkeleton count={3} variant="withActions" />
 		{:else}
-			<PendingRequests requests={admin.pendingRequests} {onUpdate} />
+			<div class="content-fade-in">
+				<PendingRequests requests={admin.pendingRequests} {onUpdate} />
+			</div>
 		{/if}
 	</Card>
 </div>

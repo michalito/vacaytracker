@@ -17,7 +17,8 @@
 		count = 1
 	}: Props = $props();
 
-	const baseStyles = 'animate-pulse bg-sand-200 rounded';
+	// Use shimmer effect for modern look
+	const baseStyles = 'skeleton-shimmer rounded';
 
 	const variantStyles = {
 		text: 'h-4 rounded',
@@ -49,5 +50,7 @@
 	<div
 		class={clsx(baseStyles, variantStyles[variant], className)}
 		style={Object.entries(getStyles(i)).map(([k, v]) => `${k}: ${v}`).join('; ')}
+		role="status"
+		aria-label="Loading"
 	></div>
 {/each}

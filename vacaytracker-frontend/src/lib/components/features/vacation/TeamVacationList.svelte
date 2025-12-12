@@ -41,7 +41,7 @@
 {:else if vacations.length === 0}
 	<EmptyState icon={Users} message={emptyMessage} />
 {:else}
-	<div class="space-y-2">
+	<div class="space-y-2 content-fade-in">
 		{#each displayedVacations as vacation (vacation.id)}
 			<div class="flex items-center gap-3 p-2 bg-sand-50 rounded-lg">
 				<Avatar name={vacation.userName} size="sm" />

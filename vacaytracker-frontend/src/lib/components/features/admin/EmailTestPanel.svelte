@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createDialog, melt } from '@melt-ui/svelte';
 	import type { EmailTemplateType, EmailPreviewResponse } from '$lib/types';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -61,8 +62,15 @@
 
 	let sendingTemplate = $state<EmailTemplateType | null>(null);
 	let previewingTemplate = $state<EmailTemplateType | null>(null);
-	let showPreview = $state(false);
 	let previewData = $state<EmailPreviewResponse | null>(null);
+
+	// Preview Dialog
+	const {
+		elements: { overlay, content, title, close },
+		states: { open: previewOpen }
+	} = createDialog({
+		forceVisible: true
+	});
 
 	async function sendTestEmail(template: EmailTemplateType) {
 		sendingTemplate = template;
@@ -80,7 +88,7 @@
 		previewingTemplate = template;
 		try {
 			previewData = await adminApi.previewEmail(template);
-			showPreview = true;
+			previewOpen.set(true);
 		} catch (error) {
 			toast.error(`Failed to load preview: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		} finally {
@@ -89,7 +97,7 @@
 	}
 
 	function closePreview() {
-		showPreview = false;
+		previewOpen.set(false);
 		previewData = null;
 	}
 </script>
@@ -152,61 +160,55 @@
 	</div>
 </Card>
 
-<!-- Preview Modal -->
-{#if showPreview && previewData}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="fixed inset-0 z-50">
-		<div class="fixed inset-0 bg-black/50" onclick={closePreview}></div>
-		<div class="fixed inset-0 flex items-center justify-center p-4">
-			<div
-				class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-				onclick={(e) => e.stopPropagation()}
-			>
-				<!-- Header -->
-				<div class="flex items-center justify-between p-4 border-b border-sand-200">
-					<div>
-						<h3 class="text-lg font-semibold text-ocean-800">{previewData.template} Preview</h3>
-						<p class="text-sm text-ocean-600">
-							<strong>Subject:</strong> {previewData.subject}
-						</p>
-					</div>
-					<button
-						onclick={closePreview}
-						class="p-2 hover:bg-sand-100 rounded-md transition-colors"
-					>
-						<X class="w-5 h-5 text-ocean-600" />
-					</button>
-				</div>
-
-				<!-- Content -->
-				<div class="flex-1 overflow-auto p-4 bg-sand-50">
-					<div class="bg-white rounded-lg shadow-sm p-4">
-						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-						{@html previewData.htmlBody}
-					</div>
-				</div>
-
-				<!-- Footer -->
-				<div class="flex justify-end gap-2 p-4 border-t border-sand-200 bg-white">
-					<Button variant="outline" onclick={closePreview}>
-						Close
-					</Button>
-					<Button
-						onclick={() => {
-							const templateId = templates.find(t => t.name === previewData?.template)?.id;
-							if (templateId) {
-								closePreview();
-								sendTestEmail(templateId);
-							}
-						}}
-						loading={sendingTemplate !== null}
-					>
-						<Send class="w-4 h-4 mr-1" />
-						Send Test Email
-					</Button>
-				</div>
+<!-- Preview Dialog -->
+{#if $previewOpen && previewData}
+	<div use:melt={$overlay} class="fixed inset-0 z-50 bg-ocean-900/50 backdrop-blur-sm"></div>
+	<div
+		use:melt={$content}
+		class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+	>
+		<!-- Header -->
+		<div class="flex items-center justify-between p-4 border-b border-ocean-100/50">
+			<div>
+				<h3 use:melt={$title} class="text-lg font-semibold text-ocean-800">{previewData.template} Preview</h3>
+				<p class="text-sm text-ocean-600">
+					<strong>Subject:</strong> {previewData.subject}
+				</p>
 			</div>
+			<button
+				use:melt={$close}
+				class="p-2 rounded-lg hover:bg-ocean-500/10 transition-all duration-200 cursor-pointer"
+			>
+				<X class="w-5 h-5 text-ocean-600" />
+			</button>
+		</div>
+
+		<!-- Content -->
+		<div class="flex-1 overflow-auto p-4 bg-ocean-50/30">
+			<div class="bg-white rounded-xl shadow-sm p-4">
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html previewData.htmlBody}
+			</div>
+		</div>
+
+		<!-- Footer -->
+		<div class="flex justify-end gap-2 p-4 border-t border-ocean-100/50">
+			<Button variant="outline" onclick={closePreview}>
+				Close
+			</Button>
+			<Button
+				onclick={() => {
+					const templateId = templates.find(t => t.name === previewData?.template)?.id;
+					if (templateId) {
+						closePreview();
+						sendTestEmail(templateId);
+					}
+				}}
+				loading={sendingTemplate !== null}
+			>
+				<Send class="w-4 h-4 mr-1" />
+				Send Test Email
+			</Button>
 		</div>
 	</div>
 {/if}

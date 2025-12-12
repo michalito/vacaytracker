@@ -31,7 +31,10 @@
       "WebSearch",
       "Bash(go doc:*)",
       "Bash(go list:*)",
-      "Bash(go get:*)"
+      "Bash(go get:*)",
+      "WebFetch(domain:www.melt-ui.com)",
+      "WebFetch(domain:next.melt-ui.com)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

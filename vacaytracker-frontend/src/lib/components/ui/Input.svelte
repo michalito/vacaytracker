@@ -89,7 +89,7 @@
 			<button
 				type="button"
 				onclick={togglePasswordVisibility}
-				class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ocean-400 hover:text-ocean-600 transition-colors duration-200 focus:outline-none focus:text-ocean-500 rounded"
+				class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ocean-400 hover:text-ocean-600 transition-colors duration-200 cursor-pointer focus:outline-none focus:text-ocean-500 rounded"
 				aria-label={showPassword ? 'Hide password' : 'Show password'}
 			>
 				{#if showPassword}

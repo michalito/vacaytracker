@@ -4,6 +4,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
+	import Select from '$lib/components/ui/Select.svelte';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import UserTable from '$lib/components/features/admin/UserTable.svelte';
 	import UserModal from '$lib/components/features/admin/UserModal.svelte';
@@ -12,8 +13,14 @@
 	import { UserPlus, Search, Users } from 'lucide-svelte';
 	import type { User, Role } from '$lib/types';
 
+	const roleFilterOptions = [
+		{ value: '', label: 'All Roles' },
+		{ value: 'admin', label: 'Admin' },
+		{ value: 'employee', label: 'Employee' }
+	];
+
 	let searchQuery = $state('');
-	let roleFilter = $state<Role | ''>('');
+	let roleFilter = $state('');
 	let isUserModalOpen = $state(false);
 	let editingUser = $state<User | null>(null);
 	let deletingUser = $state<User | null>(null);
@@ -28,7 +35,7 @@
 			page,
 			limit: 10,
 			search: searchQuery || undefined,
-			role: roleFilter || undefined
+			role: (roleFilter as Role) || undefined
 		});
 	}
 
@@ -86,26 +93,25 @@
 		{#snippet header()}
 			<div class="flex flex-col sm:flex-row gap-4">
 				<div class="flex-1 relative">
-					<Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ocean-400" />
+					<Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ocean-400" />
 					<input
 						type="text"
 						placeholder="Search users..."
 						bind:value={searchQuery}
 						onkeydown={(e) => e.key === 'Enter' && handleSearch()}
-						class="w-full pl-10 pr-4 py-2 rounded-md border border-sand-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+						class="w-full pl-11 pr-4 py-2.5 rounded-lg border-2 border-ocean-500/40 bg-white text-ocean-900 placeholder-ocean-500/50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean-500/30 focus:border-ocean-500 hover:border-ocean-500"
 					/>
 				</div>
-				<select
-					bind:value={roleFilter}
-					onchange={() => loadUsers(1)}
-					class="px-4 py-2 rounded-md border border-sand-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-				>
-					<option value="">All Roles</option>
-					<option value="admin">Admin</option>
-					<option value="employee">Employee</option>
-				</select>
+				<div class="w-40">
+					<Select
+						bind:value={roleFilter}
+						options={roleFilterOptions}
+						onchange={() => loadUsers(1)}
+					/>
+				</div>
 				<Button variant="outline" onclick={handleSearch}>
-					<Search class="w-4 h-4" />
+					<Search class="w-4 h-4 mr-2" />
+					Search
 				</Button>
 			</div>
 		{/snippet}

@@ -7,23 +7,24 @@
 		title: string;
 		value: number | string;
 		icon?: typeof SvelteComponent<IconProps>;
-		color?: 'ocean' | 'green' | 'yellow' | 'red';
+		color?: 'ocean' | 'green' | 'yellow' | 'red' | 'coral';
 	}
 
 	let { title, value, icon: Icon, color = 'ocean' }: Props = $props();
 
 	const colorStyles = {
-		ocean: 'bg-ocean-50 text-ocean-600',
-		green: 'bg-green-50 text-green-600',
-		yellow: 'bg-yellow-50 text-yellow-600',
-		red: 'bg-red-50 text-red-600'
+		ocean: 'bg-ocean-500/10 text-ocean-600',
+		green: 'bg-ocean-400/10 text-ocean-500',
+		yellow: 'bg-coral-400/10 text-coral-500',
+		red: 'bg-coral-500/15 text-coral-600',
+		coral: 'bg-coral-400/10 text-coral-500'
 	};
 </script>
 
-<div class="bg-white rounded-lg shadow-md border border-sand-200 p-4">
-	<div class="flex items-center gap-3">
+<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/30 p-5 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+	<div class="flex items-center gap-4">
 		{#if Icon}
-			<div class={clsx('p-2 rounded-lg', colorStyles[color])}>
+			<div class={clsx('p-3 rounded-xl', colorStyles[color])}>
 				<Icon class="w-6 h-6" />
 			</div>
 		{/if}

@@ -20,6 +20,8 @@ function createCalendarStore() {
 	// State
 	let currentDate = $state(new Date());
 	let viewType = $state<CalendarView>('month');
+	// Filter state: showAll=true means show everyone, showAll=false uses selectedUserIds
+	let showAll = $state(true);
 	let selectedUserIds = $state<Set<string>>(new Set());
 	let monthCache = $state<Map<string, CachedMonth>>(new Map());
 	let isLoading = $state(false);
@@ -69,11 +71,12 @@ function createCalendarStore() {
 		}
 	});
 
-	// Filtered vacations based on selectedUserIds
+	// Filtered vacations based on showAll flag and selectedUserIds
 	const filteredVacations = $derived.by(() => {
-		if (selectedUserIds.size === 0) {
+		if (showAll) {
 			return currentViewVacations;
 		}
+		// When not showing all, filter by selected users (empty = show nothing)
 		return currentViewVacations.filter((v) => selectedUserIds.has(v.userId));
 	});
 
@@ -155,8 +158,18 @@ function createCalendarStore() {
 		viewType = view;
 	}
 
-	// Filtering
+	// Filtering - simple and clear
+	function setShowAll(value: boolean): void {
+		showAll = value;
+		if (value) {
+			selectedUserIds = new Set();
+		}
+	}
+
 	function toggleUserFilter(userId: string): void {
+		// Always switch to custom filtering mode
+		showAll = false;
+
 		const newSet = new Set(selectedUserIds);
 		if (newSet.has(userId)) {
 			newSet.delete(userId);
@@ -167,14 +180,17 @@ function createCalendarStore() {
 	}
 
 	function clearFilters(): void {
+		showAll = true;
 		selectedUserIds = new Set();
 	}
 
-	function selectAllUsers(): void {
-		selectedUserIds = new Set(availableUsers.map((u) => u.id));
+	function selectNone(): void {
+		showAll = false;
+		selectedUserIds = new Set();
 	}
 
 	function setSelectedUsers(userIds: string[]): void {
+		showAll = false;
 		selectedUserIds = new Set(userIds);
 	}
 
@@ -190,6 +206,9 @@ function createCalendarStore() {
 		},
 		get viewType() {
 			return viewType;
+		},
+		get showAll() {
+			return showAll;
 		},
 		get currentMonth() {
 			return currentMonth;
@@ -219,9 +238,10 @@ function createCalendarStore() {
 		goToNext,
 		goToDate,
 		setViewType,
+		setShowAll,
 		toggleUserFilter,
 		clearFilters,
-		selectAllUsers,
+		selectNone,
 		setSelectedUsers,
 		ensureDataForCurrentView,
 		clearCache

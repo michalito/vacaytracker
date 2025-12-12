@@ -4,6 +4,7 @@
 	import { toast } from '$lib/stores/toast.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import { Mail } from 'lucide-svelte';
 
 	let vacationUpdates = $state(auth.user?.emailPreferences?.vacationUpdates ?? true);
@@ -59,11 +60,7 @@
 		</p>
 
 		<label class="flex items-center gap-3 cursor-pointer">
-			<input
-				type="checkbox"
-				bind:checked={vacationUpdates}
-				class="w-5 h-5 rounded border-sand-300 text-ocean-500 focus:ring-ocean-500"
-			/>
+			<Checkbox bind:checked={vacationUpdates} />
 			<div>
 				<p class="font-medium text-ocean-800">Vacation Updates</p>
 				<p class="text-sm text-ocean-500">
@@ -73,11 +70,7 @@
 		</label>
 
 		<label class="flex items-center gap-3 cursor-pointer">
-			<input
-				type="checkbox"
-				bind:checked={weeklyDigest}
-				class="w-5 h-5 rounded border-sand-300 text-ocean-500 focus:ring-ocean-500"
-			/>
+			<Checkbox bind:checked={weeklyDigest} />
 			<div>
 				<p class="font-medium text-ocean-800">Weekly Digest</p>
 				<p class="text-sm text-ocean-500">Get a weekly summary of team vacation schedules</p>
@@ -85,11 +78,7 @@
 		</label>
 
 		<label class="flex items-center gap-3 cursor-pointer">
-			<input
-				type="checkbox"
-				bind:checked={teamNotifications}
-				class="w-5 h-5 rounded border-sand-300 text-ocean-500 focus:ring-ocean-500"
-			/>
+			<Checkbox bind:checked={teamNotifications} />
 			<div>
 				<p class="font-medium text-ocean-800">Team Notifications</p>
 				<p class="text-sm text-ocean-500">
