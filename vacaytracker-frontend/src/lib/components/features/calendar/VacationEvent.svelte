@@ -37,7 +37,7 @@
 	});
 
 	const title = $derived(
-		`${vacation.userName}: ${vacation.startDate} - ${vacation.endDate} (${vacation.totalDays} days)`
+		`${vacation.userName}: ${vacation.startDate} - ${vacation.endDate} (${vacation.totalDays} day${vacation.totalDays !== 1 ? 's' : ''})`
 	);
 </script>
 

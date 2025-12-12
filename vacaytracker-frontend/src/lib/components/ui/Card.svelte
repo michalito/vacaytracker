@@ -22,7 +22,6 @@
 	const cardClasses = $derived(
 		clsx(
 			'bg-white/90 backdrop-blur-sm rounded-xl shadow-md border border-white/40',
-			'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
 			className
 		)
 	);
