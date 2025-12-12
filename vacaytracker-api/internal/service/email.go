@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"log"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/resend/resend-go/v2"
@@ -42,7 +43,6 @@ const (
 	maxRetries     = 3
 	baseRetryDelay = 500 * time.Millisecond
 	maxRetryDelay  = 10 * time.Second
-	requestTimeout = 30 * time.Second
 )
 
 // NewEmailService creates a new EmailService with pre-compiled templates
@@ -165,8 +165,8 @@ func (s *EmailService) Send(ctx context.Context, to, subject, htmlBody, textBody
 			tags := make([]resend.Tag, len(opts.Tags))
 			for i, tag := range opts.Tags {
 				tags[i] = resend.Tag{
-					Name:  "category",
-					Value: tag,
+					Name:  tag, // Each tag name must be unique
+					Value: "true",
 				}
 			}
 			params.Tags = tags
@@ -187,11 +187,8 @@ func (s *EmailService) Send(ctx context.Context, to, subject, htmlBody, textBody
 			}
 		}
 
-		// Create a timeout context for this attempt
-		attemptCtx, cancel := context.WithTimeout(ctx, requestTimeout)
-
-		sent, err := s.sendWithContext(attemptCtx, params, opts)
-		cancel()
+		// Send the email
+		sent, err := s.sendEmail(params)
 
 		if err == nil {
 			log.Printf("[EMAIL] Email sent to %s (ID: %s)", to, sent.Id)
@@ -212,19 +209,11 @@ func (s *EmailService) Send(ctx context.Context, to, subject, htmlBody, textBody
 	return fmt.Errorf("email failed after %d retries: %w", maxRetries, lastErr)
 }
 
-// sendWithContext sends an email with the given context
-func (s *EmailService) sendWithContext(ctx context.Context, params *resend.SendEmailRequest, opts *SendOptions) (*resend.SendEmailResponse, error) {
-	// The Resend Go SDK v2 uses context internally
-	// For idempotency, we need to use the SendEmailWithContext if available,
-	// or handle it at the request level
-
-	// Send the email
-	sent, err := s.client.Emails.Send(params)
-	if err != nil {
-		return nil, err
-	}
-
-	return sent, nil
+// sendEmail sends an email via the Resend client
+// Note: IdempotencyKey in SendOptions is generated for logging/debugging but
+// not currently passed to Resend API (SDK v2 doesn't expose this header yet)
+func (s *EmailService) sendEmail(params *resend.SendEmailRequest) (*resend.SendEmailResponse, error) {
+	return s.client.Emails.Send(params)
 }
 
 // calculateBackoff calculates exponential backoff with jitter
@@ -267,25 +256,11 @@ func isRetryableError(err error) bool {
 	}
 
 	for _, pattern := range retryablePatterns {
-		if contains(errStr, pattern) {
+		if strings.Contains(strings.ToLower(errStr), pattern) {
 			return true
 		}
 	}
 
-	return false
-}
-
-// contains checks if s contains substr (case-insensitive would be better but keeping simple)
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsSubstring(s, substr))
-}
-
-func containsSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
 	return false
 }
 
@@ -527,22 +502,6 @@ func (s *EmailService) SendAdminNewRequest(admins []*domain.User, requester *dom
 func (s *EmailService) executeTemplate(tmpl *template.Template, data interface{}) (string, error) {
 	if tmpl == nil {
 		return "", fmt.Errorf("template is nil")
-	}
-
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return "", fmt.Errorf("failed to execute template: %w", err)
-	}
-
-	return buf.String(), nil
-}
-
-// RenderTemplate renders a template string with the given data (for backwards compatibility)
-// Deprecated: Prefer using pre-compiled template methods for better performance
-func (s *EmailService) RenderTemplate(templateStr string, data interface{}) (string, error) {
-	tmpl, err := template.New("dynamic").Parse(templateStr)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse template: %w", err)
 	}
 
 	var buf bytes.Buffer

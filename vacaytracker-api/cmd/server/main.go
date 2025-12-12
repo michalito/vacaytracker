@@ -106,6 +106,9 @@ func main() {
 		router.Use(middleware.CORSMiddleware([]string{cfg.AppURL}))
 	}
 
+	// Static files (for email assets like logo)
+	router.Static("/static", "./static")
+
 	// Public routes
 	router.GET("/health", healthHandler.Check)
 

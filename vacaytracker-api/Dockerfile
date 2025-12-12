@@ -18,9 +18,10 @@ RUN apk --no-cache add ca-certificates tzdata
 
 WORKDIR /app
 
-# Copy binary and migrations
+# Copy binary, migrations, and static assets
 COPY --from=builder /build/server .
 COPY --from=builder /build/migrations ./migrations
+COPY --from=builder /build/static ./static
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data
