@@ -25,26 +25,17 @@
 <div
 	class={clsx('bg-white rounded-lg shadow-md border border-sand-200 overflow-hidden', className)}
 >
-	<!-- Header row with day labels and dates -->
+	<!-- Header row with day labels only -->
 	<div class="grid grid-cols-7 gap-px bg-sand-200">
 		{#each weekDayLabels as label, i}
 			{@const day = weekDays[i]}
 			<div
 				class={clsx(
-					'bg-ocean-50 py-2 px-3 text-center',
-					day?.isWeekend && 'bg-sand-100',
-					day?.isToday && 'bg-ocean-100'
+					'bg-ocean-50 py-2 text-center text-sm font-medium text-ocean-700',
+					day?.isWeekend && 'bg-sand-100 text-ocean-600'
 				)}
 			>
-				<div class="text-xs font-medium text-ocean-600">{label}</div>
-				<div
-					class={clsx(
-						'text-lg font-semibold',
-						day?.isToday ? 'text-ocean-600' : 'text-ocean-800'
-					)}
-				>
-					{day?.dayOfMonth}
-				</div>
+				{label}
 			</div>
 		{/each}
 	</div>

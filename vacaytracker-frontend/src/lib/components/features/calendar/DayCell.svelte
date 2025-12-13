@@ -53,8 +53,8 @@
 		'bg-white p-2',
 		variant === 'week' ? 'min-h-[120px]' : 'min-h-[100px]',
 		!day.isCurrentMonth && 'bg-sand-50',
-		day.isToday && 'ring-2 ring-inset ring-ocean-500',
-		day.isWeekend && day.isCurrentMonth && 'bg-sand-50/50',
+		day.isToday && 'ring-2 ring-inset ring-ocean-400 bg-ocean-50/30 rounded-lg',
+		day.isWeekend && day.isCurrentMonth && !day.isToday && 'bg-sand-50/50',
 		className
 	)}
 >

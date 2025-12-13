@@ -54,15 +54,19 @@
 					</div>
 				</div>
 			{:else}
-				{#if calendar.viewType === 'week'}
-					<WeekView currentDate={calendar.currentDate} vacations={calendar.filteredVacations} />
-				{:else}
-					<MonthView
-						year={calendar.currentYear}
-						month={calendar.currentMonth}
-						vacations={calendar.filteredVacations}
-					/>
-				{/if}
+				{#key calendar.viewType}
+					<div class="animate-fade-in">
+						{#if calendar.viewType === 'week'}
+							<WeekView currentDate={calendar.currentDate} vacations={calendar.filteredVacations} />
+						{:else}
+							<MonthView
+								year={calendar.currentYear}
+								month={calendar.currentMonth}
+								vacations={calendar.filteredVacations}
+							/>
+						{/if}
+					</div>
+				{/key}
 			{/if}
 		</div>
 	</Card>
