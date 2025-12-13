@@ -176,9 +176,26 @@ Server:
 Database:
 - `DB_PATH` (default: ./data/vacaytracker.db)
 
+## API Reference
+
+- Backend runs on `http://localhost:3000` (dev) with `/api/` prefix
+- Frontend proxies API requests in dev mode
+- Auth: JWT Bearer token in `Authorization` header
+- See `aidocs/02-api-specification.md` for full endpoint documentation
+
+## aidocs/ Reference
+
+The `aidocs/` directory contains detailed implementation documentation:
+- `00-architecture-overview.md` - System architecture diagrams
+- `01-database-schema.md` - SQLite tables and migrations
+- `02-api-specification.md` - Complete REST API documentation
+- `03-implementation-roadmap.md` - Feature phases and dependencies
+- `melt-ui/` - Melt UI component usage guides
+
 ## Important Guidelines
 
 - If uncertain about Svelte implementation, read the latest Svelte 5 docs first
 - If uncertain about Go implementation, research the latest Go docs first
 - Always ensure our approach aligns with the documentation in `aidocs/`
+- Melt UI uses a preprocessor (`@melt-ui/pp`) - component builders are transformed at build time
 - After changes, ensure to rebuild the containers

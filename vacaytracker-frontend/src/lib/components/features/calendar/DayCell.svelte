@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { createPopover, melt } from '@melt-ui/svelte';
 	import { clsx } from 'clsx';
 	import type { TeamVacation } from '$lib/types';
 	import type { CalendarDay } from '$lib/utils/date';
+	import { formatDateRangeShort } from '$lib/utils/date';
+	import { getUserColor } from '$lib/utils/colors';
 	import VacationEvent from './VacationEvent.svelte';
 
 	type EventPosition = 'start' | 'middle' | 'end' | 'single';
@@ -26,10 +29,14 @@
 	const hiddenCount = $derived(Math.max(0, vacations.length - maxEvents));
 	const hiddenVacations = $derived(vacations.slice(maxEvents));
 
-	// Build title for overflow indicator
-	const overflowTitle = $derived(
-		hiddenVacations.map((v) => v.userName).join(', ')
-	);
+	// Popover for hidden vacations overflow
+	const {
+		elements: { trigger, content, close },
+		states: { open }
+	} = createPopover({
+		forceVisible: true,
+		positioning: { placement: 'bottom-start' }
+	});
 
 	function getEventPosition(vacation: TeamVacation): EventPosition {
 		const isStart = day.dateString === vacation.startDate;
@@ -74,9 +81,47 @@
 				/>
 			{/each}
 			{#if hiddenCount > 0}
-				<div class="text-xs text-ocean-500 pl-1 cursor-default" title={overflowTitle}>
+				<button
+					use:melt={$trigger}
+					class="text-xs text-ocean-500 pl-1 hover:text-ocean-700 hover:underline cursor-pointer transition-colors"
+				>
 					+{hiddenCount} more
-				</div>
+				</button>
+
+				{#if $open}
+					<div
+						use:melt={$content}
+						class="z-50 w-56 bg-white rounded-lg shadow-xl border border-ocean-200 overflow-hidden
+							transition-all duration-150
+							data-[state=open]:opacity-100 data-[state=open]:scale-100
+							data-[state=closed]:opacity-0 data-[state=closed]:scale-95"
+					>
+						<div class="px-3 py-2 bg-ocean-50 border-b border-ocean-100">
+							<span class="text-sm font-medium text-ocean-700">
+								+{hiddenCount} more vacation{hiddenCount !== 1 ? 's' : ''}
+							</span>
+						</div>
+						<div class="max-h-48 overflow-y-auto">
+							{#each hiddenVacations as vacation (vacation.id)}
+								{@const color = getUserColor(vacation.userId)}
+								<div class="px-3 py-2 flex items-start gap-2 hover:bg-ocean-50 transition-colors">
+									<span class={clsx('w-2 h-2 rounded-full mt-1.5 flex-shrink-0', color.background)}></span>
+									<div class="min-w-0 flex-1">
+										<div class="text-sm font-medium text-ocean-800 truncate">
+											{vacation.userName}
+										</div>
+										<div class="text-xs text-ocean-500">
+											{formatDateRangeShort(vacation.startDate, vacation.endDate)}
+											<span class="text-ocean-400">
+												({vacation.totalDays} day{vacation.totalDays !== 1 ? 's' : ''})
+											</span>
+										</div>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/if}
