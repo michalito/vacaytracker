@@ -2,7 +2,7 @@
 	import { createToggleGroup, melt } from '@melt-ui/svelte';
 	import { clsx } from 'clsx';
 	import { calendar } from '$lib/stores/calendar.svelte';
-	import { formatMonthYear, formatWeekRange, getMonday } from '$lib/utils/date';
+	import { formatMonthYear, formatWeekRange, getMonday, getWeekDays } from '$lib/utils/date';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { ChevronLeft, ChevronRight, Calendar, CalendarDays } from 'lucide-svelte';
 
@@ -38,18 +38,48 @@
 			? formatMonthYear(calendar.currentDate)
 			: formatWeekRange(getMonday(calendar.currentDate))
 	);
+
+	// Check if current view contains today's date
+	const isViewingToday = $derived.by(() => {
+		const today = new Date();
+		if (calendar.viewType === 'month') {
+			return (
+				today.getMonth() === calendar.currentDate.getMonth() &&
+				today.getFullYear() === calendar.currentDate.getFullYear()
+			);
+		} else {
+			// Week view: check if today is in the current week
+			const weekDays = getWeekDays(calendar.currentDate);
+			const todayStr = today.toISOString().split('T')[0];
+			return weekDays.some((day) => day.dateString === todayStr);
+		}
+	});
 </script>
 
 <div class={clsx('flex items-center justify-between flex-wrap gap-3', className)}>
 	<!-- Title and navigation -->
-	<div class="flex items-center gap-2">
-		<h2 class="text-lg font-semibold text-ocean-700">{title}</h2>
-		<div class="flex items-center gap-1">
-			<Button variant="ghost" size="sm" onclick={() => calendar.goToPrevious()}>
+	<div class="flex items-center gap-3">
+		<!-- Fixed width title to prevent layout shift -->
+		<h2 class="text-lg font-semibold text-ocean-700 min-w-[180px]">{title}</h2>
+		<!-- Navigation buttons styled to match Melt-UI toggle group -->
+		<div class="flex items-center gap-1 bg-sand-100 rounded-lg p-1">
+			<Button variant="ghost" size="sm" onclick={() => calendar.goToPrevious()} class="!p-1.5 !rounded-md hover:bg-white hover:shadow-sm focus:!ring-0 focus:!ring-offset-0">
 				<ChevronLeft class="w-4 h-4" />
 			</Button>
-			<Button variant="outline" size="sm" onclick={() => calendar.goToToday()}>Today</Button>
-			<Button variant="ghost" size="sm" onclick={() => calendar.goToNext()}>
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={() => calendar.goToToday()}
+				class={clsx(
+					'!rounded-md focus:!ring-0 focus:!ring-offset-0',
+					isViewingToday
+						? '!bg-white !text-ocean-700 !shadow-sm hover:!bg-ocean-50'
+						: 'hover:bg-white hover:shadow-sm'
+				)}
+			>
+				Today
+			</Button>
+			<Button variant="ghost" size="sm" onclick={() => calendar.goToNext()} class="!p-1.5 !rounded-md hover:bg-white hover:shadow-sm focus:!ring-0 focus:!ring-offset-0">
 				<ChevronRight class="w-4 h-4" />
 			</Button>
 		</div>
