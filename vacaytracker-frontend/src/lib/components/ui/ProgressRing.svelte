@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { createProgress, melt } from '@melt-ui/svelte';
+
 	interface Props {
 		value: number;
 		max: number;
@@ -8,6 +10,25 @@
 	}
 
 	let { value, max, size = 120, strokeWidth = 8, class: className = '' }: Props = $props();
+
+	const {
+		elements: { root },
+		states: { value: progressValue },
+		options: { max: progressMax }
+	} = createProgress({
+		defaultValue: value,
+		max
+	});
+
+	// Sync external value prop with internal Melt-UI state
+	$effect(() => {
+		progressValue.set(value);
+	});
+
+	// Sync max prop with internal Melt-UI state
+	$effect(() => {
+		progressMax.set(max);
+	});
 
 	const percentage = $derived(Math.min(100, Math.max(0, (value / max) * 100)));
 	const radius = $derived((size - strokeWidth) / 2);
@@ -19,7 +40,7 @@
 	);
 </script>
 
-<div class="relative inline-flex items-center justify-center {className}">
+<div use:melt={$root} class="relative inline-flex items-center justify-center {className}">
 	<svg width={size} height={size} class="-rotate-90">
 		<!-- Background circle -->
 		<circle

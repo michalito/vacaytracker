@@ -39,20 +39,22 @@
 		{/if}
 	</div>
 
-	<!-- Pending Requests -->
-	<Card>
-		{#snippet header()}
-			<h2 class="text-lg font-semibold text-ocean-700">
-				Pending Requests ({admin.pendingRequests.length})
-			</h2>
-		{/snippet}
+	<!-- Pending Requests (only shown when there are requests or loading) -->
+	{#if isLoading || admin.pendingRequests.length > 0}
+		<Card>
+			{#snippet header()}
+				<h2 class="text-lg font-semibold text-ocean-700">
+					Pending Requests ({admin.pendingRequests.length})
+				</h2>
+			{/snippet}
 
-		{#if isLoading}
-			<ListSkeleton count={3} variant="withActions" />
-		{:else}
-			<div class="content-fade-in">
-				<PendingRequests requests={admin.pendingRequests} {onUpdate} />
-			</div>
-		{/if}
-	</Card>
+			{#if isLoading}
+				<ListSkeleton count={3} variant="withActions" />
+			{:else}
+				<div class="content-fade-in">
+					<PendingRequests requests={admin.pendingRequests} {onUpdate} />
+				</div>
+			{/if}
+		</Card>
+	{/if}
 </div>

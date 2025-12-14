@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { createAvatar, melt } from '@melt-ui/svelte';
 	import { clsx } from 'clsx';
 
 	interface Props {
@@ -9,6 +10,12 @@
 	}
 
 	let { name = '', src, size = 'md', class: className = '' }: Props = $props();
+
+	const {
+		elements: { image, fallback }
+	} = createAvatar({
+		src: src ?? ''
+	});
 
 	const initials = $derived(
 		name
@@ -25,19 +32,30 @@
 		lg: 'w-12 h-12 text-base'
 	};
 
-	const classes = $derived(
+	const containerClasses = $derived(
 		clsx(
-			'inline-flex items-center justify-center rounded-full bg-ocean-500 text-white font-medium',
+			'relative inline-flex items-center justify-center rounded-full bg-ocean-500 overflow-hidden',
 			sizeStyles[size],
 			className
 		)
 	);
 </script>
 
-{#if src}
-	<img {src} alt={name} class={clsx('rounded-full object-cover', sizeStyles[size], className)} />
-{:else}
-	<div class={classes}>
+<div class={containerClasses}>
+	{#if src}
+		<img
+			use:melt={$image}
+			{src}
+			alt={name}
+			class="h-full w-full object-cover transition-opacity duration-200
+				data-[state=loading]:opacity-0 data-[state=loaded]:opacity-100 data-[state=error]:opacity-0"
+		/>
+	{/if}
+	<span
+		use:melt={$fallback}
+		class="absolute inset-0 flex items-center justify-center text-white font-medium
+			data-[state=loaded]:hidden"
+	>
 		{initials || '?'}
-	</div>
-{/if}
+	</span>
+</div>

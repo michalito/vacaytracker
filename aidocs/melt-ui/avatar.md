@@ -69,8 +69,7 @@ import { createAvatar } from '@melt-ui/svelte';
   let { src, name }: Props = $props();
 
   const {
-    elements: { image, fallback },
-    states: { loadingStatus }
+    elements: { image, fallback }
   } = createAvatar({ src });
 
   // Get initials for fallback
@@ -84,20 +83,27 @@ import { createAvatar } from '@melt-ui/svelte';
   );
 </script>
 
-<div class="relative h-10 w-10 rounded-full bg-ocean-200 overflow-hidden">
-  <img
-    use:melt={$image}
-    alt={name}
-    class="h-full w-full object-cover"
-  />
+<div class="relative h-10 w-10 rounded-full bg-ocean-500 overflow-hidden">
+  {#if src}
+    <img
+      use:melt={$image}
+      {src}
+      alt={name}
+      class="h-full w-full object-cover transition-opacity duration-200
+        data-[state=loading]:opacity-0 data-[state=loaded]:opacity-100 data-[state=error]:opacity-0"
+    />
+  {/if}
   <span
     use:melt={$fallback}
-    class="absolute inset-0 flex items-center justify-center text-sm font-medium text-ocean-700"
+    class="absolute inset-0 flex items-center justify-center text-white font-medium
+      data-[state=loaded]:hidden"
   >
     {initials}
   </span>
 </div>
 ```
+
+> **Note**: The `data-[state=loaded]:hidden` class hides the fallback when the image successfully loads. The image uses `data-[state=loading]:opacity-0` to fade in smoothly.
 
 ## Styling with Tailwind
 

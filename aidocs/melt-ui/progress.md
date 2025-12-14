@@ -217,20 +217,43 @@ import { createProgress } from '@melt-ui/svelte';
 
 ## Circular Progress
 
+For circular/ring progress indicators, wrap the container with `use:melt={$root}` to get proper ARIA accessibility attributes (`role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax`).
+
 ```svelte
 <script lang="ts">
   import { createProgress, melt } from '@melt-ui/svelte';
 
-  const { states: { value }, options: { max } } = createProgress({
-    defaultValue: 70
+  interface Props {
+    value: number;
+    max: number;
+  }
+
+  let { value, max }: Props = $props();
+
+  const {
+    elements: { root },
+    states: { value: progressValue },
+    options: { max: progressMax }
+  } = createProgress({
+    defaultValue: value,
+    max
   });
 
-  const percentage = $derived(($value / $max) * 100);
+  // Sync external props with Melt-UI state
+  $effect(() => {
+    progressValue.set(value);
+  });
+
+  $effect(() => {
+    progressMax.set(max);
+  });
+
+  const percentage = $derived(Math.min(100, Math.max(0, (value / max) * 100)));
   const circumference = 2 * Math.PI * 45; // radius = 45
   const offset = $derived(circumference - (percentage / 100) * circumference);
 </script>
 
-<div class="relative h-32 w-32">
+<div use:melt={$root} class="relative h-32 w-32">
   <svg class="h-full w-full -rotate-90" viewBox="0 0 100 100">
     <!-- Background circle -->
     <circle
@@ -239,7 +262,7 @@ import { createProgress } from '@melt-ui/svelte';
       r="45"
       fill="none"
       stroke-width="8"
-      class="stroke-ocean-200"
+      class="stroke-sand-200"
     />
     <!-- Progress circle -->
     <circle
@@ -254,11 +277,14 @@ import { createProgress } from '@melt-ui/svelte';
       stroke-dashoffset={offset}
     />
   </svg>
-  <div class="absolute inset-0 flex items-center justify-center">
-    <span class="text-2xl font-bold text-ocean-800">{percentage.toFixed(0)}%</span>
+  <div class="absolute inset-0 flex flex-col items-center justify-center">
+    <span class="text-2xl font-bold text-ocean-900">{value}</span>
+    <span class="text-sm text-ocean-500">of {max}</span>
   </div>
 </div>
 ```
+
+> **VacayTracker Usage**: This pattern is used in `ProgressRing.svelte` for displaying vacation balance. The Melt-UI `root` element adds accessibility without changing the visual design.
 
 ## File Upload Progress
 
