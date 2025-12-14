@@ -24,21 +24,20 @@
 	}: Props = $props();
 
 	const color = $derived(getUserColor(vacation.userId));
+	const daysLabel = $derived(vacation.totalDays === 1 ? 'day' : 'days');
 
 	const borderRadius = $derived.by(() => {
 		switch (position) {
 			case 'start':
-				return 'rounded-l-md rounded-r-none';
+				return 'rounded-l-full rounded-r-none';
 			case 'middle':
 				return 'rounded-none';
 			case 'end':
-				return 'rounded-r-md rounded-l-none';
+				return 'rounded-r-full rounded-l-none';
 			default:
-				return 'rounded-md';
+				return 'rounded-full';
 		}
 	});
-
-	const daysLabel = $derived(vacation.totalDays === 1 ? 'day' : 'days');
 </script>
 
 <Tooltip placement="top">
@@ -57,8 +56,9 @@
 		class={clsx(
 			color.combined,
 			borderRadius,
-			compact ? 'text-xs px-1 py-0.5' : 'text-sm px-2 py-1',
-			'truncate cursor-default',
+			compact ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1',
+			'truncate cursor-default shadow-sm',
+			'transition-shadow duration-200 hover:shadow-md',
 			className
 		)}
 	>
