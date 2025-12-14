@@ -52,33 +52,42 @@ import { createDateRangePicker } from '@melt-ui/svelte';
 | `grid` | Calendar grid |
 | `prevButton` | Previous month button |
 | `nextButton` | Next month button |
-| `field` | Date range field |
-| `startSegment` | Start date segment |
-| `endSegment` | End date segment |
+| `field` | Date range field container |
+| `startSegment` | Start date segment builder (function) |
+| `endSegment` | End date segment builder (function) |
 | `label` | Field label |
+| `startHiddenInput` | Hidden input for start date (form submission) |
+| `endHiddenInput` | Hidden input for end date (form submission) |
+| `validation` | Validation message container |
 
 ### Returned States
 
 | State | Type | Description |
 |-------|------|-------------|
 | `open` | `Writable<boolean>` | Popup visibility |
-| `value` | `Writable<DateRange>` | Selected range |
-| `months` | `Readable<Month[]>` | Month data |
+| `value` | `Writable<DateRange>` | Selected range `{ start, end }` |
+| `months` | `Readable<Month[]>` | Month data for rendering |
 | `weekdays` | `Readable<string[]>` | Weekday labels |
 | `isInvalid` | `Readable<boolean>` | Validation state |
-| `startSegments` | `Readable<Segment[]>` | Start segments |
-| `endSegments` | `Readable<Segment[]>` | End segments |
+| `segmentContents` | `Readable<{ start: Segment[], end: Segment[] }>` | Segment arrays for start/end |
+| `startValue` | `Writable<DateValue \| undefined>` | Start date value |
+| `endValue` | `Writable<DateValue \| undefined>` | End date value |
+| `headingValue` | `Readable<string>` | Formatted heading text |
+| `placeholder` | `Writable<DateValue>` | Current placeholder date |
 
 ## Data Attributes
 
 ### Cell
-- `[data-selected]` - In selected range
-- `[data-range-start]` - Range start date
-- `[data-range-end]` - Range end date
-- `[data-in-range]` - Between start and end
+- `[data-selected]` - Date is in selected range
+- `[data-selection-start]` - Range start date
+- `[data-selection-end]` - Range end date
+- `[data-highlighted]` - Between start and end (hover preview)
 - `[data-today]` - Today's date
 - `[data-disabled]` - Date is disabled
+- `[data-unavailable]` - Date is unavailable
 - `[data-outside-month]` - Outside current month
+- `[data-outside-visible-months]` - Outside all visible months
+- `[data-focused]` - Has keyboard focus
 
 ## Keyboard Navigation
 
@@ -117,7 +126,7 @@ import { createDateRangePicker } from '@melt-ui/svelte';
       endSegment,
       label
     },
-    states: { open, value, months, weekdays, startSegments, endSegments }
+    states: { open, value, months, weekdays, segmentContents }
   } = createDateRangePicker({
     locale: 'en-GB',
     weekStartsOn: 1,
@@ -139,7 +148,7 @@ import { createDateRangePicker } from '@melt-ui/svelte';
     >
       <!-- Start segments -->
       <div class="flex items-center gap-0.5">
-        {#each $startSegments as seg}
+        {#each $segmentContents.start as seg}
           {#if seg.part === 'literal'}
             <span class="text-ocean-400">{seg.value}</span>
           {:else}
@@ -154,7 +163,7 @@ import { createDateRangePicker } from '@melt-ui/svelte';
 
       <!-- End segments -->
       <div class="flex items-center gap-0.5">
-        {#each $endSegments as seg}
+        {#each $segmentContents.end as seg}
           {#if seg.part === 'literal'}
             <span class="text-ocean-400">{seg.value}</span>
           {:else}
@@ -223,9 +232,9 @@ import { createDateRangePicker } from '@melt-ui/svelte';
                           use:melt={$cell(day, month.value)}
                           class="h-9 w-9 flex items-center justify-center text-sm cursor-pointer
                             data-[outside-month]:text-ocean-300
-                            data-[range-start]:bg-ocean-500 data-[range-start]:text-white data-[range-start]:rounded-l-lg
-                            data-[range-end]:bg-ocean-500 data-[range-end]:text-white data-[range-end]:rounded-r-lg
-                            data-[in-range]:bg-ocean-100
+                            data-[selection-start]:bg-ocean-500 data-[selection-start]:text-white data-[selection-start]:rounded-l-lg
+                            data-[selection-end]:bg-ocean-500 data-[selection-end]:text-white data-[selection-end]:rounded-r-lg
+                            data-[highlighted]:bg-ocean-100
                             data-[today]:ring-2 data-[today]:ring-ocean-400
                             hover:bg-ocean-200 transition-colors"
                         >
@@ -248,18 +257,18 @@ import { createDateRangePicker } from '@melt-ui/svelte';
 ## Styling with Tailwind
 
 ```css
-/* Range start */
-[data-melt-calendar-cell][data-range-start] {
+/* Selection start */
+[data-melt-calendar-cell][data-selection-start] {
   @apply bg-ocean-500 text-white rounded-l-lg;
 }
 
-/* Range end */
-[data-melt-calendar-cell][data-range-end] {
+/* Selection end */
+[data-melt-calendar-cell][data-selection-end] {
   @apply bg-ocean-500 text-white rounded-r-lg;
 }
 
-/* In range */
-[data-melt-calendar-cell][data-in-range] {
+/* Highlighted (in range preview) */
+[data-melt-calendar-cell][data-highlighted] {
   @apply bg-ocean-100;
 }
 
@@ -271,6 +280,11 @@ import { createDateRangePicker } from '@melt-ui/svelte';
 /* Disabled dates */
 [data-melt-calendar-cell][data-disabled] {
   @apply opacity-40 cursor-not-allowed;
+}
+
+/* Unavailable dates */
+[data-melt-calendar-cell][data-unavailable] {
+  @apply text-ocean-300 line-through;
 }
 ```
 

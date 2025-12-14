@@ -166,6 +166,8 @@
 					</div>
 					<button
 						use:melt={$close}
+						type="button"
+						aria-label="Close dialog"
 						class="p-1 rounded-lg text-ocean-400 hover:text-ocean-600 hover:bg-ocean-500/10 transition-all duration-200 cursor-pointer"
 					>
 						<X class="w-5 h-5" />

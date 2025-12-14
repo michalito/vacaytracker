@@ -77,18 +77,39 @@
 				onkeydown={handleKeyDown}
 				min="0"
 				max="365"
+				aria-label={`Vacation balance for ${user.name}`}
 				class="w-20 px-2 py-1 text-center rounded border border-ocean-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
 			/>
-			<Button variant="ghost" size="sm" onclick={saveEdit} loading={isSaving}>
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={saveEdit}
+				loading={isSaving}
+				aria-label={`Save balance for ${user.name}`}
+				title={`Save balance for ${user.name}`}
+			>
 				<Check class="w-4 h-4 text-green-600" />
 			</Button>
-			<Button variant="ghost" size="sm" onclick={cancelEdit} disabled={isSaving}>
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={cancelEdit}
+				disabled={isSaving}
+				aria-label={`Cancel editing balance for ${user.name}`}
+				title={`Cancel editing balance for ${user.name}`}
+			>
 				<X class="w-4 h-4 text-error" />
 			</Button>
 		{:else}
 			<span class="font-bold text-ocean-800 w-12 text-center">{user.vacationBalance}</span>
 			<span class="text-ocean-500 text-sm">days</span>
-			<Button variant="ghost" size="sm" onclick={startEdit}>
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={startEdit}
+				aria-label={`Edit balance for ${user.name}`}
+				title={`Edit balance for ${user.name}`}
+			>
 				<Edit2 class="w-4 h-4" />
 			</Button>
 		{/if}

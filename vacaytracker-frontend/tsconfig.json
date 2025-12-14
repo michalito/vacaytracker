@@ -7,9 +7,6 @@
 		"module": "ESNext",
 		"target": "ESNext",
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
-		"paths": {
-			"$lib/*": ["./src/lib/*"],
-			"$components/*": ["./src/lib/components/*"]
-		}
+		"skipLibCheck": true
 	}
 }

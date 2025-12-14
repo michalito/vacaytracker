@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import type { Snippet } from 'svelte';
+	import type { HTMLButtonAttributes } from 'svelte/elements';
 
 	interface Props {
 		variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -8,10 +9,11 @@
 		disabled?: boolean;
 		loading?: boolean;
 		type?: 'button' | 'submit' | 'reset';
-		onclick?: (e: MouseEvent) => void;
 		class?: string;
 		children: Snippet;
 	}
+
+	type ButtonProps = Props & HTMLButtonAttributes;
 
 	let {
 		variant = 'primary',
@@ -21,8 +23,9 @@
 		type = 'button',
 		onclick,
 		class: className = '',
-		children
-	}: Props = $props();
+		children,
+		...rest
+	}: ButtonProps = $props();
 
 	const baseStyles =
 		'inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
@@ -44,7 +47,14 @@
 	const classes = $derived(clsx(baseStyles, variantStyles[variant], sizeStyles[size], className));
 </script>
 
-<button {type} class={classes} disabled={disabled || loading} {onclick}>
+<button
+	{...rest}
+	{type}
+	class={classes}
+	disabled={disabled || loading}
+	aria-busy={loading || undefined}
+	{onclick}
+>
 	{#if loading}
 		<svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
 			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"

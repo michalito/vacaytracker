@@ -4,7 +4,11 @@
       "Bash(ls:*)",
       "Bash(cat:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run check:*)"
+      "Bash(npm run check:*)",
+      "Bash(docker compose up:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(docker compose restart:*)",
+      "Bash(docker compose exec:*)"
     ],
     "deny": [],
     "ask": []

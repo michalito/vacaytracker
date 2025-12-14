@@ -33,8 +33,9 @@
 
 	const {
 		elements: { trigger, menu, option, label },
-		states: { open, selectedLabel, selected, disabled: disabledState },
-		helpers: { isSelected }
+		states: { open, selectedLabel, selected },
+		helpers: { isSelected },
+		options: { disabled: disabledOption }
 	} = createSelect<string>({
 		defaultSelected: defaultSelected ? { value: defaultSelected.value, label: defaultSelected.label } : undefined,
 		forceVisible: true,
@@ -50,7 +51,7 @@
 
 	// Sync disabled prop reactively
 	$effect(() => {
-		disabledState.set(disabled);
+		disabledOption.set(disabled);
 	});
 
 	// Sync external value prop with internal state

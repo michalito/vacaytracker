@@ -72,14 +72,15 @@ type DateRange = {
 ## Data Attributes
 
 ### Cell
-- `[data-selected]` - In selected range
-- `[data-range-start]` - Range start date
-- `[data-range-end]` - Range end date
-- `[data-in-range]` - Between start and end
+- `[data-selected]` - Date is in selected range
+- `[data-selection-start]` - Range start date
+- `[data-selection-end]` - Range end date
+- `[data-highlighted]` - Between start and end (hover preview)
 - `[data-today]` - Today's date
 - `[data-disabled]` - Date is disabled
 - `[data-unavailable]` - Date is unavailable
 - `[data-outside-month]` - Outside current month
+- `[data-outside-visible-months]` - Outside all visible months
 - `[data-focused]` - Has keyboard focus
 
 ## Keyboard Navigation
@@ -160,9 +161,9 @@ type DateRange = {
                       use:melt={$cell(day, month.value)}
                       class="h-10 w-10 flex items-center justify-center text-sm cursor-pointer transition-all
                         data-[outside-month]:text-ocean-300
-                        data-[range-start]:bg-ocean-500 data-[range-start]:text-white data-[range-start]:rounded-l-lg
-                        data-[range-end]:bg-ocean-500 data-[range-end]:text-white data-[range-end]:rounded-r-lg
-                        data-[in-range]:bg-ocean-100
+                        data-[selection-start]:bg-ocean-500 data-[selection-start]:text-white data-[selection-start]:rounded-l-lg
+                        data-[selection-end]:bg-ocean-500 data-[selection-end]:text-white data-[selection-end]:rounded-r-lg
+                        data-[highlighted]:bg-ocean-100
                         data-[today]:ring-2 data-[today]:ring-ocean-400
                         data-[disabled]:opacity-40 data-[disabled]:cursor-not-allowed
                         data-[unavailable]:line-through data-[unavailable]:text-ocean-300
@@ -192,18 +193,18 @@ type DateRange = {
 ## Styling with Tailwind
 
 ```css
-/* Range start */
-[data-melt-range-calendar-cell][data-range-start] {
+/* Selection start */
+[data-melt-range-calendar-cell][data-selection-start] {
   @apply bg-ocean-500 text-white rounded-l-lg;
 }
 
-/* Range end */
-[data-melt-range-calendar-cell][data-range-end] {
+/* Selection end */
+[data-melt-range-calendar-cell][data-selection-end] {
   @apply bg-ocean-500 text-white rounded-r-lg;
 }
 
-/* In range (between start and end) */
-[data-melt-range-calendar-cell][data-in-range] {
+/* Highlighted (between start and end) */
+[data-melt-range-calendar-cell][data-highlighted] {
   @apply bg-ocean-100;
 }
 
@@ -223,7 +224,7 @@ type DateRange = {
 }
 
 /* Selection (both start and end on same day) */
-[data-melt-range-calendar-cell][data-range-start][data-range-end] {
+[data-melt-range-calendar-cell][data-selection-start][data-selection-end] {
   @apply rounded-lg;
 }
 ```

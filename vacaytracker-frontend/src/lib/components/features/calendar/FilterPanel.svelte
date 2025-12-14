@@ -72,6 +72,8 @@
 				<span class="text-sm font-medium text-ocean-700">Filter by User</span>
 				<button
 					use:melt={$close}
+					type="button"
+					aria-label="Close filters"
 					class="text-ocean-400 hover:text-ocean-600 p-1 cursor-pointer"
 				>
 					<X class="w-4 h-4" />

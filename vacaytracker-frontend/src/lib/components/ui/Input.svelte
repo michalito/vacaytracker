@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { Eye, EyeOff } from 'lucide-svelte';
+	import type { HTMLInputAttributes } from 'svelte/elements';
 
 	interface Props {
 		type?: 'text' | 'email' | 'password' | 'number' | 'date';
@@ -18,6 +19,8 @@
 		onblur?: (e: FocusEvent) => void;
 	}
 
+	type InputProps = Props & HTMLInputAttributes;
+
 	let {
 		type = 'text',
 		value = $bindable(''),
@@ -31,14 +34,16 @@
 		class: className = '',
 		showPasswordToggle = false,
 		oninput,
-		onblur
-	}: Props = $props();
+		onblur,
+		...rest
+	}: InputProps = $props();
 
 	let showPassword = $state(false);
 
 	// Generate stable ID once on component creation
 	const generatedId = crypto.randomUUID().slice(0, 8);
 	const inputId = $derived(id || `input-${generatedId}`);
+	const errorId = $derived(`${inputId}-error`);
 
 	const effectiveType = $derived(
 		type === 'password' && showPasswordToggle && showPassword ? 'text' : type
@@ -75,6 +80,7 @@
 
 	<div class="relative">
 		<input
+			{...rest}
 			id={inputId}
 			type={effectiveType}
 			{name}
@@ -82,6 +88,8 @@
 			{disabled}
 			{required}
 			class={inputClasses}
+			aria-invalid={error ? true : undefined}
+			aria-describedby={error ? errorId : undefined}
 			bind:value
 			{oninput}
 			{onblur}
@@ -104,6 +112,6 @@
 	</div>
 
 	{#if error}
-		<p class="mt-1 text-sm text-error">{error}</p>
+		<p id={errorId} class="mt-1 text-sm text-error" aria-live="polite">{error}</p>
 	{/if}
 </div>

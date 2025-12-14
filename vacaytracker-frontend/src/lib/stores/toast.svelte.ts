@@ -1,23 +1,51 @@
+/**
+ * Toast notification store using Svelte 5 runes.
+ * Provides a simple API for displaying notifications with auto-dismiss.
+ */
+
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
-export interface Toast {
+export interface ToastData {
 	id: string;
 	type: ToastType;
-	message: string;
-	duration?: number;
+	title: string;
+	description?: string;
 }
 
 function createToastStore() {
-	let toasts = $state<Toast[]>([]);
+	let toasts = $state<ToastData[]>([]);
 
-	function add(type: ToastType, message: string, duration: number = 5000): string {
+	/**
+	 * Add a toast notification.
+	 * Supports multiple signatures for backward compatibility:
+	 * - add(type, title)
+	 * - add(type, title, duration)
+	 * - add(type, title, description)
+	 * - add(type, title, description, duration)
+	 */
+	function add(
+		type: ToastType,
+		title: string,
+		descOrDuration?: string | number,
+		duration?: number
+	): string {
 		const id = crypto.randomUUID();
-		const toast: Toast = { id, type, message, duration };
 
+		let description: string | undefined;
+		let closeDelay = 5000;
+
+		if (typeof descOrDuration === 'number') {
+			closeDelay = descOrDuration;
+		} else if (typeof descOrDuration === 'string') {
+			description = descOrDuration;
+			closeDelay = duration ?? 5000;
+		}
+
+		const toast: ToastData = { id, type, title, description };
 		toasts = [...toasts, toast];
 
-		if (duration > 0) {
-			setTimeout(() => dismiss(id), duration);
+		if (closeDelay > 0) {
+			setTimeout(() => dismiss(id), closeDelay);
 		}
 
 		return id;
@@ -32,10 +60,17 @@ function createToastStore() {
 	}
 
 	// Convenience methods
-	const success = (message: string, duration?: number) => add('success', message, duration);
-	const error = (message: string, duration?: number) => add('error', message, duration);
-	const warning = (message: string, duration?: number) => add('warning', message, duration);
-	const info = (message: string, duration?: number) => add('info', message, duration);
+	const success = (title: string, descOrDuration?: string | number, duration?: number) =>
+		add('success', title, descOrDuration, duration);
+
+	const error = (title: string, descOrDuration?: string | number, duration?: number) =>
+		add('error', title, descOrDuration, duration);
+
+	const warning = (title: string, descOrDuration?: string | number, duration?: number) =>
+		add('warning', title, descOrDuration, duration);
+
+	const info = (title: string, descOrDuration?: string | number, duration?: number) =>
+		add('info', title, descOrDuration, duration);
 
 	return {
 		get toasts() {

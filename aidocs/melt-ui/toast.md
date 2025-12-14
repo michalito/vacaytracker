@@ -1,125 +1,73 @@
 # Toast
 
-A notification system for displaying temporary messages.
+A notification system for displaying temporary messages with auto-dismiss.
 
 ## Use Cases
 
-- Success notifications
-- Error messages
-- Informational alerts
-- Action confirmations
+- Success notifications (e.g., "Settings saved")
+- Error messages (e.g., "Failed to save changes")
+- Informational alerts (e.g., "Session expiring soon")
+- Action confirmations with optional descriptions
 
-## Installation
+## VacayTracker Implementation
 
-```typescript
-import { createToaster } from '@melt-ui/svelte';
-```
+VacayTracker uses a Svelte 5 rune-based toast store with a clean API supporting both simple messages and title+description format.
 
-## API Reference
-
-### createToaster Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `closeDelay` | `number` | `5000` | Auto-close delay (ms) |
-| `type` | `'foreground' \| 'background'` | `'foreground'` | Toast priority |
-| `hover` | `'pause' \| 'pause-all' \| null` | `'pause'` | Hover behavior |
-
-### Returned Elements
-
-| Element | Description |
-|---------|-------------|
-| `content` | Toast container |
-| `title` | Toast title |
-| `description` | Toast description |
-| `close` | Close button |
-
-### Returned States
-
-| State | Type | Description |
-|-------|------|-------------|
-| `toasts` | `Readable<Toast[]>` | Active toasts |
-
-### Returned Helpers
-
-| Helper | Description |
-|--------|-------------|
-| `addToast(data)` | Add a new toast |
-| `removeToast(id)` | Remove a toast |
-| `updateToast(id, data)` | Update toast data |
-
-### Returned Actions
-
-| Action | Description |
-|--------|-------------|
-| `portal` | Portal action for rendering |
-
-### Toast Type
+### Toast Store (`src/lib/stores/toast.svelte.ts`)
 
 ```typescript
-type Toast<T> = {
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+export interface ToastData {
   id: string;
-  data: T;
-  closeDelay?: number;
-  type?: 'foreground' | 'background';
-};
+  type: ToastType;
+  title: string;
+  description?: string;
+}
+
+function createToastStore() {
+  let toasts = $state<ToastData[]>([]);
+
+  function add(type, title, descOrDuration?, duration?): string { ... }
+  function dismiss(id: string): void { ... }
+  function dismissAll(): void { ... }
+
+  return {
+    get toasts() { return toasts; },
+    add, dismiss, dismissAll,
+    success, error, warning, info  // Convenience methods
+  };
+}
+
+export const toast = createToastStore();
 ```
 
-## Data Attributes
+### Usage
 
-### Content
-- `[data-melt-toast-content]` - Present on content
+```typescript
+import { toast } from '$lib/stores/toast.svelte';
 
-### Title
-- `[data-melt-toast-title]` - Present on title
+// Simple message
+toast.success('Settings saved');
+toast.error('Failed to save');
 
-### Description
-- `[data-melt-toast-description]` - Present on description
+// With description
+toast.success('Request Approved', 'John\'s vacation from Dec 20-25 has been approved.');
 
-### Close
-- `[data-melt-toast-close]` - Present on close button
+// With custom duration (milliseconds)
+toast.error('Connection lost', 10000);  // 10 seconds
 
-## Keyboard Navigation
+// With description and custom duration
+toast.info('New update available', 'Click to refresh the page.', 8000);
+```
 
-| Key | Action |
-|-----|--------|
-| `Tab` | Navigate focusable elements |
-| `Escape` | Dismiss toast |
-
-## Accessibility
-
-Follows [WAI-ARIA Alert Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/alert/):
-- `role="alert"` for important messages
-- Focus management
-- Screen reader announcements
-
-## Setup
-
-### 1. Create Toaster Component
+### Toaster Component (`src/lib/components/ui/Toaster.svelte`)
 
 ```svelte
-<!-- Toaster.svelte -->
-<script lang="ts" module>
-  import { createToaster, melt } from '@melt-ui/svelte';
+<script lang="ts">
+  import { toast } from '$lib/stores/toast.svelte';
   import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-svelte';
 
-  export type ToastData = {
-    title: string;
-    description?: string;
-    type: 'success' | 'error' | 'warning' | 'info';
-  };
-
-  const {
-    elements: { content, title, description, close },
-    helpers: { addToast },
-    states: { toasts },
-    actions: { portal }
-  } = createToaster<ToastData>();
-
-  export { addToast };
-</script>
-
-<script lang="ts">
   const icons = {
     success: CheckCircle,
     error: AlertCircle,
@@ -128,252 +76,113 @@ Follows [WAI-ARIA Alert Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/alert/
   };
 
   const styles = {
-    success: 'bg-green-50 border-green-500 text-green-800',
-    error: 'bg-red-50 border-red-500 text-red-800',
-    warning: 'bg-yellow-50 border-yellow-500 text-yellow-800',
-    info: 'bg-blue-50 border-blue-500 text-blue-800'
+    success: { container: 'bg-success/10 border-success', icon: 'text-success' },
+    error: { container: 'bg-error/10 border-error', icon: 'text-error' },
+    warning: { container: 'bg-warning/10 border-warning', icon: 'text-warning' },
+    info: { container: 'bg-info/10 border-info', icon: 'text-info' }
   };
 </script>
 
-<div use:portal class="fixed top-4 right-4 z-50 flex flex-col gap-2 w-80">
-  {#each $toasts as t (t.id)}
-    {@const Icon = icons[t.data.type]}
-    <div
-      use:melt={$content(t.id)}
-      class="flex items-start gap-3 p-4 rounded-lg border-l-4 shadow-lg {styles[t.data.type]}"
-    >
-      <Icon class="w-5 h-5 flex-shrink-0" />
-      <div class="flex-1 min-w-0">
-        <p use:melt={$title(t.id)} class="font-medium">{t.data.title}</p>
-        {#if t.data.description}
-          <p use:melt={$description(t.id)} class="text-sm mt-1 opacity-80">
-            {t.data.description}
-          </p>
-        {/if}
-      </div>
-      <button
-        use:melt={$close(t.id)}
-        class="flex-shrink-0 p-1 rounded hover:bg-black/5 transition-colors"
-      >
-        <X class="w-4 h-4" />
-      </button>
+<div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] ..." role="region" aria-label="Notifications">
+  {#each toast.toasts as t (t.id)}
+    <div role="alert" aria-live="polite" class="... {styles[t.type].container}">
+      <Icon class="{styles[t.type].icon}" />
+      <p class="font-semibold">{t.title}</p>
+      {#if t.description}<p>{t.description}</p>{/if}
+      <button onclick={() => toast.dismiss(t.id)}>×</button>
     </div>
   {/each}
 </div>
 ```
 
-### 2. Add to Layout
+## API Reference
+
+### Toast Store Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `success` | `(title, descOrDuration?, duration?)` | Show success toast |
+| `error` | `(title, descOrDuration?, duration?)` | Show error toast |
+| `warning` | `(title, descOrDuration?, duration?)` | Show warning toast |
+| `info` | `(title, descOrDuration?, duration?)` | Show info toast |
+| `dismiss` | `(id: string)` | Dismiss specific toast |
+| `dismissAll` | `()` | Dismiss all toasts |
+
+### Toast Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Unique identifier (auto-generated) |
+| `type` | `ToastType` | 'success' \| 'error' \| 'warning' \| 'info' |
+| `title` | `string` | Main message text |
+| `description` | `string?` | Optional secondary text |
+
+### Default Behavior
+
+- **Auto-dismiss**: 5 seconds (5000ms)
+- **Position**: Bottom center
+- **Stacking**: Newest at bottom (reverse column)
+- **Z-index**: 9999
+
+## Accessibility
+
+- `role="region"` on container with `aria-label="Notifications"`
+- `role="alert"` and `aria-live="polite"` on each toast
+- `aria-hidden="true"` on decorative icons
+- Accessible dismiss button with `aria-label`
+
+## Styling
+
+### Color Scheme
+
+Uses semantic colors from `app.css`:
+- **Success**: `--color-success` (green) - `oklch(0.65 0.2 145)`
+- **Error**: `--color-error` (red) - `oklch(0.6 0.22 25)`
+- **Warning**: `--color-warning` (amber) - `oklch(0.75 0.18 85)`
+- **Info**: `--color-info` (blue) - `oklch(0.65 0.15 250)`
+
+### Toast Animations (`app.css`)
+
+```css
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(100%) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(100%) scale(0.95); }
+}
+
+.animate-toast-in {
+  animation: toastIn 0.3s ease-out forwards;
+}
+```
+
+## Layout Integration
+
+The Toaster component is mounted globally in `+layout.svelte`:
 
 ```svelte
-<!-- +layout.svelte -->
 <script lang="ts">
   import Toaster from '$lib/components/ui/Toaster.svelte';
 </script>
 
-<slot />
 <Toaster />
+{@render children()}
 ```
 
-### 3. Use the Toast
+## Positioning Options
+
+Default is bottom-center. To change position, modify the container classes:
 
 ```svelte
-<script lang="ts">
-  import { addToast } from '$lib/components/ui/Toaster.svelte';
+<!-- Top right -->
+<div class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 ...">
 
-  function handleSuccess() {
-    addToast({
-      data: {
-        title: 'Request submitted!',
-        description: 'Your vacation request has been sent for approval.',
-        type: 'success'
-      }
-    });
-  }
-
-  function handleError() {
-    addToast({
-      data: {
-        title: 'Error',
-        description: 'Something went wrong. Please try again.',
-        type: 'error'
-      },
-      closeDelay: 10000 // Longer for errors
-    });
-  }
-</script>
-```
-
-## Styling with Tailwind
-
-```css
-/* Toast animations */
-[data-melt-toast-content] {
-  animation: slideIn 200ms ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* Toast types */
-[data-melt-toast-content].success {
-  @apply bg-green-50 border-l-4 border-green-500;
-}
-
-[data-melt-toast-content].error {
-  @apply bg-red-50 border-l-4 border-red-500;
-}
-
-[data-melt-toast-content].warning {
-  @apply bg-yellow-50 border-l-4 border-yellow-500;
-}
-
-[data-melt-toast-content].info {
-  @apply bg-blue-50 border-l-4 border-blue-500;
-}
-```
-
-## VacayTracker Toast Store
-
-```typescript
-// toast.svelte.ts
-import { createToaster, melt } from '@melt-ui/svelte';
-
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-export interface ToastData {
-  title: string;
-  description?: string;
-  type: ToastType;
-}
-
-const toaster = createToaster<ToastData>({
-  closeDelay: 5000,
-  hover: 'pause'
-});
-
-export const {
-  elements,
-  helpers: { addToast, removeToast },
-  states: { toasts },
-  actions: { portal }
-} = toaster;
-
-// Convenience methods
-export function toast(type: ToastType, title: string, description?: string) {
-  addToast({
-    data: { type, title, description }
-  });
-}
-
-export const toastSuccess = (title: string, description?: string) =>
-  toast('success', title, description);
-
-export const toastError = (title: string, description?: string) =>
-  toast('error', title, description);
-
-export const toastWarning = (title: string, description?: string) =>
-  toast('warning', title, description);
-
-export const toastInfo = (title: string, description?: string) =>
-  toast('info', title, description);
-```
-
-## With Progress Bar
-
-```svelte
-<script lang="ts">
-  // Each toast provides getPercentage() helper
-</script>
-
-{#each $toasts as t (t.id)}
-  {@const percentage = t.getPercentage()}
-  <div use:melt={$content(t.id)} class="relative overflow-hidden ...">
-    <!-- Toast content -->
-
-    <!-- Progress bar -->
-    <div
-      class="absolute bottom-0 left-0 h-1 bg-current opacity-30 transition-all"
-      style="width: {100 - percentage}%"
-    ></div>
-  </div>
-{/each}
-```
-
-## With Actions
-
-```svelte
-<script lang="ts" module>
-  export type ToastData = {
-    title: string;
-    description?: string;
-    type: 'success' | 'error';
-    action?: {
-      label: string;
-      onClick: () => void;
-    };
-  };
-</script>
-
-{#each $toasts as t (t.id)}
-  <div use:melt={$content(t.id)} class="...">
-    <div class="flex-1">
-      <p use:melt={$title(t.id)}>{t.data.title}</p>
-      {#if t.data.description}
-        <p use:melt={$description(t.id)}>{t.data.description}</p>
-      {/if}
-    </div>
-
-    {#if t.data.action}
-      <button
-        onclick={() => {
-          t.data.action?.onClick();
-          removeToast(t.id);
-        }}
-        class="px-3 py-1 text-sm font-medium bg-white/50 rounded hover:bg-white/80"
-      >
-        {t.data.action.label}
-      </button>
-    {/if}
-
-    <button use:melt={$close(t.id)}>×</button>
-  </div>
-{/each}
-
-<!-- Usage -->
-<script>
-  addToast({
-    data: {
-      title: 'File deleted',
-      type: 'success',
-      action: {
-        label: 'Undo',
-        onClick: () => restoreFile()
-      }
-    }
-  });
-</script>
-```
-
-## Positioning
-
-```svelte
-<!-- Top right (default) -->
-<div use:portal class="fixed top-4 right-4 z-50">
-
-<!-- Top left -->
-<div use:portal class="fixed top-4 left-4 z-50">
+<!-- Top center -->
+<div class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 ...">
 
 <!-- Bottom right -->
-<div use:portal class="fixed bottom-4 right-4 z-50">
-
-<!-- Bottom center -->
-<div use:portal class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+<div class="fixed bottom-4 right-4 z-[9999] flex flex-col-reverse gap-2 ...">
 ```

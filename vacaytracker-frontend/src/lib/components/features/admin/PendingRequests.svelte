@@ -120,7 +120,12 @@
 	>
 		<div class="flex items-center justify-between mb-4">
 			<h3 use:melt={$title} class="text-lg font-semibold text-ocean-800">Reject Request</h3>
-			<button use:melt={$close} class="p-1 rounded-lg text-ocean-400 hover:text-ocean-600 hover:bg-ocean-500/10 transition-all cursor-pointer">
+			<button
+				use:melt={$close}
+				type="button"
+				aria-label="Close dialog"
+				class="p-1 rounded-lg text-ocean-400 hover:text-ocean-600 hover:bg-ocean-500/10 transition-all cursor-pointer"
+			>
 				<X class="w-5 h-5" />
 			</button>
 		</div>

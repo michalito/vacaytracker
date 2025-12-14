@@ -57,7 +57,14 @@
 		</Badge>
 
 		{#if request.status === 'pending'}
-			<Button variant="ghost" size="sm" onclick={handleCancel} loading={isCancelling}>
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={handleCancel}
+				loading={isCancelling}
+				aria-label="Cancel request"
+				title="Cancel request"
+			>
 				<Trash2 class="w-4 h-4 text-error" />
 			</Button>
 		{/if}

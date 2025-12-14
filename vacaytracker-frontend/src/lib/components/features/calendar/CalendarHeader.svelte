@@ -39,6 +39,9 @@
 			: formatWeekRange(getMonday(calendar.currentDate))
 	);
 
+	const prevLabel = $derived(calendar.viewType === 'month' ? 'Previous month' : 'Previous week');
+	const nextLabel = $derived(calendar.viewType === 'month' ? 'Next month' : 'Next week');
+
 	// Check if current view contains today's date
 	const isViewingToday = $derived.by(() => {
 		const today = new Date();
@@ -63,7 +66,14 @@
 		<h2 class="text-lg font-semibold text-ocean-700 min-w-[180px]">{title}</h2>
 		<!-- Navigation buttons styled to match Melt-UI toggle group -->
 		<div class="flex items-center gap-1 bg-sand-100 rounded-lg p-1">
-			<Button variant="ghost" size="sm" onclick={() => calendar.goToPrevious()} class="!p-1.5 !rounded-md hover:bg-white hover:shadow-sm focus:!ring-0 focus:!ring-offset-0">
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={() => calendar.goToPrevious()}
+				aria-label={prevLabel}
+				title={prevLabel}
+				class="!p-1.5 !rounded-md hover:bg-white hover:shadow-sm focus:!ring-0 focus:!ring-offset-0"
+			>
 				<ChevronLeft class="w-4 h-4" />
 			</Button>
 			<Button
@@ -79,7 +89,14 @@
 			>
 				Today
 			</Button>
-			<Button variant="ghost" size="sm" onclick={() => calendar.goToNext()} class="!p-1.5 !rounded-md hover:bg-white hover:shadow-sm focus:!ring-0 focus:!ring-offset-0">
+			<Button
+				variant="ghost"
+				size="sm"
+				onclick={() => calendar.goToNext()}
+				aria-label={nextLabel}
+				title={nextLabel}
+				class="!p-1.5 !rounded-md hover:bg-white hover:shadow-sm focus:!ring-0 focus:!ring-offset-0"
+			>
 				<ChevronRight class="w-4 h-4" />
 			</Button>
 		</div>

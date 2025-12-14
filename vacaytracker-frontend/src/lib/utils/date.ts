@@ -258,3 +258,58 @@ export function fromApiDateFormat(dateStr: string): string {
 	const [day, month, year] = dateStr.split('/');
 	return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
+
+// ============================================
+// @internationalized/date Integration
+// ============================================
+
+import type { DateValue } from '@internationalized/date';
+import { getLocalTimeZone } from '@internationalized/date';
+
+/**
+ * Convert @internationalized/date DateValue to API format (DD/MM/YYYY)
+ * @param dateValue - DateValue from Melt UI date picker
+ */
+export function dateValueToApiFormat(dateValue: DateValue): string {
+	const day = String(dateValue.day).padStart(2, '0');
+	const month = String(dateValue.month).padStart(2, '0');
+	return `${day}/${month}/${dateValue.year}`;
+}
+
+/**
+ * Convert @internationalized/date DateValue to ISO format (YYYY-MM-DD)
+ * @param dateValue - DateValue from Melt UI date picker
+ */
+export function dateValueToISO(dateValue: DateValue): string {
+	return dateValue.toString(); // DateValue.toString() returns YYYY-MM-DD
+}
+
+/**
+ * Calculate business days between two DateValue dates
+ * @param start - Start date
+ * @param end - End date
+ * @param excludeWeekends - Whether to exclude Saturday and Sunday (default: true)
+ */
+export function calculateBusinessDays(
+	start: DateValue,
+	end: DateValue,
+	excludeWeekends: boolean = true
+): number {
+	let days = 0;
+	let current = start;
+
+	while (current.compare(end) <= 0) {
+		if (!excludeWeekends) {
+			days++;
+		} else {
+			const dayOfWeek = current.toDate(getLocalTimeZone()).getDay();
+			// Sunday = 0, Saturday = 6
+			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+				days++;
+			}
+		}
+		current = current.add({ days: 1 });
+	}
+
+	return days;
+}

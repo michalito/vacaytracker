@@ -260,9 +260,8 @@ Follows [WAI-ARIA Date Picker Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/
       if (!excludeWeekends) return false;
       const day = date.toDate('UTC').getDay();
       return day === 0 || day === 6;
-    },
-    // Close after selection
-    closeOnSelect: true
+    }
+    // Note: Picker closes automatically after selection by default
   });
 
   // Convert to API format when submitting

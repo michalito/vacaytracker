@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { auth } from '$lib/stores/auth.svelte';
-	import Toast from '$lib/components/ui/Toast.svelte';
+	import Toaster from '$lib/components/ui/Toaster.svelte';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
@@ -15,7 +15,7 @@
 	});
 </script>
 
-<Toast />
+<Toaster />
 
 {#if auth.isLoading}
 	<div class="min-h-screen flex items-center justify-center">
