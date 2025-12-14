@@ -80,6 +80,13 @@ function createCalendarStore() {
 		return currentViewVacations.filter((v) => selectedUserIds.has(v.userId));
 	});
 
+	// Current month vacations (for dashboard)
+	const currentMonthVacations = $derived.by(() => {
+		const now = new Date();
+		const key = getCacheKey(now.getMonth() + 1, now.getFullYear());
+		return monthCache.get(key)?.vacations ?? [];
+	});
+
 	// Cache helpers
 	function getCacheKey(month: number, year: number): string {
 		return `${year}-${month}`;
@@ -199,6 +206,12 @@ function createCalendarStore() {
 		monthCache = new Map();
 	}
 
+	// Fetch current month (convenience method for dashboard)
+	async function fetchCurrentMonth(): Promise<void> {
+		const now = new Date();
+		await fetchMonth(now.getMonth() + 1, now.getFullYear());
+	}
+
 	return {
 		// Getters
 		get currentDate() {
@@ -231,6 +244,9 @@ function createCalendarStore() {
 		get selectedUserIds() {
 			return selectedUserIds;
 		},
+		get currentMonthVacations() {
+			return currentMonthVacations;
+		},
 
 		// Actions
 		goToToday,
@@ -244,7 +260,8 @@ function createCalendarStore() {
 		selectNone,
 		setSelectedUsers,
 		ensureDataForCurrentView,
-		clearCache
+		clearCache,
+		fetchCurrentMonth
 	};
 }
 

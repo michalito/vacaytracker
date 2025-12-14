@@ -19,10 +19,6 @@
 	}
 
 	let { teamVacations = [], isLoadingTeam = false, onRequestVacation }: Props = $props();
-
-	const totalDaysUsed = $derived(
-		vacation.approvedRequests.reduce((sum, r) => sum + r.totalDays, 0)
-	);
 </script>
 
 <div class="space-y-6">
@@ -50,7 +46,7 @@
 			icon={CheckCircle}
 			color="green"
 		/>
-		<StatsCard title="Days Used" value={totalDaysUsed} icon={Calculator} color="ocean" />
+		<StatsCard title="Days Used" value={vacation.totalDaysUsed} icon={Calculator} color="ocean" />
 	</div>
 
 	<!-- Team Vacations This Month -->

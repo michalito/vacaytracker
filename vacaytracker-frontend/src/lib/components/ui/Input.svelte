@@ -36,7 +36,9 @@
 
 	let showPassword = $state(false);
 
-	const inputId = $derived(id || `input-${crypto.randomUUID().slice(0, 8)}`);
+	// Generate stable ID once on component creation
+	const generatedId = crypto.randomUUID().slice(0, 8);
+	const inputId = $derived(id || `input-${generatedId}`);
 
 	const effectiveType = $derived(
 		type === 'password' && showPasswordToggle && showPassword ? 'text' : type

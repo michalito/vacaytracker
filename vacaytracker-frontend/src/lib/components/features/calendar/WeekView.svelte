@@ -15,10 +15,33 @@
 	const weekDays = $derived(getWeekDays(currentDate));
 	const weekDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+	// Pre-compute vacation lookup map: dateString -> TeamVacation[]
+	// This runs once when vacations or weekDays change, instead of O(n*m) per render
+	const vacationsByDay = $derived.by(() => {
+		const map = new Map<string, TeamVacation[]>();
+
+		for (const day of weekDays) {
+			const dayVacations: TeamVacation[] = [];
+
+			for (const v of vacations) {
+				const start = parseISODate(v.startDate);
+				const end = parseISODate(v.endDate);
+
+				if (isDateInRange(day.date, start, end)) {
+					dayVacations.push(v);
+				}
+			}
+
+			if (dayVacations.length > 0) {
+				map.set(day.dateString, dayVacations);
+			}
+		}
+
+		return map;
+	});
+
 	function getVacationsForDay(day: CalendarDay): TeamVacation[] {
-		return vacations.filter((v) =>
-			isDateInRange(day.date, parseISODate(v.startDate), parseISODate(v.endDate))
-		);
+		return vacationsByDay.get(day.dateString) ?? [];
 	}
 </script>
 

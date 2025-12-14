@@ -2,29 +2,34 @@
 	import { auth } from '$lib/stores/auth.svelte';
 	import { admin } from '$lib/stores/admin.svelte';
 	import { vacation } from '$lib/stores/vacation.svelte';
-	import { vacationApi } from '$lib/api/vacation';
+	import { calendar } from '$lib/stores/calendar.svelte';
 	import AdminSection from '$lib/components/features/dashboard/AdminSection.svelte';
 	import EmployeeSection from '$lib/components/features/dashboard/EmployeeSection.svelte';
 	import RequestModal from '$lib/components/features/vacation/RequestModal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { Plus } from 'lucide-svelte';
-	import type { TeamVacation } from '$lib/types';
 
 	let isRequestModalOpen = $state(false);
-	let teamVacations = $state<TeamVacation[]>([]);
 	let isLoadingTeam = $state(true);
 	let isLoadingAdmin = $state(true);
+	let hasMounted = $state(false);
 
 	$effect(() => {
+		if (hasMounted) return;
+		hasMounted = true;
 		loadData();
 	});
 
 	async function loadData() {
-		// Load employee data
+		// Load employee data (with caching)
 		vacation.fetchRequests();
-		loadTeamVacations();
 
-		// Load admin data if user is admin
+		// Use shared calendar store for team vacations (with caching)
+		isLoadingTeam = true;
+		await calendar.fetchCurrentMonth();
+		isLoadingTeam = false;
+
+		// Load admin data if user is admin (with caching)
 		if (auth.isAdmin) {
 			isLoadingAdmin = true;
 			await Promise.all([admin.fetchPendingRequests(), admin.fetchUsers({ limit: 1 })]);
@@ -32,22 +37,9 @@
 		}
 	}
 
-	async function loadTeamVacations() {
-		isLoadingTeam = true;
-		try {
-			const now = new Date();
-			const response = await vacationApi.team(now.getMonth() + 1, now.getFullYear());
-			teamVacations = response.vacations || [];
-		} catch (error) {
-			console.error('Failed to load team vacations:', error);
-			teamVacations = [];
-		} finally {
-			isLoadingTeam = false;
-		}
-	}
-
-	function handleUpdate() {
-		loadData();
+	async function handleUpdate() {
+		// Only refresh pending requests after approve/reject (targeted update)
+		await admin.fetchPendingRequests({ force: true });
 	}
 </script>
 
@@ -77,7 +69,7 @@
 
 	<!-- Employee Section (for everyone) -->
 	<EmployeeSection
-		{teamVacations}
+		teamVacations={calendar.currentMonthVacations}
 		{isLoadingTeam}
 		onRequestVacation={() => (isRequestModalOpen = true)}
 	/>

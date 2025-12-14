@@ -87,7 +87,7 @@
 	}
 
 	// Calculate estimated days (simple version - doesn't account for weekends)
-	const estimatedDays = $derived(() => {
+	const estimatedDays = $derived.by(() => {
 		if (!startDate || !endDate) return 0;
 		const start = new Date(startDate);
 		const end = new Date(endDate);
@@ -165,10 +165,10 @@
 							<span class="text-ocean-700">Current Balance:</span>
 							<span class="font-medium text-ocean-900">{auth.user?.vacationBalance ?? 0} days</span>
 						</div>
-						{#if estimatedDays() > 0}
+						{#if estimatedDays > 0}
 							<div class="flex justify-between text-sm">
 								<span class="text-ocean-700">Estimated Days:</span>
-								<span class="font-medium text-ocean-900">{estimatedDays()} days</span>
+								<span class="font-medium text-ocean-900">{estimatedDays} days</span>
 							</div>
 							<p class="text-xs text-ocean-500 mt-1">
 								* Final days calculated by admin based on weekend policy
