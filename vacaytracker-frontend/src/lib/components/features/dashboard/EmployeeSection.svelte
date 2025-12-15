@@ -2,14 +2,12 @@
 	import { auth } from '$lib/stores/auth.svelte';
 	import { vacation } from '$lib/stores/vacation.svelte';
 	import BalanceDisplay from '$lib/components/features/vacation/BalanceDisplay.svelte';
-	import RequestList from '$lib/components/features/vacation/RequestList.svelte';
+	import RequestTabs from '$lib/components/features/vacation/RequestTabs.svelte';
 	import TeamVacationList from '$lib/components/features/vacation/TeamVacationList.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import StatsCard from '$lib/components/ui/StatsCard.svelte';
 	import ListSkeleton from '$lib/components/ui/ListSkeleton.svelte';
-	import EmptyState from '$lib/components/ui/EmptyState.svelte';
-	import { Umbrella, Users, Clock, CheckCircle, Calculator } from 'lucide-svelte';
+	import { Users, Clock, CheckCircle, Calculator } from 'lucide-svelte';
 	import type { TeamVacation } from '$lib/types';
 
 	interface Props {
@@ -61,31 +59,22 @@
 		<TeamVacationList vacations={teamVacations} isLoading={isLoadingTeam} />
 	</Card>
 
-	<!-- Your Requests -->
-	<Card>
-		{#snippet header()}
-			<div class="flex items-center justify-between">
-				<h2 class="text-lg font-semibold text-ocean-700">Your Requests</h2>
-				<Umbrella class="w-5 h-5 text-ocean-400" />
-			</div>
-		{/snippet}
-
-		{#if vacation.isLoading}
+	<!-- Your Requests (Tabbed) -->
+	{#if vacation.isLoading}
+		<Card>
+			{#snippet header()}
+				<div class="flex items-center justify-between">
+					<h2 class="text-lg font-semibold text-ocean-700">Your Requests</h2>
+				</div>
+			{/snippet}
 			<ListSkeleton count={3} variant="simple" />
-		{:else if vacation.requests.length === 0}
-			<div class="content-fade-in">
-				<EmptyState icon={Umbrella} message="No vacation requests yet" iconSize="lg">
-					{#if onRequestVacation}
-						<Button variant="outline" onclick={onRequestVacation}>
-							Request Your First Vacation
-						</Button>
-					{/if}
-				</EmptyState>
-			</div>
-		{:else}
-			<div class="content-fade-in">
-				<RequestList requests={vacation.requests} />
-			</div>
-		{/if}
-	</Card>
+		</Card>
+	{:else}
+		<RequestTabs
+			pendingRequests={vacation.pendingRequests}
+			upcomingRequests={vacation.upcomingRequests}
+			pastRequests={vacation.pastRequests}
+			{onRequestVacation}
+		/>
+	{/if}
 </div>

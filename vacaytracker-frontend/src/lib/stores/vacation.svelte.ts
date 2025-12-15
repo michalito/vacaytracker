@@ -1,5 +1,6 @@
 import { vacationApi } from '$lib/api/vacation';
 import type { VacationRequest, VacationStatus } from '$lib/types';
+import { formatDateISO } from '$lib/utils/date';
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -14,6 +15,24 @@ function createVacationStore() {
 	const rejectedRequests = $derived(requests.filter((r) => r.status === 'rejected'));
 	const totalDaysUsed = $derived(
 		approvedRequests.reduce((sum, r) => sum + r.totalDays, 0)
+	);
+
+	// Today's date for categorization (recalculated on each access)
+	const today = $derived(formatDateISO(new Date()));
+
+	// Upcoming: approved requests with future start dates
+	const upcomingRequests = $derived(
+		approvedRequests
+			.filter((r) => r.startDate > today)
+			.sort((a, b) => a.startDate.localeCompare(b.startDate))
+	);
+
+	// Past: completed approved requests + all rejected requests
+	const pastRequests = $derived(
+		[
+			...approvedRequests.filter((r) => r.endDate < today),
+			...rejectedRequests
+		].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 	);
 
 	function isCacheValid(): boolean {
@@ -83,6 +102,12 @@ function createVacationStore() {
 		},
 		get rejectedRequests() {
 			return rejectedRequests;
+		},
+		get upcomingRequests() {
+			return upcomingRequests;
+		},
+		get pastRequests() {
+			return pastRequests;
 		},
 		get isLoading() {
 			return isLoading;

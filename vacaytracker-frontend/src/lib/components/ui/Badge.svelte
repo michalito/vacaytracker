@@ -37,7 +37,7 @@
 
 	const classes = $derived(
 		clsx(
-			'inline-flex items-center font-medium rounded-full',
+			'inline-flex items-center font-medium rounded-md',
 			variantStyles[variant],
 			sizeStyles[size],
 			className
