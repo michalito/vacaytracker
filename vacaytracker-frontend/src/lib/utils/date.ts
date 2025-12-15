@@ -266,6 +266,46 @@ export function fromApiDateFormat(dateStr: string): string {
 import type { DateValue } from '@internationalized/date';
 import { getLocalTimeZone } from '@internationalized/date';
 
+// ============================================
+// Vacation Status Utilities
+// ============================================
+
+/**
+ * Check if a vacation is currently ongoing (today is within the date range)
+ * @param startDate - ISO date string (YYYY-MM-DD)
+ * @param endDate - ISO date string (YYYY-MM-DD)
+ */
+export function isCurrentlyOngoing(startDate: string, endDate: string): boolean {
+	const today = formatDateISO(new Date());
+	return startDate <= today && endDate >= today;
+}
+
+/**
+ * Get the number of days until a vacation ends
+ * @param endDate - ISO date string (YYYY-MM-DD)
+ * @returns Number of days (0 if ending today, negative if already ended)
+ */
+export function getDaysUntilEnd(endDate: string): number {
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const end = parseISODate(endDate);
+	const diff = end.getTime() - today.getTime();
+	return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Get the number of days until a vacation starts
+ * @param startDate - ISO date string (YYYY-MM-DD)
+ * @returns Number of days (0 if starting today, negative if already started)
+ */
+export function getDaysUntilStart(startDate: string): number {
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const start = parseISODate(startDate);
+	const diff = start.getTime() - today.getTime();
+	return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
 /**
  * Convert @internationalized/date DateValue to API format (DD/MM/YYYY)
  * @param dateValue - DateValue from Melt UI date picker
