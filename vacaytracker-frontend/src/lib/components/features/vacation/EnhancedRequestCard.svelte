@@ -3,9 +3,9 @@
 	import { vacation } from '$lib/stores/vacation.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 	import { formatDateMedium, getDaysUntilStart } from '$lib/utils/date';
-	import Badge from '$lib/components/ui/Badge.svelte';
+	import StatusBadge from '$lib/components/ui/StatusBadge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { Calendar, Trash2, AlertCircle } from 'lucide-svelte';
+	import { Calendar, Trash2, AlertCircle, Hourglass } from 'lucide-svelte';
 
 	type CardVariant = 'pending' | 'upcoming' | 'past';
 
@@ -18,11 +18,11 @@
 
 	let isCancelling = $state(false);
 
-	// Border colors based on variant
+	// Border colors using app palette (coral/ocean/sand)
 	const borderColors: Record<CardVariant, string> = {
 		pending: 'border-l-coral-400',
 		upcoming: 'border-l-ocean-400',
-		past: 'border-l-sand-400'
+		past: 'border-l-sand-300'
 	};
 
 	// Card background styling based on variant
@@ -31,6 +31,17 @@
 		upcoming: 'bg-white',
 		past: 'bg-sand-50/50'
 	};
+
+	// Map variant + request status to StatusBadge status
+	function getStatusBadgeVariant(): 'pending' | 'upcoming' | 'completed' | 'rejected' {
+		if (request.status === 'rejected') return 'rejected';
+		if (request.status === 'pending') return 'pending';
+		// Approved requests
+		if (variant === 'upcoming') return 'upcoming';
+		return 'completed'; // past approved
+	}
+
+	const statusBadgeVariant = $derived(getStatusBadgeVariant());
 
 	// Get countdown text for upcoming requests
 	function getCountdown(startDate: string): string | null {
@@ -101,13 +112,12 @@
 
 		<div class="flex items-center gap-2">
 			{#if countdown}
-				<span class="px-2.5 py-1 text-xs font-medium rounded-md bg-ocean-100 text-ocean-700">
+				<span class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-md bg-ocean-100 text-ocean-700 border border-ocean-200">
+					<Hourglass class="w-3.5 h-3.5 text-ocean-500" />
 					{countdown}
 				</span>
 			{/if}
-			<Badge variant={request.status} size="sm">
-				{request.status}
-			</Badge>
+			<StatusBadge status={statusBadgeVariant} size="sm" />
 		</div>
 	</div>
 
