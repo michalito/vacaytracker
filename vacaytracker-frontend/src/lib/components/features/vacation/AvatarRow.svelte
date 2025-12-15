@@ -27,7 +27,7 @@
 
 	// Popover for overflow indicator
 	const {
-		elements: { trigger: overflowTrigger, content: overflowContent, close: overflowClose },
+		elements: { trigger: overflowTrigger, content: overflowContent },
 		states: { open: overflowOpen }
 	} = createPopover({
 		forceVisible: true,
