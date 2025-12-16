@@ -13,8 +13,15 @@ function createVacationStore() {
 	const pendingRequests = $derived(requests.filter((r) => r.status === 'pending'));
 	const approvedRequests = $derived(requests.filter((r) => r.status === 'approved'));
 	const rejectedRequests = $derived(requests.filter((r) => r.status === 'rejected'));
+
+	// Current year for filtering
+	const currentYear = new Date().getFullYear();
+
+	// Only count approved vacation days from the current year
 	const totalDaysUsed = $derived(
-		approvedRequests.reduce((sum, r) => sum + r.totalDays, 0)
+		approvedRequests
+			.filter((r) => new Date(r.startDate).getFullYear() === currentYear)
+			.reduce((sum, r) => sum + r.totalDays, 0)
 	);
 
 	// Today's date for categorization (recalculated on each access)
