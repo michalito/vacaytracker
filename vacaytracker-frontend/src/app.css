@@ -254,6 +254,22 @@ body {
 	animation: contentFadeIn 0.25s ease-out;
 }
 
+/* Tab panel transitions */
+[data-melt-tabs-content] {
+	animation: tabFadeIn 0.2s ease-out;
+}
+
+@keyframes tabFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
 /* Skeleton shimmer effect */
 @keyframes shimmer {
 	0% {
