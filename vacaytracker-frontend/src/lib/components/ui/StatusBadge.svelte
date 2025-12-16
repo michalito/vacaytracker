@@ -49,9 +49,9 @@
 		completed: {
 			icon: Palmtree,
 			label: 'Enjoyed',
-			bgClass: 'bg-sand-200/60 border-sand-300',
-			textClass: 'text-sand-500',
-			iconClass: 'text-sand-400'
+			bgClass: 'bg-emerald-50 border-emerald-200',
+			textClass: 'text-emerald-700',
+			iconClass: 'text-emerald-500'
 		},
 		rejected: {
 			icon: CloudRain,
