@@ -64,7 +64,11 @@
 
 	<!-- Admin Section (only for admins) -->
 	{#if auth.isAdmin}
-		<AdminSection isLoading={isLoadingAdmin} onUpdate={handleUpdate} />
+		<AdminSection
+			isLoading={isLoadingAdmin}
+			onUpdate={handleUpdate}
+			teamVacations={calendar.currentMonthVacations}
+		/>
 	{/if}
 
 	<!-- Employee Section (for everyone) -->

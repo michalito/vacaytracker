@@ -5,36 +5,59 @@
 	import StatsCardSkeleton from '$lib/components/ui/StatsCardSkeleton.svelte';
 	import ListSkeleton from '$lib/components/ui/ListSkeleton.svelte';
 	import PendingRequests from '$lib/components/features/admin/PendingRequests.svelte';
-	import { Users, Clock, CheckCircle, XCircle } from 'lucide-svelte';
+	import { Users, Umbrella, CalendarDays } from 'lucide-svelte';
+	import type { TeamVacation } from '$lib/types';
 
 	interface Props {
 		isLoading?: boolean;
 		onUpdate?: () => void;
+		teamVacations?: TeamVacation[];
 	}
 
-	let { isLoading = false, onUpdate = () => {} }: Props = $props();
+	let { isLoading = false, onUpdate = () => {}, teamVacations = [] }: Props = $props();
 
-	// TODO: Track approved/rejected today from API response if available
-	let approvedToday = $state(0);
-	let rejectedToday = $state(0);
+	function getDateStr(date: Date): string {
+		return date.toISOString().split('T')[0];
+	}
+
+	const onLeaveToday = $derived.by(() => {
+		const today = getDateStr(new Date());
+		return teamVacations.filter((v) => v.startDate <= today && v.endDate >= today).length;
+	});
+
+	const upcomingThisWeek = $derived.by(() => {
+		const now = new Date();
+		const today = getDateStr(now);
+		const weekFromNow = getDateStr(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
+		return teamVacations.filter((v) => v.startDate > today && v.startDate <= weekFromNow).length;
+	});
 </script>
 
 <div class="space-y-6">
 	<!-- Stats Grid -->
-	<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+	<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 		{#if isLoading}
-			<StatsCardSkeleton count={4} />
+			<StatsCardSkeleton count={3} />
 		{:else}
 			<div class="contents content-fade-in">
-				<StatsCard title="Total Crew" value={admin.pagination.total} icon={Users} color="ocean" />
 				<StatsCard
-					title="Pending Requests"
-					value={admin.pendingRequests.length}
-					icon={Clock}
-					color="yellow"
+					title="Total Crew"
+					value={admin.pagination.total}
+					icon={Users}
+					color="ocean"
 				/>
-				<StatsCard title="Approved Today" value={approvedToday} icon={CheckCircle} color="green" />
-				<StatsCard title="Rejected Today" value={rejectedToday} icon={XCircle} color="red" />
+				<StatsCard
+					title="On Leave Today"
+					value={onLeaveToday}
+					icon={Umbrella}
+					color="coral"
+				/>
+				<StatsCard
+					title="Upcoming This Week"
+					value={upcomingThisWeek}
+					icon={CalendarDays}
+					color="ocean"
+				/>
 			</div>
 		{/if}
 	</div>
