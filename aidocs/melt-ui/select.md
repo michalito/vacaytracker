@@ -337,6 +337,85 @@ Follows [WAI-ARIA Listbox Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/list
 </div>
 ```
 
+## Compact Filter Select
+
+A minimal inline select for filters (e.g., year filter in lists):
+
+```svelte
+<script lang="ts">
+  import { createSelect, melt } from '@melt-ui/svelte';
+  import { ChevronDown, Check } from 'lucide-svelte';
+
+  let selectedYear = $state<string>('all');
+
+  // Build options dynamically
+  const yearOptions = $derived(() => {
+    const options = [{ value: 'all', label: 'All years' }];
+    [2024, 2023, 2022].forEach((year) => {
+      options.push({ value: year.toString(), label: year.toString() });
+    });
+    return options;
+  });
+
+  const {
+    elements: { trigger, menu, option },
+    states: { open, selectedLabel },
+    helpers: { isSelected }
+  } = createSelect<string>({
+    defaultSelected: { value: 'all', label: 'All years' },
+    forceVisible: true,
+    positioning: { placement: 'bottom-end', sameWidth: false },
+    onSelectedChange: ({ next }) => {
+      if (next) {
+        selectedYear = next.value;
+      }
+      return next;
+    }
+  });
+</script>
+
+<div class="relative">
+  <button
+    use:melt={$trigger}
+    class="flex items-center gap-2 pl-3 pr-2 py-1.5 text-sm font-medium rounded-lg
+      bg-sand-100 border border-sand-200 text-ocean-700
+      hover:bg-sand-200 hover:border-sand-300
+      focus:outline-none focus:ring-2 focus:ring-ocean-500/30 focus:border-ocean-400
+      cursor-pointer transition-colors"
+  >
+    <span>{$selectedLabel || 'All years'}</span>
+    <ChevronDown class="w-4 h-4 text-ocean-400 transition-transform {$open ? 'rotate-180' : ''}" />
+  </button>
+
+  {#if $open}
+    <div
+      use:melt={$menu}
+      class="absolute z-50 mt-1 min-w-[120px] overflow-hidden rounded-lg bg-white p-1
+        shadow-lg border border-ocean-200 ring-1 ring-black/5"
+    >
+      {#each yearOptions() as opt}
+        <div
+          use:melt={$option({ value: opt.value, label: opt.label })}
+          class="flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm cursor-pointer outline-none
+            text-ocean-700 data-[highlighted]:bg-ocean-50 data-[highlighted]:text-ocean-800 data-[selected]:font-medium"
+        >
+          <span>{opt.label}</span>
+          {#if $isSelected(opt.value)}
+            <Check class="w-4 h-4 text-ocean-500" />
+          {/if}
+        </div>
+      {/each}
+    </div>
+  {/if}
+</div>
+```
+
+Key differences from standard select:
+- `positioning: { placement: 'bottom-end', sameWidth: false }` - Aligns to right edge, auto-width
+- Compact padding and font size (`text-sm`, `py-1.5`)
+- Uses sand/ocean theme colors for filter context
+- Subtle styling to not compete with primary content
+
 ## Form Integration
 
 ```svelte

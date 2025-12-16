@@ -11,7 +11,10 @@
       "Bash(docker compose exec:*)",
       "Bash(docker run:*)",
       "Bash(docker compose stop:*)",
-      "Bash(docker compose start:*)"
+      "Bash(docker compose start:*)",
+      "Bash(sqlite3:*)",
+      "Bash(docker compose cp:*)",
+      "Bash(del temp_vacay.db)"
     ],
     "deny": [],
     "ask": []
