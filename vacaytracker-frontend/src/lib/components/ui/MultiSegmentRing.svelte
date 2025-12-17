@@ -70,13 +70,13 @@
 		return arcs;
 	});
 
-	// Center label color based on theme (matches "Available" segment)
+	// Center label color based on theme (darker shade for contrast on white)
 	const centerColor = $derived(
 		theme === 'healthy'
-			? 'text-mint-500'
+			? 'text-mint-600'
 			: theme === 'warning'
-				? 'text-sunshine-500'
-				: 'text-salmon-500'
+				? 'text-sunshine-600'
+				: 'text-salmon-600'
 	);
 </script>
 

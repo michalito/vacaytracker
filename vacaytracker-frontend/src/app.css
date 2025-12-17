@@ -55,12 +55,15 @@
 	--color-caribbean-400: #4FD1C5;
 	--color-caribbean-500: #38B2AC;
 	/* Available - Dynamic by balance */
-	--color-mint-400: #68D391;      /* High balance (>50%) - Soft Mint */
-	--color-mint-500: #48BB78;
-	--color-sunshine-400: #F6E05E;  /* Medium balance (20-50%) - Sunshine */
-	--color-sunshine-500: #ECC94B;
-	--color-salmon-400: #FC8181;    /* Low balance (<20%) - Soft Coral */
-	--color-salmon-500: #F56565;
+	--color-mint-400: #68D391;      /* High balance (>50%) - Soft Mint (ring) */
+	--color-mint-500: #48BB78;      /* Legend dot */
+	--color-mint-600: #2F855A;      /* Text - darker for contrast */
+	--color-sunshine-400: #F6E05E;  /* Medium balance (20-50%) - Sunshine (ring) */
+	--color-sunshine-500: #ECC94B;  /* Legend dot */
+	--color-sunshine-600: #B7791F;  /* Text - darker for contrast */
+	--color-salmon-400: #FC8181;    /* Low balance (<20%) - Soft Coral (ring) */
+	--color-salmon-500: #F56565;    /* Legend dot */
+	--color-salmon-600: #C53030;    /* Text - darker for contrast */
 
 	/* Semantic Colors */
 	--color-success: oklch(0.65 0.2 145);

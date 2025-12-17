@@ -43,14 +43,14 @@
 		used: 'bg-stone-300'
 	});
 
-	// Spa/Resort icon colors (available=dynamic, upcoming=caribbean, used=stone)
+	// Spa/Resort icon colors (darker shades for contrast)
 	const iconColors = $derived({
 		available:
 			theme === 'healthy'
-				? 'text-mint-500'
+				? 'text-mint-600'
 				: theme === 'warning'
-					? 'text-sunshine-500'
-					: 'text-salmon-500',
+					? 'text-sunshine-600'
+					: 'text-salmon-600',
 		upcoming: 'text-caribbean-500',
 		used: 'text-stone-400'
 	});
