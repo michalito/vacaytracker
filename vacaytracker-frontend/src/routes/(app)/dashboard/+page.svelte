@@ -3,6 +3,7 @@
 	import { admin } from '$lib/stores/admin.svelte';
 	import { vacation } from '$lib/stores/vacation.svelte';
 	import { calendar } from '$lib/stores/calendar.svelte';
+	import { settingsApi, type PublicSettings } from '$lib/api/settings';
 	import AdminSection from '$lib/components/features/dashboard/AdminSection.svelte';
 	import EmployeeSection from '$lib/components/features/dashboard/EmployeeSection.svelte';
 	import RequestModal from '$lib/components/features/vacation/RequestModal.svelte';
@@ -13,6 +14,7 @@
 	let isLoadingTeam = $state(true);
 	let isLoadingAdmin = $state(true);
 	let hasMounted = $state(false);
+	let publicSettings = $state<PublicSettings | null>(null);
 
 	$effect(() => {
 		if (hasMounted) return;
@@ -23,6 +25,13 @@
 	async function loadData() {
 		// Load employee data (with caching)
 		vacation.fetchRequests();
+
+		// Fetch public settings for vacation balance display
+		try {
+			publicSettings = await settingsApi.getPublic();
+		} catch (e) {
+			console.error('Failed to fetch settings:', e);
+		}
 
 		// Use shared calendar store for team vacations (with caching)
 		isLoadingTeam = true;
@@ -75,6 +84,7 @@
 	<EmployeeSection
 		teamVacations={calendar.currentMonthVacations}
 		{isLoadingTeam}
+		defaultVacationDays={publicSettings?.defaultVacationDays ?? 25}
 		onRequestVacation={() => (isRequestModalOpen = true)}
 	/>
 </div>

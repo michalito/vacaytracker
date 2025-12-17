@@ -1,20 +1,79 @@
 <script lang="ts">
-	import ProgressRing from '$lib/components/ui/ProgressRing.svelte';
+	import MultiSegmentRing from '$lib/components/ui/MultiSegmentRing.svelte';
 	import Tooltip from '$lib/components/ui/Tooltip.svelte';
-	import { Palmtree, Calendar, Info, Umbrella } from 'lucide-svelte';
+	import { Palmtree, Calendar, Plane, Info, Umbrella } from 'lucide-svelte';
 	import type { VacationRequest } from '$lib/types';
 
+	type Theme = 'healthy' | 'warning' | 'critical';
+
 	interface Props {
-		available: number;
+		total: number; // Total yearly allowance from admin settings
 		used: number;
+		upcoming: number;
 		nextVacation?: VacationRequest | null;
 	}
 
-	let { available, used, nextVacation = null }: Props = $props();
+	let { total, used, upcoming, nextVacation = null }: Props = $props();
 
-	// Derive total from available + used
-	const total = $derived(available + used);
+	// Calculate available days: total - used - upcoming
+	const available = $derived(Math.max(0, total - used - upcoming));
 	const percentage = $derived(total > 0 ? Math.round((available / total) * 100) : 0);
+
+	// Determine theme based on available percentage
+	const theme = $derived<Theme>(
+		percentage > 60 ? 'healthy' : percentage > 30 ? 'warning' : 'critical'
+	);
+
+	// Ring segments: [used, upcoming, available] - order matters for shading
+	const segments = $derived([
+		{ value: used, label: 'Used' },
+		{ value: upcoming, label: 'Upcoming' },
+		{ value: available, label: 'Available' }
+	]);
+
+	// Theme-based legend colors
+	const legendColors = $derived({
+		used:
+			theme === 'healthy'
+				? 'bg-ocean-600'
+				: theme === 'warning'
+					? 'bg-amber-600'
+					: 'bg-coral-600',
+		upcoming:
+			theme === 'healthy'
+				? 'bg-ocean-400'
+				: theme === 'warning'
+					? 'bg-amber-400'
+					: 'bg-coral-500',
+		available:
+			theme === 'healthy'
+				? 'bg-ocean-200'
+				: theme === 'warning'
+					? 'bg-amber-300'
+					: 'bg-coral-300'
+	});
+
+	// Theme-based icon colors
+	const iconColors = $derived({
+		used:
+			theme === 'healthy'
+				? 'text-ocean-600'
+				: theme === 'warning'
+					? 'text-amber-600'
+					: 'text-coral-600',
+		upcoming:
+			theme === 'healthy'
+				? 'text-ocean-500'
+				: theme === 'warning'
+					? 'text-amber-500'
+					: 'text-coral-500',
+		available:
+			theme === 'healthy'
+				? 'text-ocean-400'
+				: theme === 'warning'
+					? 'text-amber-400'
+					: 'text-coral-400'
+	});
 
 	// Calculate days until next vacation
 	const daysUntilVacation = $derived.by(() => {
@@ -85,32 +144,51 @@
 	<div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
 		<!-- Ring Section -->
 		<div class="flex-shrink-0">
-			<ProgressRing value={available} max={total} size={140} />
+			<MultiSegmentRing
+				{segments}
+				{theme}
+				size={140}
+				strokeWidth={12}
+				centerLabel={String(available)}
+				centerSubLabel="of {total}"
+			/>
 		</div>
 
 		<!-- Stats Section -->
-		<div class="flex-1 w-full space-y-4">
+		<div class="flex-1 w-full space-y-3">
 			<!-- Available Days -->
 			<div class="flex items-center gap-3">
-				<div class="p-2 rounded-lg bg-ocean-500/10">
-					<Palmtree class="w-5 h-5 text-ocean-600" />
-				</div>
-				<div>
-					<p class="text-xl font-bold text-ocean-800">{available} days</p>
-					<p class="text-sm text-ocean-500">available</p>
+				<div class="w-3 h-3 rounded-full {legendColors.available}"></div>
+				<div class="flex items-center gap-2">
+					<Palmtree class="w-4 h-4 {iconColors.available}" />
+					<span class="text-ocean-800 font-semibold">{available}</span>
+					<span class="text-ocean-500 text-sm">days available</span>
 				</div>
 			</div>
 
+			<!-- Upcoming Days -->
+			{#if upcoming > 0}
+				<div class="flex items-center gap-3">
+					<div class="w-3 h-3 rounded-full {legendColors.upcoming}"></div>
+					<div class="flex items-center gap-2">
+						<Plane class="w-4 h-4 {iconColors.upcoming}" />
+						<span class="text-ocean-800 font-semibold">{upcoming}</span>
+						<span class="text-ocean-500 text-sm">days upcoming</span>
+					</div>
+				</div>
+			{/if}
+
 			<!-- Used Days -->
-			<div class="flex items-center gap-3">
-				<div class="p-2 rounded-lg bg-sand-200">
-					<Calendar class="w-5 h-5 text-ocean-500" />
+			{#if used > 0}
+				<div class="flex items-center gap-3">
+					<div class="w-3 h-3 rounded-full {legendColors.used}"></div>
+					<div class="flex items-center gap-2">
+						<Calendar class="w-4 h-4 {iconColors.used}" />
+						<span class="text-ocean-800 font-semibold">{used}</span>
+						<span class="text-ocean-500 text-sm">days used</span>
+					</div>
 				</div>
-				<div>
-					<p class="text-lg font-semibold text-ocean-700">{used} days</p>
-					<p class="text-sm text-ocean-400">used</p>
-				</div>
-			</div>
+			{/if}
 		</div>
 	</div>
 

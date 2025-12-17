@@ -17,15 +17,26 @@ function createVacationStore() {
 	// Current year for filtering
 	const currentYear = new Date().getFullYear();
 
-	// Only count approved vacation days from the current year
-	const totalDaysUsed = $derived(
+	// Today's date for categorization (recalculated on each access)
+	const today = $derived(formatDateISO(new Date()));
+
+	// Days already used (past + ongoing approved vacations this year)
+	// A vacation is "used" if it has already started (startDate <= today)
+	const usedDays = $derived(
 		approvedRequests
-			.filter((r) => new Date(r.startDate).getFullYear() === currentYear)
+			.filter((r) => new Date(r.startDate).getFullYear() === currentYear && r.startDate <= today)
 			.reduce((sum, r) => sum + r.totalDays, 0)
 	);
 
-	// Today's date for categorization (recalculated on each access)
-	const today = $derived(formatDateISO(new Date()));
+	// Days upcoming (future approved vacations this year)
+	const upcomingDays = $derived(
+		approvedRequests
+			.filter((r) => new Date(r.startDate).getFullYear() === currentYear && r.startDate > today)
+			.reduce((sum, r) => sum + r.totalDays, 0)
+	);
+
+	// Total days used this year (used + upcoming) - kept for backwards compatibility
+	const totalDaysUsed = $derived(usedDays + upcomingDays);
 
 	// Upcoming: approved requests with future start dates
 	const upcomingRequests = $derived(
@@ -124,6 +135,12 @@ function createVacationStore() {
 		},
 		get totalDaysUsed() {
 			return totalDaysUsed;
+		},
+		get usedDays() {
+			return usedDays;
+		},
+		get upcomingDays() {
+			return upcomingDays;
 		},
 		fetchRequests,
 		createRequest,

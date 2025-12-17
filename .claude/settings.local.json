@@ -14,7 +14,11 @@
       "Bash(docker compose start:*)",
       "Bash(sqlite3:*)",
       "Bash(docker compose cp:*)",
-      "Bash(del temp_vacay.db)"
+      "Bash(del temp_vacay.db)",
+      "Bash(MSYS_NO_PATHCONV=1 docker compose cp:*)",
+      "Bash(go build:*)",
+      "Bash(curl:*)",
+      "Bash(MSYS_NO_PATHCONV=1 docker compose exec:*)"
     ],
     "deny": [],
     "ask": []

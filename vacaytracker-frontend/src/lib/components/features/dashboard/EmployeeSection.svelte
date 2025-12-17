@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { auth } from '$lib/stores/auth.svelte';
 	import { vacation } from '$lib/stores/vacation.svelte';
 	import VacationBalanceCard from '$lib/components/features/dashboard/VacationBalanceCard.svelte';
 	import RequestTabs from '$lib/components/features/vacation/RequestTabs.svelte';
@@ -12,17 +11,24 @@
 	interface Props {
 		teamVacations?: TeamVacation[];
 		isLoadingTeam?: boolean;
+		defaultVacationDays?: number;
 		onRequestVacation?: () => void;
 	}
 
-	let { teamVacations = [], isLoadingTeam = false, onRequestVacation }: Props = $props();
+	let {
+		teamVacations = [],
+		isLoadingTeam = false,
+		defaultVacationDays = 25,
+		onRequestVacation
+	}: Props = $props();
 </script>
 
 <div class="space-y-6">
 	<!-- Vacation Balance Card -->
 	<VacationBalanceCard
-		available={auth.user?.vacationBalance ?? 0}
-		used={vacation.totalDaysUsed}
+		total={defaultVacationDays}
+		used={vacation.usedDays}
+		upcoming={vacation.upcomingDays}
 		nextVacation={vacation.upcomingRequests[0] ?? null}
 	/>
 

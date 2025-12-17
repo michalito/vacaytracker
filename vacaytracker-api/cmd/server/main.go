@@ -74,6 +74,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 	vacationHandler := handler.NewVacationHandler(vacationService, vacationRepo, userRepo, emailService)
 	adminHandler := handler.NewAdminHandler(cfg, userService, userRepo, vacationService, vacationRepo, settingsRepo, emailService, newsletterService)
+	settingsHandler := handler.NewSettingsHandler(settingsRepo)
 
 	// Create Gin router
 	router := gin.New()
@@ -141,6 +142,13 @@ func main() {
 			vacation.GET("/requests/:id", vacationHandler.Get)
 			vacation.DELETE("/requests/:id", vacationHandler.Cancel)
 			vacation.GET("/team", vacationHandler.Team)
+		}
+
+		// Settings routes (authenticated - public settings only)
+		settings := api.Group("/settings")
+		settings.Use(middleware.AuthMiddleware(authService))
+		{
+			settings.GET("/public", settingsHandler.GetPublic)
 		}
 
 		// Admin routes (authenticated + admin role)

@@ -18,9 +18,16 @@
 	--color-neutral: #F2F2F2;
 
 	/* Coral/Peach Accent (from logo umbrella) */
+	--color-coral-300: #f7c4a8;
 	--color-coral-400: #f4a574;
 	--color-coral-500: #f08c4f;
 	--color-coral-600: #e57328;
+
+	/* Amber/Warning Shades */
+	--color-amber-300: #fcd34d;
+	--color-amber-400: #fbbf24;
+	--color-amber-500: #f59e0b;
+	--color-amber-600: #d97706;
 
 	/* Sand Colors */
 	--color-sand-50: oklch(0.98 0.01 80);
