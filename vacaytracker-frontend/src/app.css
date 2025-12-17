@@ -47,6 +47,21 @@
 	--color-slate-300: #cbd5e1;
 	--color-slate-400: #94a3b8;
 
+	/* Spa/Resort Ring Chart Palette */
+	/* Used (Past) - Warm Stone Grey */
+	--color-stone-300: #D1D5DB;
+	--color-stone-400: #9CA3AF;
+	/* Upcoming (Future) - Caribbean Water */
+	--color-caribbean-400: #4FD1C5;
+	--color-caribbean-500: #38B2AC;
+	/* Available - Dynamic by balance */
+	--color-mint-400: #68D391;      /* High balance (>50%) - Soft Mint */
+	--color-mint-500: #48BB78;
+	--color-sunshine-400: #F6E05E;  /* Medium balance (20-50%) - Sunshine */
+	--color-sunshine-500: #ECC94B;
+	--color-salmon-400: #FC8181;    /* Low balance (<20%) - Soft Coral */
+	--color-salmon-500: #F56565;
+
 	/* Semantic Colors */
 	--color-success: oklch(0.65 0.2 145);
 	--color-warning: oklch(0.75 0.18 85);

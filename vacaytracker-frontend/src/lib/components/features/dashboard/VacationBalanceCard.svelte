@@ -19,9 +19,9 @@
 	const available = $derived(Math.max(0, total - used - upcoming));
 	const percentage = $derived(total > 0 ? Math.round((available / total) * 100) : 0);
 
-	// Determine theme based on available percentage
+	// Determine theme based on available percentage (spa/resort traffic light)
 	const theme = $derived<Theme>(
-		percentage > 60 ? 'healthy' : percentage > 30 ? 'warning' : 'critical'
+		percentage > 50 ? 'healthy' : percentage >= 20 ? 'warning' : 'critical'
 	);
 
 	// Ring segments: [available, upcoming, used] - clockwise from 12 o'clock, matches legend order
@@ -31,28 +31,28 @@
 		{ value: used, label: 'Used' }
 	]);
 
-	// Theme-based legend colors (available=vibrant, upcoming=teal, used=cool gray)
+	// Spa/Resort legend colors (available=dynamic, upcoming=caribbean, used=stone)
 	const legendColors = $derived({
 		available:
 			theme === 'healthy'
-				? 'bg-ocean-600'
+				? 'bg-mint-400'
 				: theme === 'warning'
-					? 'bg-amber-600'
-					: 'bg-coral-600',
-		upcoming: 'bg-teal-500',
-		used: 'bg-slate-300'
+					? 'bg-sunshine-400'
+					: 'bg-salmon-400',
+		upcoming: 'bg-caribbean-400',
+		used: 'bg-stone-300'
 	});
 
-	// Theme-based icon colors (available=vibrant, upcoming=teal, used=cool gray)
+	// Spa/Resort icon colors (available=dynamic, upcoming=caribbean, used=stone)
 	const iconColors = $derived({
 		available:
 			theme === 'healthy'
-				? 'text-ocean-600'
+				? 'text-mint-500'
 				: theme === 'warning'
-					? 'text-amber-600'
-					: 'text-coral-600',
-		upcoming: 'text-teal-600',
-		used: 'text-slate-400'
+					? 'text-sunshine-500'
+					: 'text-salmon-500',
+		upcoming: 'text-caribbean-500',
+		used: 'text-stone-400'
 	});
 
 	// Calculate days until next vacation
@@ -176,8 +176,8 @@
 	<div class="mt-5 pt-4 border-t border-ocean-100/50">
 		{#if nextVacation}
 			<div class="flex items-center gap-2">
-				<div class="p-1.5 rounded-lg bg-teal-500/15">
-					<Umbrella class="w-4 h-4 text-teal-600" />
+				<div class="p-1.5 rounded-lg bg-caribbean-400/15">
+					<Umbrella class="w-4 h-4 text-caribbean-500" />
 				</div>
 				<span class="font-medium text-ocean-700">Next escape: {formattedDateRange}</span>
 				{#if daysUntilVacation !== null && daysUntilVacation > 0}

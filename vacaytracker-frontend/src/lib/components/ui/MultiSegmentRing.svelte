@@ -26,12 +26,12 @@
 		class: className = ''
 	}: Props = $props();
 
-	// Shade mappings: [available (vibrant), upcoming (teal accent), used (cool gray)]
+	// Spa/Resort palette: [available (dynamic), upcoming (caribbean), used (stone)]
 	// Segment order matches legend: Available → Upcoming → Used (clockwise from 12 o'clock)
 	const themeShades: Record<Theme, [string, string, string]> = {
-		healthy: ['text-ocean-600', 'text-teal-500', 'text-slate-300'],
-		warning: ['text-amber-600', 'text-teal-500', 'text-slate-300'],
-		critical: ['text-coral-600', 'text-teal-500', 'text-slate-300']
+		healthy: ['text-mint-400', 'text-caribbean-400', 'text-stone-300'],      // >50% - Soft Mint
+		warning: ['text-sunshine-400', 'text-caribbean-400', 'text-stone-300'],  // 20-50% - Sunshine
+		critical: ['text-salmon-400', 'text-caribbean-400', 'text-stone-300']    // <20% - Soft Coral
 	};
 
 	const radius = $derived((size - strokeWidth) / 2);
@@ -73,10 +73,10 @@
 	// Center label color based on theme (matches "Available" segment)
 	const centerColor = $derived(
 		theme === 'healthy'
-			? 'text-ocean-600'
+			? 'text-mint-500'
 			: theme === 'warning'
-				? 'text-amber-600'
-				: 'text-coral-600'
+				? 'text-sunshine-500'
+				: 'text-salmon-500'
 	);
 </script>
 
