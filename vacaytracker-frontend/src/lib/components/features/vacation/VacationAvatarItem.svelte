@@ -150,7 +150,7 @@
 				<Avatar name={vacation.userName} size="md" />
 				<div>
 					<p class="font-medium text-ocean-800">{vacation.userName}</p>
-					<Badge variant="approved" size="sm">On Vacation</Badge>
+					<Badge variant="success" size="sm">On Vacation</Badge>
 				</div>
 			</div>
 

@@ -4,7 +4,7 @@
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 
 	interface Props {
-		variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+		variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning';
 		size?: 'sm' | 'md' | 'lg';
 		disabled?: boolean;
 		loading?: boolean;
@@ -35,7 +35,9 @@
 		secondary: 'bg-sand-200 text-ocean-900 hover:bg-sand-300 focus:ring-sand-400',
 		outline: 'border-2 border-ocean-500 text-ocean-500 hover:bg-ocean-50 focus:ring-ocean-500',
 		ghost: 'text-ocean-600 hover:bg-ocean-50 focus:ring-ocean-500',
-		danger: 'bg-error text-white hover:bg-red-600 focus:ring-error'
+		danger: 'bg-error text-white hover:bg-red-600 focus:ring-error',
+		success: 'bg-success text-white hover:bg-green-600 focus:ring-success',
+		warning: 'bg-warning text-white hover:bg-yellow-600 focus:ring-warning'
 	};
 
 	const sizeStyles = {

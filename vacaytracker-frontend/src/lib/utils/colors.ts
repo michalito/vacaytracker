@@ -4,22 +4,19 @@ export interface UserColor {
 	combined: string;
 }
 
+// Theme-aligned color palette for user assignments in team calendar
 export const USER_COLOR_PALETTE: UserColor[] = [
 	{ background: 'bg-ocean-200', text: 'text-ocean-800', combined: 'bg-ocean-200 text-ocean-800' },
-	{ background: 'bg-green-200', text: 'text-green-800', combined: 'bg-green-200 text-green-800' },
+	{ background: 'bg-coral-300', text: 'text-coral-600', combined: 'bg-coral-300 text-coral-600' },
+	{ background: 'bg-teal-200', text: 'text-teal-800', combined: 'bg-teal-200 text-teal-800' },
+	{ background: 'bg-amber-200', text: 'text-amber-800', combined: 'bg-amber-200 text-amber-800' },
+	{ background: 'bg-sand-300', text: 'text-sand-500', combined: 'bg-sand-300 text-sand-500' },
+	{ background: 'bg-slate-200', text: 'text-slate-700', combined: 'bg-slate-200 text-slate-700' },
 	{
 		background: 'bg-purple-200',
 		text: 'text-purple-800',
 		combined: 'bg-purple-200 text-purple-800'
 	},
-	{ background: 'bg-pink-200', text: 'text-pink-800', combined: 'bg-pink-200 text-pink-800' },
-	{
-		background: 'bg-yellow-200',
-		text: 'text-yellow-800',
-		combined: 'bg-yellow-200 text-yellow-800'
-	},
-	{ background: 'bg-red-200', text: 'text-red-800', combined: 'bg-red-200 text-red-800' },
-	{ background: 'bg-teal-200', text: 'text-teal-800', combined: 'bg-teal-200 text-teal-800' },
 	{
 		background: 'bg-indigo-200',
 		text: 'text-indigo-800',

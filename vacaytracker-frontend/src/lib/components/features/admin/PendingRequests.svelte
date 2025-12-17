@@ -235,8 +235,8 @@
 							Cancel
 						</Button>
 						<Button
-							variant="primary"
-							class="flex-1 !bg-green-600 hover:!bg-green-700"
+							variant="success"
+							class="flex-1"
 							onclick={confirmApprove}
 							loading={processingId !== null}
 						>
@@ -324,8 +324,8 @@
 							Cancel
 						</Button>
 						<Button
-							variant="primary"
-							class="flex-1 !bg-error hover:!bg-red-600"
+							variant="danger"
+							class="flex-1"
 							onclick={confirmReject}
 							loading={processingId !== null}
 						>

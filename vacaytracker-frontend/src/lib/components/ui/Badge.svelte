@@ -9,9 +9,8 @@
 			| 'warning'
 			| 'error'
 			| 'info'
-			| 'pending'
-			| 'approved'
-			| 'rejected';
+			| 'ocean'
+			| 'coral';
 		size?: 'sm' | 'md';
 		class?: string;
 		children: Snippet;
@@ -19,15 +18,15 @@
 
 	let { variant = 'default', size = 'md', class: className = '', children }: Props = $props();
 
+	// Unified semantic color variants using theme tokens
 	const variantStyles = {
-		default: 'bg-sand-200 text-ocean-700',
-		success: 'bg-green-100 text-green-800',
-		warning: 'bg-yellow-100 text-yellow-800',
-		error: 'bg-red-100 text-red-800',
-		info: 'bg-blue-100 text-blue-800',
-		pending: 'bg-yellow-100 text-yellow-800',
-		approved: 'bg-green-100 text-green-800',
-		rejected: 'bg-red-100 text-red-800'
+		default: 'bg-slate-100 text-slate-700 border border-slate-200',
+		success: 'bg-success-light text-green-800 border border-green-200',
+		warning: 'bg-warning-light text-yellow-800 border border-yellow-200',
+		error: 'bg-error-light text-red-800 border border-red-200',
+		info: 'bg-info-light text-blue-800 border border-blue-200',
+		ocean: 'bg-ocean-100 text-ocean-800 border border-ocean-200',
+		coral: 'bg-coral-300/30 text-coral-600 border border-coral-300'
 	};
 
 	const sizeStyles = {

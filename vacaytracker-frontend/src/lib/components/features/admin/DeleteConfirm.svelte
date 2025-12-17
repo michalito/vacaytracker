@@ -93,8 +93,8 @@
 					</Button>
 					<Button
 						type="button"
-						variant="primary"
-						class="flex-1 !bg-error hover:!bg-red-600"
+						variant="danger"
+						class="flex-1"
 						onclick={onConfirm}
 						loading={isLoading}
 					>

@@ -14,7 +14,7 @@
 
 	let { status, size = 'sm', showLabel = true, class: className = '' }: Props = $props();
 
-	// Status configuration using app's ocean/coral/sand palette
+	// Status configuration using semantic traffic light colors
 	const statusConfig: Record<
 		StatusVariant,
 		{
@@ -28,37 +28,37 @@
 		pending: {
 			icon: Clock,
 			label: 'Awaiting',
-			bgClass: 'bg-coral-400/15 border-coral-400/30',
-			textClass: 'text-coral-600',
-			iconClass: 'text-coral-500'
+			bgClass: 'bg-warning-light border-yellow-200',
+			textClass: 'text-yellow-800',
+			iconClass: 'text-yellow-600'
 		},
 		approved: {
 			icon: Sun,
 			label: 'Confirmed',
-			bgClass: 'bg-ocean-100 border-ocean-200',
-			textClass: 'text-ocean-700',
-			iconClass: 'text-ocean-500'
+			bgClass: 'bg-success-light border-green-200',
+			textClass: 'text-green-800',
+			iconClass: 'text-green-600'
 		},
 		upcoming: {
 			icon: Sun,
 			label: 'Confirmed',
-			bgClass: 'bg-ocean-100 border-ocean-200',
-			textClass: 'text-ocean-700',
-			iconClass: 'text-ocean-500'
+			bgClass: 'bg-success-light border-green-200',
+			textClass: 'text-green-800',
+			iconClass: 'text-green-600'
 		},
 		completed: {
 			icon: Palmtree,
 			label: 'Enjoyed',
-			bgClass: 'bg-emerald-50 border-emerald-200',
-			textClass: 'text-emerald-700',
-			iconClass: 'text-emerald-500'
+			bgClass: 'bg-success-light border-green-200',
+			textClass: 'text-green-800',
+			iconClass: 'text-green-600'
 		},
 		rejected: {
 			icon: CloudRain,
 			label: 'Declined',
-			bgClass: 'bg-red-50 border-red-200/60',
-			textClass: 'text-red-500',
-			iconClass: 'text-red-400'
+			bgClass: 'bg-error-light border-red-200',
+			textClass: 'text-red-800',
+			iconClass: 'text-red-600'
 		}
 	};
 

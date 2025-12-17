@@ -43,7 +43,7 @@
 						</div>
 					</td>
 					<td class="py-3 px-4">
-						<Badge variant={user.role === 'admin' ? 'approved' : 'pending'}>
+						<Badge variant={user.role === 'admin' ? 'ocean' : 'default'}>
 							{user.role}
 						</Badge>
 					</td>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { VacationRequest } from '$lib/types';
+	import type { VacationRequest, VacationStatus } from '$lib/types';
 	import { vacation } from '$lib/stores/vacation.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 	import { formatDateMedium } from '$lib/utils/date';
@@ -14,6 +14,15 @@
 	let { request }: Props = $props();
 
 	let isCancelling = $state(false);
+
+	// Map VacationStatus to Badge variant (semantic traffic light)
+	const statusVariantMap: Record<VacationStatus, 'success' | 'warning' | 'error'> = {
+		pending: 'warning',
+		approved: 'success',
+		rejected: 'error'
+	};
+
+	const badgeVariant = $derived(statusVariantMap[request.status]);
 
 	async function handleCancel() {
 		if (!confirm('Are you sure you want to cancel this request?')) return;
@@ -52,7 +61,7 @@
 	</div>
 
 	<div class="flex items-center gap-3">
-		<Badge variant={request.status}>
+		<Badge variant={badgeVariant}>
 			{request.status}
 		</Badge>
 

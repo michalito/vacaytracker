@@ -65,16 +65,15 @@
 	--color-salmon-500: #F56565;    /* Legend dot */
 	--color-salmon-600: #C53030;    /* Text - darker for contrast */
 
-	/* Semantic Colors */
-	--color-success: oklch(0.65 0.2 145);
-	--color-warning: oklch(0.75 0.18 85);
-	--color-error: oklch(0.6 0.22 25);
-	--color-info: oklch(0.65 0.15 250);
-
-	/* Status Colors */
-	--color-pending: oklch(0.75 0.15 85);
-	--color-approved: oklch(0.65 0.2 145);
-	--color-rejected: oklch(0.6 0.22 25);
+	/* Semantic Status Colors - Traffic Light Pattern */
+	--color-success: #22c55e;        /* Green-500 */
+	--color-success-light: #dcfce7;  /* Green-100 - for badge backgrounds */
+	--color-warning: #eab308;        /* Yellow-500 */
+	--color-warning-light: #fef9c3;  /* Yellow-100 - for badge backgrounds */
+	--color-error: #ef4444;          /* Red-500 */
+	--color-error-light: #fee2e2;    /* Red-100 - for badge backgrounds */
+	--color-info: #3b82f6;           /* Blue-500 */
+	--color-info-light: #dbeafe;     /* Blue-100 - for badge backgrounds */
 
 	/* Typography */
 	--font-family-sans: 'Nunito', system-ui, sans-serif;
