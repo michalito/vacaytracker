@@ -1,7 +1,7 @@
 <script lang="ts">
 	import MultiSegmentRing from '$lib/components/ui/MultiSegmentRing.svelte';
 	import Tooltip from '$lib/components/ui/Tooltip.svelte';
-	import { Palmtree, Calendar, Plane, Info, Umbrella } from 'lucide-svelte';
+	import { Palmtree, CheckCircle, Plane, Info, Umbrella } from 'lucide-svelte';
 	import type { VacationRequest } from '$lib/types';
 
 	type Theme = 'healthy' | 'warning' | 'critical';
@@ -24,55 +24,35 @@
 		percentage > 60 ? 'healthy' : percentage > 30 ? 'warning' : 'critical'
 	);
 
-	// Ring segments: [used, upcoming, available] - order matters for shading
+	// Ring segments: [available, upcoming, used] - clockwise from 12 o'clock, matches legend order
 	const segments = $derived([
-		{ value: used, label: 'Used' },
+		{ value: available, label: 'Available' },
 		{ value: upcoming, label: 'Upcoming' },
-		{ value: available, label: 'Available' }
+		{ value: used, label: 'Used' }
 	]);
 
-	// Theme-based legend colors
+	// Theme-based legend colors (available=vibrant, upcoming=teal, used=cool gray)
 	const legendColors = $derived({
-		used:
+		available:
 			theme === 'healthy'
 				? 'bg-ocean-600'
 				: theme === 'warning'
 					? 'bg-amber-600'
 					: 'bg-coral-600',
-		upcoming:
-			theme === 'healthy'
-				? 'bg-ocean-400'
-				: theme === 'warning'
-					? 'bg-amber-400'
-					: 'bg-coral-500',
-		available:
-			theme === 'healthy'
-				? 'bg-ocean-200'
-				: theme === 'warning'
-					? 'bg-amber-300'
-					: 'bg-coral-300'
+		upcoming: 'bg-teal-500',
+		used: 'bg-slate-300'
 	});
 
-	// Theme-based icon colors
+	// Theme-based icon colors (available=vibrant, upcoming=teal, used=cool gray)
 	const iconColors = $derived({
-		used:
+		available:
 			theme === 'healthy'
 				? 'text-ocean-600'
 				: theme === 'warning'
 					? 'text-amber-600'
 					: 'text-coral-600',
-		upcoming:
-			theme === 'healthy'
-				? 'text-ocean-500'
-				: theme === 'warning'
-					? 'text-amber-500'
-					: 'text-coral-500',
-		available:
-			theme === 'healthy'
-				? 'text-ocean-400'
-				: theme === 'warning'
-					? 'text-amber-400'
-					: 'text-coral-400'
+		upcoming: 'text-teal-600',
+		used: 'text-slate-400'
 	});
 
 	// Calculate days until next vacation
@@ -161,7 +141,7 @@
 				<div class="w-3 h-3 rounded-full {legendColors.available}"></div>
 				<div class="flex items-center gap-2">
 					<Palmtree class="w-4 h-4 {iconColors.available}" />
-					<span class="text-ocean-800 font-semibold">{available}</span>
+					<span class="text-ocean-800 font-semibold tabular-nums min-w-[2ch] text-right">{available}</span>
 					<span class="text-ocean-500 text-sm">days available</span>
 				</div>
 			</div>
@@ -172,7 +152,7 @@
 					<div class="w-3 h-3 rounded-full {legendColors.upcoming}"></div>
 					<div class="flex items-center gap-2">
 						<Plane class="w-4 h-4 {iconColors.upcoming}" />
-						<span class="text-ocean-800 font-semibold">{upcoming}</span>
+						<span class="text-ocean-800 font-semibold tabular-nums min-w-[2ch] text-right">{upcoming}</span>
 						<span class="text-ocean-500 text-sm">days upcoming</span>
 					</div>
 				</div>
@@ -183,8 +163,8 @@
 				<div class="flex items-center gap-3">
 					<div class="w-3 h-3 rounded-full {legendColors.used}"></div>
 					<div class="flex items-center gap-2">
-						<Calendar class="w-4 h-4 {iconColors.used}" />
-						<span class="text-ocean-800 font-semibold">{used}</span>
+						<CheckCircle class="w-4 h-4 {iconColors.used}" />
+						<span class="text-ocean-800 font-semibold tabular-nums min-w-[2ch] text-right">{used}</span>
 						<span class="text-ocean-500 text-sm">days used</span>
 					</div>
 				</div>
@@ -196,8 +176,8 @@
 	<div class="mt-5 pt-4 border-t border-ocean-100/50">
 		{#if nextVacation}
 			<div class="flex items-center gap-2">
-				<div class="p-1.5 rounded-lg bg-coral-400/15">
-					<Umbrella class="w-4 h-4 text-coral-500" />
+				<div class="p-1.5 rounded-lg bg-teal-500/15">
+					<Umbrella class="w-4 h-4 text-teal-600" />
 				</div>
 				<span class="font-medium text-ocean-700">Next escape: {formattedDateRange}</span>
 				{#if daysUntilVacation !== null && daysUntilVacation > 0}

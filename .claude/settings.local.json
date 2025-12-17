@@ -18,7 +18,8 @@
       "Bash(MSYS_NO_PATHCONV=1 docker compose cp:*)",
       "Bash(go build:*)",
       "Bash(curl:*)",
-      "Bash(MSYS_NO_PATHCONV=1 docker compose exec:*)"
+      "Bash(MSYS_NO_PATHCONV=1 docker compose exec:*)",
+      "Bash(dir \"C:\\code\\vacayv2\\vacaytracker-frontend\\src\\routes\" /B)"
     ],
     "deny": [],
     "ask": []

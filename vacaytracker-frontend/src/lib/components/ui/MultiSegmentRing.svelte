@@ -26,11 +26,12 @@
 		class: className = ''
 	}: Props = $props();
 
-	// Shade mappings: [used (dark), upcoming (medium), available (light)]
+	// Shade mappings: [available (vibrant), upcoming (teal accent), used (cool gray)]
+	// Segment order matches legend: Available → Upcoming → Used (clockwise from 12 o'clock)
 	const themeShades: Record<Theme, [string, string, string]> = {
-		healthy: ['text-ocean-600', 'text-ocean-400', 'text-ocean-200'],
-		warning: ['text-amber-600', 'text-amber-400', 'text-amber-300'],
-		critical: ['text-coral-600', 'text-coral-500', 'text-coral-300']
+		healthy: ['text-ocean-600', 'text-teal-500', 'text-slate-300'],
+		warning: ['text-amber-600', 'text-teal-500', 'text-slate-300'],
+		critical: ['text-coral-600', 'text-teal-500', 'text-slate-300']
 	};
 
 	const radius = $derived((size - strokeWidth) / 2);
@@ -69,12 +70,12 @@
 		return arcs;
 	});
 
-	// Center label color based on theme
+	// Center label color based on theme (matches "Available" segment)
 	const centerColor = $derived(
 		theme === 'healthy'
-			? 'text-ocean-800'
+			? 'text-ocean-600'
 			: theme === 'warning'
-				? 'text-amber-700'
+				? 'text-amber-600'
 				: 'text-coral-600'
 	);
 </script>

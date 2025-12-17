@@ -29,6 +29,11 @@
 	--color-amber-500: #f59e0b;
 	--color-amber-600: #d97706;
 
+	/* Teal - accent color for upcoming vacations */
+	--color-teal-400: #2dd4bf;
+	--color-teal-500: #14b8a6;
+	--color-teal-600: #0d9488;
+
 	/* Sand Colors */
 	--color-sand-50: oklch(0.98 0.01 80);
 	--color-sand-100: oklch(0.95 0.02 80);
@@ -36,6 +41,11 @@
 	--color-sand-300: oklch(0.85 0.06 80);
 	--color-sand-400: oklch(0.75 0.08 80);
 	--color-sand-500: oklch(0.65 0.1 80);
+
+	/* Slate/Cool Gray - for inactive/past data */
+	--color-slate-200: #e2e8f0;
+	--color-slate-300: #cbd5e1;
+	--color-slate-400: #94a3b8;
 
 	/* Semantic Colors */
 	--color-success: oklch(0.65 0.2 145);
