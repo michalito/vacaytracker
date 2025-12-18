@@ -2,7 +2,7 @@
 	import { createTooltip, createPopover, melt } from '@melt-ui/svelte';
 	import Avatar from '$lib/components/ui/Avatar.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import { Calendar, Clock, X } from 'lucide-svelte';
+	import { Calendar, Clock, X, Palmtree } from 'lucide-svelte';
 	import {
 		formatDateRangeShort,
 		formatDateShort,
@@ -81,12 +81,14 @@
 						ring-[3px] ring-white shadow-md"
 				/>
 
-				<!-- Status indicator (green dot) for currently out -->
+				<!-- Status indicator (palm tree) for currently out -->
 				{#if showStatusIndicator}
 					<span
-						class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"
+						class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-amber-400 border-2 border-white rounded-full flex items-center justify-center shadow-sm"
 						aria-label="Currently on vacation"
-					></span>
+					>
+						<Palmtree class="w-2.5 h-2.5 text-amber-800" />
+					</span>
 				{/if}
 			</div>
 		</span>
