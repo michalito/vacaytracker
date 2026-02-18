@@ -70,7 +70,8 @@ func AdminMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if role.(domain.Role) != domain.RoleAdmin {
+		roleVal, ok := role.(domain.Role)
+		if !ok || roleVal != domain.RoleAdmin {
 			respondWithError(c, dto.ErrAdminRequiredError())
 			return
 		}
@@ -89,7 +90,8 @@ func EmployeeMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if role.(domain.Role) != domain.RoleEmployee {
+		roleVal, ok := role.(domain.Role)
+		if !ok || roleVal != domain.RoleEmployee {
 			respondWithError(c, dto.ErrForbiddenError("This action is only available to employees"))
 			return
 		}
@@ -101,37 +103,41 @@ func EmployeeMiddleware() gin.HandlerFunc {
 // GetUserID retrieves the user ID from the context
 func GetUserID(c *gin.Context) string {
 	userID, _ := c.Get(ContextKeyUserID)
-	if userID == nil {
+	str, ok := userID.(string)
+	if !ok {
 		return ""
 	}
-	return userID.(string)
+	return str
 }
 
 // GetUserEmail retrieves the user email from the context
 func GetUserEmail(c *gin.Context) string {
 	email, _ := c.Get(ContextKeyEmail)
-	if email == nil {
+	str, ok := email.(string)
+	if !ok {
 		return ""
 	}
-	return email.(string)
+	return str
 }
 
 // GetUserRole retrieves the user role from the context
 func GetUserRole(c *gin.Context) domain.Role {
 	role, _ := c.Get(ContextKeyRole)
-	if role == nil {
+	r, ok := role.(domain.Role)
+	if !ok {
 		return ""
 	}
-	return role.(domain.Role)
+	return r
 }
 
 // GetClaims retrieves the full JWT claims from the context
 func GetClaims(c *gin.Context) *service.JWTClaims {
 	claims, _ := c.Get(ContextKeyClaims)
-	if claims == nil {
+	jwtClaims, ok := claims.(*service.JWTClaims)
+	if !ok {
 		return nil
 	}
-	return claims.(*service.JWTClaims)
+	return jwtClaims
 }
 
 // IsAdmin checks if the current user is an admin

@@ -50,7 +50,7 @@ func main() {
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, cfg.JWTSecret)
-	vacationService := service.NewVacationService(vacationRepo, userRepo, settingsRepo)
+	vacationService := service.NewVacationService(vacationRepo, userRepo, settingsRepo, db)
 	userService := service.NewUserService(userRepo, authService)
 	emailService := service.NewEmailService(cfg)
 	newsletterService := service.NewNewsletterService(cfg, userRepo, vacationRepo, settingsRepo, emailService)
@@ -61,6 +61,7 @@ func main() {
 
 	// Create initial admin user if it doesn't exist
 	if err := authService.CreateInitialAdmin(
+		context.Background(),
 		cfg.AdminEmail,
 		cfg.AdminPassword,
 		cfg.AdminName,

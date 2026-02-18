@@ -15,6 +15,7 @@ function createAdminStore() {
 	let settings = $state<Settings | null>(null);
 	let pagination = $state<PaginationInfo>({ page: 1, limit: 10, total: 0, totalPages: 0 });
 	let isLoading = $state(false);
+	let error = $state<string | null>(null);
 	let newsletterPreview = $state<NewsletterPreview | null>(null);
 	let isSendingNewsletter = $state(false);
 	let cacheInfo = $state<CacheInfo>({
@@ -42,6 +43,7 @@ function createAdminStore() {
 		}
 
 		isLoading = true;
+		error = null;
 		try {
 			const response = await adminApi.listUsers(params);
 			users = response.users;
@@ -49,8 +51,9 @@ function createAdminStore() {
 			if (isDefaultList && !hasFilters) {
 				cacheInfo = { ...cacheInfo, usersAt: Date.now() };
 			}
-		} catch (error) {
-			console.error('Failed to fetch users:', error);
+		} catch (e) {
+			console.error('Failed to fetch users:', e);
+			error = e instanceof Error ? e.message : 'Failed to fetch users';
 			users = [];
 		} finally {
 			isLoading = false;
@@ -62,12 +65,14 @@ function createAdminStore() {
 			return;
 		}
 
+		error = null;
 		try {
 			const response = await adminApi.pendingRequests();
 			pendingRequests = response.requests;
 			cacheInfo = { ...cacheInfo, pendingRequestsAt: Date.now() };
-		} catch (error) {
-			console.error('Failed to fetch pending requests:', error);
+		} catch (e) {
+			console.error('Failed to fetch pending requests:', e);
+			error = e instanceof Error ? e.message : 'Failed to fetch pending requests';
 			pendingRequests = [];
 		}
 	}
@@ -77,11 +82,13 @@ function createAdminStore() {
 			return;
 		}
 
+		error = null;
 		try {
 			settings = await adminApi.getSettings();
 			cacheInfo = { ...cacheInfo, settingsAt: Date.now() };
-		} catch (error) {
-			console.error('Failed to fetch settings:', error);
+		} catch (e) {
+			console.error('Failed to fetch settings:', e);
+			error = e instanceof Error ? e.message : 'Failed to fetch settings';
 			settings = null;
 		}
 	}
@@ -138,10 +145,10 @@ function createAdminStore() {
 		try {
 			newsletterPreview = await adminApi.getNewsletterPreview();
 			return newsletterPreview;
-		} catch (error) {
-			console.error('Failed to fetch newsletter preview:', error);
+		} catch (e) {
+			console.error('Failed to fetch newsletter preview:', e);
 			newsletterPreview = null;
-			throw error;
+			throw e;
 		}
 	}
 
@@ -172,6 +179,9 @@ function createAdminStore() {
 		},
 		get isLoading() {
 			return isLoading;
+		},
+		get error() {
+			return error;
 		},
 		get newsletterPreview() {
 			return newsletterPreview;

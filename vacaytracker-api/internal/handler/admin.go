@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -12,7 +13,7 @@ import (
 	"vacaytracker-api/internal/domain"
 	"vacaytracker-api/internal/dto"
 	"vacaytracker-api/internal/middleware"
-	"vacaytracker-api/internal/repository/sqlite"
+	"vacaytracker-api/internal/repository"
 	"vacaytracker-api/internal/service"
 )
 
@@ -20,10 +21,10 @@ import (
 type AdminHandler struct {
 	cfg               *config.Config
 	userService       *service.UserService
-	userRepo          *sqlite.UserRepository
+	userRepo          repository.UserRepository
 	vacationService   *service.VacationService
-	vacationRepo      *sqlite.VacationRepository
-	settingsRepo      *sqlite.SettingsRepository
+	vacationRepo      repository.VacationRepository
+	settingsRepo      repository.SettingsRepository
 	emailService      *service.EmailService
 	newsletterService *service.NewsletterService
 }
@@ -32,10 +33,10 @@ type AdminHandler struct {
 func NewAdminHandler(
 	cfg *config.Config,
 	userService *service.UserService,
-	userRepo *sqlite.UserRepository,
+	userRepo repository.UserRepository,
 	vacationService *service.VacationService,
-	vacationRepo *sqlite.VacationRepository,
-	settingsRepo *sqlite.SettingsRepository,
+	vacationRepo repository.VacationRepository,
+	settingsRepo repository.SettingsRepository,
 	emailService *service.EmailService,
 	newsletterService *service.NewsletterService,
 ) *AdminHandler {
@@ -341,7 +342,8 @@ func (h *AdminHandler) Review(c *gin.Context) {
 	}
 
 	// Send email notification to the user (non-blocking)
-	go h.sendReviewEmail(c.Request.Context(), vacation, req.Status, req.Reason)
+	// Use background context since the request context is cancelled after the response is sent
+	go h.sendReviewEmail(context.Background(), vacation, req.Status, req.Reason)
 
 	c.JSON(http.StatusOK, dto.ToVacationRequestResponse(vacation))
 }
@@ -349,7 +351,11 @@ func (h *AdminHandler) Review(c *gin.Context) {
 // sendReviewEmail sends an email after a vacation request is reviewed
 func (h *AdminHandler) sendReviewEmail(ctx context.Context, vacation *domain.VacationRequest, status string, reason string) {
 	user, err := h.userRepo.GetByID(ctx, vacation.UserID)
-	if err != nil || user == nil {
+	if err != nil {
+		log.Printf("ERROR: failed to get user for review email notification: %v", err)
+		return
+	}
+	if user == nil {
 		return
 	}
 

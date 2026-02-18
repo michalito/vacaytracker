@@ -12,7 +12,7 @@ import (
 
 	"vacaytracker-api/internal/domain"
 	"vacaytracker-api/internal/dto"
-	"vacaytracker-api/internal/repository/sqlite"
+	"vacaytracker-api/internal/repository"
 )
 
 // Vacation service errors
@@ -29,21 +29,24 @@ var (
 
 // VacationService handles vacation request business logic
 type VacationService struct {
-	vacationRepo *sqlite.VacationRepository
-	userRepo     *sqlite.UserRepository
-	settingsRepo *sqlite.SettingsRepository
+	vacationRepo repository.VacationRepository
+	userRepo     repository.UserRepository
+	settingsRepo repository.SettingsRepository
+	transactor   repository.Transactor
 }
 
 // NewVacationService creates a new VacationService
 func NewVacationService(
-	vacationRepo *sqlite.VacationRepository,
-	userRepo *sqlite.UserRepository,
-	settingsRepo *sqlite.SettingsRepository,
+	vacationRepo repository.VacationRepository,
+	userRepo repository.UserRepository,
+	settingsRepo repository.SettingsRepository,
+	transactor repository.Transactor,
 ) *VacationService {
 	return &VacationService{
 		vacationRepo: vacationRepo,
 		userRepo:     userRepo,
 		settingsRepo: settingsRepo,
+		transactor:   transactor,
 	}
 }
 
@@ -93,7 +96,7 @@ func (s *VacationService) Create(ctx context.Context, userID string, req dto.Cre
 	}
 
 	if user.VacationBalance < totalDays {
-		return nil, dto.ErrInsufficientBalanceError(user.VacationBalance, totalDays)
+		return nil, dto.ErrInsufficientBalanceError(totalDays, user.VacationBalance)
 	}
 
 	// Format dates for storage
@@ -135,8 +138,7 @@ func (s *VacationService) Create(ctx context.Context, userID string, req dto.Cre
 			newBalance = 0
 		}
 
-		db := s.vacationRepo.GetDB()
-		err = db.Transaction(func(tx *sql.Tx) error {
+		err = s.transactor.Transaction(func(tx *sql.Tx) error {
 			if err := s.vacationRepo.CreateTx(ctx, tx, vacation); err != nil {
 				return err
 			}
@@ -210,7 +212,7 @@ func (s *VacationService) Approve(ctx context.Context, requestID, adminID string
 
 	// Check if user still has enough balance
 	if user.VacationBalance < request.TotalDays {
-		return nil, dto.ErrInsufficientBalanceError(user.VacationBalance, request.TotalDays)
+		return nil, dto.ErrInsufficientBalanceError(request.TotalDays, user.VacationBalance)
 	}
 
 	// Calculate new balance
@@ -220,8 +222,7 @@ func (s *VacationService) Approve(ctx context.Context, requestID, adminID string
 	}
 
 	// Execute status update and balance deduction atomically in a transaction
-	db := s.vacationRepo.GetDB()
-	err = db.Transaction(func(tx *sql.Tx) error {
+	err = s.transactor.Transaction(func(tx *sql.Tx) error {
 		// Update status
 		if err := s.vacationRepo.UpdateStatusTx(ctx, tx, requestID, domain.StatusApproved, adminID, nil); err != nil {
 			return err

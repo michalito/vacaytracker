@@ -7,17 +7,17 @@ import (
 
 	"vacaytracker-api/internal/domain"
 	"vacaytracker-api/internal/dto"
-	"vacaytracker-api/internal/repository/sqlite"
+	"vacaytracker-api/internal/repository"
 )
 
 // UserService handles user management business logic
 type UserService struct {
-	userRepo    *sqlite.UserRepository
+	userRepo    repository.UserRepository
 	authService *AuthService
 }
 
 // NewUserService creates a new UserService
-func NewUserService(userRepo *sqlite.UserRepository, authService *AuthService) *UserService {
+func NewUserService(userRepo repository.UserRepository, authService *AuthService) *UserService {
 	return &UserService{
 		userRepo:    userRepo,
 		authService: authService,

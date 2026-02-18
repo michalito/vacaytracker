@@ -38,6 +38,9 @@ const (
 	ErrOverlappingRequest    = "OVERLAPPING_REQUEST"
 	ErrInvalidStatus         = "INVALID_STATUS"
 
+	// Rate limiting errors
+	ErrRateLimitExceeded = "RATE_LIMIT_EXCEEDED"
+
 	// Server errors
 	ErrInternal = "INTERNAL_ERROR"
 	ErrDatabase = "DATABASE_ERROR"

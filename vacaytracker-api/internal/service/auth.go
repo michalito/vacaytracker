@@ -11,7 +11,7 @@ import (
 
 	"vacaytracker-api/internal/domain"
 	"vacaytracker-api/internal/dto"
-	"vacaytracker-api/internal/repository/sqlite"
+	"vacaytracker-api/internal/repository"
 )
 
 // JWTClaims represents the claims stored in JWT tokens
@@ -25,13 +25,13 @@ type JWTClaims struct {
 
 // AuthService handles authentication operations
 type AuthService struct {
-	userRepo  *sqlite.UserRepository
+	userRepo  repository.UserRepository
 	jwtSecret []byte
 	jwtExpiry time.Duration
 }
 
 // NewAuthService creates a new AuthService
-func NewAuthService(userRepo *sqlite.UserRepository, jwtSecret string) *AuthService {
+func NewAuthService(userRepo repository.UserRepository, jwtSecret string) *AuthService {
 	return &AuthService{
 		userRepo:  userRepo,
 		jwtSecret: []byte(jwtSecret),
@@ -117,9 +117,7 @@ func (s *AuthService) ValidateToken(tokenString string) (*JWTClaims, error) {
 }
 
 // Login authenticates a user and returns a token
-func (s *AuthService) Login(email, password string) (string, *domain.User, error) {
-	ctx := context.Background()
-
+func (s *AuthService) Login(ctx context.Context, email, password string) (string, *domain.User, error) {
 	// Find user by email
 	user, err := s.userRepo.GetByEmail(ctx, email)
 	if err != nil || user == nil {
@@ -141,9 +139,7 @@ func (s *AuthService) Login(email, password string) (string, *domain.User, error
 }
 
 // GetUserByID retrieves a user by their ID
-func (s *AuthService) GetUserByID(id string) (*domain.User, error) {
-	ctx := context.Background()
-
+func (s *AuthService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
 	user, err := s.userRepo.GetByID(ctx, id)
 	if err != nil || user == nil {
 		return nil, dto.ErrUserNotFoundError()
@@ -152,9 +148,7 @@ func (s *AuthService) GetUserByID(id string) (*domain.User, error) {
 }
 
 // ChangePassword changes a user's password
-func (s *AuthService) ChangePassword(userID, currentPassword, newPassword string) error {
-	ctx := context.Background()
-
+func (s *AuthService) ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
 	// Get user
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil || user == nil {
@@ -181,9 +175,7 @@ func (s *AuthService) ChangePassword(userID, currentPassword, newPassword string
 }
 
 // UpdateEmailPreferences updates a user's email notification preferences
-func (s *AuthService) UpdateEmailPreferences(userID string, updates *dto.UpdateEmailPreferencesRequest) (*domain.User, error) {
-	ctx := context.Background()
-
+func (s *AuthService) UpdateEmailPreferences(ctx context.Context, userID string, updates *dto.UpdateEmailPreferencesRequest) (*domain.User, error) {
 	// Get current user
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil || user == nil {
@@ -211,9 +203,7 @@ func (s *AuthService) UpdateEmailPreferences(userID string, updates *dto.UpdateE
 }
 
 // CreateInitialAdmin creates the initial admin user if it doesn't exist
-func (s *AuthService) CreateInitialAdmin(email, password, name string, defaultBalance int) error {
-	ctx := context.Background()
-
+func (s *AuthService) CreateInitialAdmin(ctx context.Context, email, password, name string, defaultBalance int) error {
 	// Check if admin already exists
 	exists, err := s.userRepo.EmailExists(ctx, email)
 	if err != nil {

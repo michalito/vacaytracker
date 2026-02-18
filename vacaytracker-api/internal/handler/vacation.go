@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -11,23 +12,23 @@ import (
 	"vacaytracker-api/internal/domain"
 	"vacaytracker-api/internal/dto"
 	"vacaytracker-api/internal/middleware"
-	"vacaytracker-api/internal/repository/sqlite"
+	"vacaytracker-api/internal/repository"
 	"vacaytracker-api/internal/service"
 )
 
 // VacationHandler handles vacation request endpoints
 type VacationHandler struct {
 	vacationService *service.VacationService
-	vacationRepo    *sqlite.VacationRepository
-	userRepo        *sqlite.UserRepository
+	vacationRepo    repository.VacationRepository
+	userRepo        repository.UserRepository
 	emailService    *service.EmailService
 }
 
 // NewVacationHandler creates a new VacationHandler
 func NewVacationHandler(
 	vacationService *service.VacationService,
-	vacationRepo *sqlite.VacationRepository,
-	userRepo *sqlite.UserRepository,
+	vacationRepo repository.VacationRepository,
+	userRepo repository.UserRepository,
 	emailService *service.EmailService,
 ) *VacationHandler {
 	return &VacationHandler{
@@ -74,7 +75,8 @@ func (h *VacationHandler) Create(c *gin.Context) {
 	}
 
 	// Send email notifications (non-blocking)
-	go h.sendVacationRequestEmails(c.Request.Context(), userID, vacation)
+	// Use background context since the request context is cancelled after the response is sent
+	go h.sendVacationRequestEmails(context.Background(), userID, vacation)
 
 	c.JSON(http.StatusCreated, dto.ToVacationRequestResponse(vacation))
 }
@@ -83,7 +85,11 @@ func (h *VacationHandler) Create(c *gin.Context) {
 func (h *VacationHandler) sendVacationRequestEmails(ctx context.Context, userID string, vacation *domain.VacationRequest) {
 	// Get the user who submitted the request
 	user, err := h.userRepo.GetByID(ctx, userID)
-	if err != nil || user == nil {
+	if err != nil {
+		log.Printf("ERROR: failed to get user for email notification: %v", err)
+		return
+	}
+	if user == nil {
 		return
 	}
 
@@ -92,7 +98,11 @@ func (h *VacationHandler) sendVacationRequestEmails(ctx context.Context, userID 
 
 	// Send notification to all admins
 	admins, err := h.userRepo.GetByRole(ctx, domain.RoleAdmin)
-	if err != nil || len(admins) == 0 {
+	if err != nil {
+		log.Printf("ERROR: failed to get admins for email notification: %v", err)
+		return
+	}
+	if len(admins) == 0 {
 		return
 	}
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"vacaytracker-api/internal/domain"
+	"vacaytracker-api/internal/repository"
 )
 
 // VacationRepository handles vacation request database operations
@@ -178,8 +179,11 @@ func (r *VacationRepository) UpdateStatus(ctx context.Context, id string, status
 		return fmt.Errorf("failed to update vacation status: %w", err)
 	}
 
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rowsAffected == 0 {
 		return fmt.Errorf("vacation request not found")
 	}
 	return nil
@@ -198,8 +202,11 @@ func (r *VacationRepository) UpdateStatusTx(ctx context.Context, tx *sql.Tx, id 
 		return fmt.Errorf("failed to update vacation status: %w", err)
 	}
 
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rowsAffected == 0 {
 		return fmt.Errorf("vacation request not found")
 	}
 	return nil
@@ -212,24 +219,18 @@ func (r *VacationRepository) Delete(ctx context.Context, id string) error {
 		return fmt.Errorf("failed to delete vacation request: %w", err)
 	}
 
-	rows, _ := result.RowsAffected()
-	if rows == 0 {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rowsAffected == 0 {
 		return fmt.Errorf("vacation request not found")
 	}
 	return nil
 }
 
-// MonthlyStats holds aggregated vacation request statistics for a specific month
-type MonthlyStats struct {
-	TotalSubmitted int
-	TotalApproved  int
-	TotalRejected  int
-	TotalPending   int
-	TotalDaysUsed  int
-}
-
 // GetMonthlyStats returns aggregated statistics for vacation requests in a specific month
-func (r *VacationRepository) GetMonthlyStats(ctx context.Context, year, month int) (*MonthlyStats, error) {
+func (r *VacationRepository) GetMonthlyStats(ctx context.Context, year, month int) (*repository.MonthlyStats, error) {
 	yearStr := fmt.Sprintf("%d", year)
 	monthStr := fmt.Sprintf("%02d", month)
 
@@ -244,7 +245,7 @@ func (r *VacationRepository) GetMonthlyStats(ctx context.Context, year, month in
 		WHERE strftime('%Y', created_at) = ? AND strftime('%m', created_at) = ?
 	`
 
-	var stats MonthlyStats
+	var stats repository.MonthlyStats
 	err := r.db.QueryRowContext(ctx, query, yearStr, monthStr).Scan(
 		&stats.TotalSubmitted,
 		&stats.TotalApproved,

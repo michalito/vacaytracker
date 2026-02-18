@@ -37,7 +37,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Attempt login
-	token, user, err := h.authService.Login(req.Email, req.Password)
+	token, user, err := h.authService.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
 		if appErr, ok := err.(*dto.AppError); ok {
 			c.JSON(appErr.HTTPStatus, appErr.ToResponse())
@@ -70,7 +70,7 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	}
 
 	// Get user from database
-	user, err := h.authService.GetUserByID(userID)
+	user, err := h.authService.GetUserByID(c.Request.Context(), userID)
 	if err != nil {
 		if appErr, ok := err.(*dto.AppError); ok {
 			c.JSON(appErr.HTTPStatus, appErr.ToResponse())
@@ -110,7 +110,7 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	}
 
 	// Change password
-	err := h.authService.ChangePassword(userID, req.CurrentPassword, req.NewPassword)
+	err := h.authService.ChangePassword(c.Request.Context(), userID, req.CurrentPassword, req.NewPassword)
 	if err != nil {
 		if appErr, ok := err.(*dto.AppError); ok {
 			c.JSON(appErr.HTTPStatus, appErr.ToResponse())
@@ -152,7 +152,7 @@ func (h *AuthHandler) UpdateEmailPreferences(c *gin.Context) {
 	}
 
 	// Update preferences
-	user, err := h.authService.UpdateEmailPreferences(userID, &req)
+	user, err := h.authService.UpdateEmailPreferences(c.Request.Context(), userID, &req)
 	if err != nil {
 		if appErr, ok := err.(*dto.AppError); ok {
 			c.JSON(appErr.HTTPStatus, appErr.ToResponse())

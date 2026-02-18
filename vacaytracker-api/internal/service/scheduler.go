@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"vacaytracker-api/internal/domain"
-	"vacaytracker-api/internal/repository/sqlite"
+	"vacaytracker-api/internal/repository"
 )
 
 // Scheduler handles background scheduled tasks
 type Scheduler struct {
 	newsletterService *NewsletterService
-	settingsRepo      *sqlite.SettingsRepository
+	settingsRepo      repository.SettingsRepository
 	ticker            *time.Ticker
 	done              chan bool
 	mu                sync.Mutex
@@ -23,7 +23,7 @@ type Scheduler struct {
 // NewScheduler creates a new background scheduler
 func NewScheduler(
 	newsletterService *NewsletterService,
-	settingsRepo *sqlite.SettingsRepository,
+	settingsRepo repository.SettingsRepository,
 ) *Scheduler {
 	return &Scheduler{
 		newsletterService: newsletterService,

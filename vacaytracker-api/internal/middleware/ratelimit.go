@@ -104,7 +104,7 @@ func (rl *RateLimiter) Middleware() gin.HandlerFunc {
 
 		if !rl.Allow(ip) {
 			c.JSON(http.StatusTooManyRequests, dto.ErrorResponse{
-				Code:    "RATE_LIMIT_EXCEEDED",
+				Code:    dto.ErrRateLimitExceeded,
 				Message: "Too many requests. Please try again later.",
 			})
 			c.Abort()

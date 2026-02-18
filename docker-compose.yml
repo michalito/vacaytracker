@@ -11,8 +11,8 @@ services:
       - ENV=development
       - DB_PATH=/app/data/vacaytracker.db
       - JWT_SECRET=${JWT_SECRET:-docker-dev-secret-key-minimum-32-characters}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@company.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-password123}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@test.com}
       - ADMIN_NAME=${ADMIN_NAME:-Captain Admin}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-}

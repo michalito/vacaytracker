@@ -9,7 +9,7 @@ import (
 	"vacaytracker-api/internal/config"
 	"vacaytracker-api/internal/domain"
 	"vacaytracker-api/internal/dto"
-	"vacaytracker-api/internal/repository/sqlite"
+	"vacaytracker-api/internal/repository"
 )
 
 const (
@@ -22,7 +22,7 @@ type NewsletterData struct {
 	AppURL            string
 	RecipientName     string
 	Period            string
-	Stats             *sqlite.MonthlyStats
+	Stats             *repository.MonthlyStats
 	UpcomingVacations []*domain.TeamVacation
 	LowBalanceUsers   []LowBalanceUser
 	HasUpcoming       bool
@@ -38,18 +38,18 @@ type LowBalanceUser struct {
 // NewsletterService handles newsletter generation and sending
 type NewsletterService struct {
 	cfg          *config.Config
-	userRepo     *sqlite.UserRepository
-	vacationRepo *sqlite.VacationRepository
-	settingsRepo *sqlite.SettingsRepository
+	userRepo     repository.UserRepository
+	vacationRepo repository.VacationRepository
+	settingsRepo repository.SettingsRepository
 	emailService *EmailService
 }
 
 // NewNewsletterService creates a new NewsletterService
 func NewNewsletterService(
 	cfg *config.Config,
-	userRepo *sqlite.UserRepository,
-	vacationRepo *sqlite.VacationRepository,
-	settingsRepo *sqlite.SettingsRepository,
+	userRepo repository.UserRepository,
+	vacationRepo repository.VacationRepository,
+	settingsRepo repository.SettingsRepository,
 	emailService *EmailService,
 ) *NewsletterService {
 	return &NewsletterService{
@@ -67,7 +67,7 @@ func (s *NewsletterService) GetRecipients(ctx context.Context) ([]*domain.User, 
 }
 
 // GetStats returns aggregated statistics for the previous month
-func (s *NewsletterService) GetStats(ctx context.Context) (*sqlite.MonthlyStats, string, error) {
+func (s *NewsletterService) GetStats(ctx context.Context) (*repository.MonthlyStats, string, error) {
 	// Get previous month
 	now := time.Now()
 	prevMonth := now.AddDate(0, -1, 0)
