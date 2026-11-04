@@ -1,5 +1,12 @@
+import { untrack } from 'svelte';
 import { adminApi } from '$lib/api/admin';
-import type { User, Settings, VacationRequest, PaginationInfo, NewsletterPreview } from '$lib/types';
+import type {
+	User,
+	Settings,
+	VacationRequest,
+	PaginationInfo,
+	NewsletterPreview
+} from '$lib/types';
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -24,21 +31,41 @@ function createAdminStore() {
 		settingsAt: null
 	});
 
+	// Read untracked: fetch* functions are commands, and an $effect that calls one must not
+	// re-run just because the fetch refreshed the cache (that would refetch in a loop).
 	function isCacheValid(key: keyof CacheInfo): boolean {
-		const timestamp = cacheInfo[key];
+		const timestamp = untrack(() => cacheInfo[key]);
 		if (!timestamp) return false;
 		return Date.now() - timestamp < CACHE_TTL;
+	}
+
+	// The query whose results are currently in `users`. The cache may only answer that exact
+	// query: after a filtered or differently-sized fetch, `users` no longer holds the default list.
+	let usersQuery: string | null = null;
+
+	function usersQueryKey(params?: {
+		page?: number;
+		limit?: number;
+		role?: string;
+		search?: string;
+	}): string {
+		return JSON.stringify([
+			params?.page ?? 1,
+			params?.limit ?? null,
+			params?.role ?? '',
+			params?.search ?? ''
+		]);
 	}
 
 	async function fetchUsers(
 		params?: { page?: number; limit?: number; role?: string; search?: string },
 		options?: { force?: boolean }
 	) {
-		// Only use cache for default list (page 1, no filters)
-		const isDefaultList = !params?.page || params.page === 1;
-		const hasFilters = params?.search || params?.role;
+		// Filtered queries always hit the API; unfiltered ones may be served from cache
+		const key = usersQueryKey(params);
+		const cacheable = !params?.search && !params?.role;
 
-		if (!options?.force && isDefaultList && !hasFilters && isCacheValid('usersAt')) {
+		if (!options?.force && cacheable && key === usersQuery && isCacheValid('usersAt')) {
 			return;
 		}
 
@@ -48,13 +75,13 @@ function createAdminStore() {
 			const response = await adminApi.listUsers(params);
 			users = response.users;
 			pagination = response.pagination;
-			if (isDefaultList && !hasFilters) {
-				cacheInfo = { ...cacheInfo, usersAt: Date.now() };
-			}
+			usersQuery = key;
+			cacheInfo = { ...cacheInfo, usersAt: Date.now() };
 		} catch (e) {
 			console.error('Failed to fetch users:', e);
 			error = e instanceof Error ? e.message : 'Failed to fetch users';
 			users = [];
+			usersQuery = null;
 		} finally {
 			isLoading = false;
 		}
@@ -106,7 +133,10 @@ function createAdminStore() {
 
 	function invalidateCache(keys?: (keyof CacheInfo)[]) {
 		if (keys) {
-			const updates = keys.reduce((acc, key) => ({ ...acc, [key]: null }), {} as Partial<CacheInfo>);
+			const updates = keys.reduce(
+				(acc, key) => ({ ...acc, [key]: null }),
+				{} as Partial<CacheInfo>
+			);
 			cacheInfo = { ...cacheInfo, ...updates };
 		} else {
 			cacheInfo = { pendingRequestsAt: null, usersAt: null, settingsAt: null };

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createPopover, melt } from '@melt-ui/svelte';
+	import { Popover } from 'bits-ui';
 	import { clsx } from 'clsx';
 	import type { TeamVacation } from '$lib/types';
 	import type { CalendarDay } from '$lib/utils/date';
@@ -28,15 +28,6 @@
 	const visibleVacations = $derived(vacations.slice(0, maxEvents));
 	const hiddenCount = $derived(Math.max(0, vacations.length - maxEvents));
 	const hiddenVacations = $derived(vacations.slice(maxEvents));
-
-	// Popover for hidden vacations overflow
-	const {
-		elements: { trigger, content, close },
-		states: { open }
-	} = createPopover({
-		forceVisible: true,
-		positioning: { placement: 'bottom-start' }
-	});
 
 	function getEventPosition(vacation: TeamVacation): EventPosition {
 		const isStart = day.dateString === vacation.startDate;
@@ -81,47 +72,47 @@
 				/>
 			{/each}
 			{#if hiddenCount > 0}
-				<button
-					use:melt={$trigger}
-					class="text-xs text-ocean-500 pl-1 hover:text-ocean-700 hover:underline cursor-pointer transition-colors"
-				>
-					+{hiddenCount} more
-				</button>
-
-				{#if $open}
-					<div
-						use:melt={$content}
-						class="z-50 w-56 bg-white rounded-lg shadow-xl border border-ocean-200 overflow-hidden
-							transition-all duration-150
-							data-[state=open]:opacity-100 data-[state=open]:scale-100
-							data-[state=closed]:opacity-0 data-[state=closed]:scale-95"
+				<Popover.Root>
+					<Popover.Trigger
+						class="text-xs text-ocean-500 pl-1 hover:text-ocean-700 hover:underline cursor-pointer transition-colors"
 					>
-						<div class="px-3 py-2 bg-ocean-50 border-b border-ocean-100">
-							<span class="text-sm font-medium text-ocean-700">
-								+{hiddenCount} more vacation{hiddenCount !== 1 ? 's' : ''}
-							</span>
-						</div>
-						<div class="max-h-48 overflow-y-auto">
-							{#each hiddenVacations as vacation (vacation.id)}
-								{@const color = getUserColor(vacation.userId)}
-								<div class="px-3 py-2 flex items-start gap-2 hover:bg-ocean-50 transition-colors">
-									<span class={clsx('w-2 h-2 rounded-full mt-1.5 flex-shrink-0', color.background)}></span>
-									<div class="min-w-0 flex-1">
-										<div class="text-sm font-medium text-ocean-800 truncate">
-											{vacation.userName}
-										</div>
-										<div class="text-xs text-ocean-500">
-											{formatDateRangeShort(vacation.startDate, vacation.endDate)}
-											<span class="text-ocean-400">
-												({vacation.totalDays} day{vacation.totalDays !== 1 ? 's' : ''})
-											</span>
+						+{hiddenCount} more
+					</Popover.Trigger>
+
+					<Popover.Portal>
+						<Popover.Content
+							side="bottom"
+							align="start"
+							sideOffset={4}
+							class="presence-pop z-50 w-56 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-white/40 overflow-hidden"
+						>
+							<div class="px-3 py-2 bg-ocean-50/50 border-b border-ocean-100/50">
+								<span class="text-sm font-medium text-ocean-700">
+									+{hiddenCount} more vacation{hiddenCount !== 1 ? 's' : ''}
+								</span>
+							</div>
+							<div class="max-h-48 overflow-y-auto">
+								{#each hiddenVacations as vacation (vacation.id)}
+									{@const color = getUserColor(vacation.userId)}
+									<div class="px-3 py-2 flex items-start gap-2 hover:bg-ocean-50 transition-colors">
+										<span class={clsx('w-2 h-2 rounded-full mt-1.5 flex-shrink-0', color.background)}></span>
+										<div class="min-w-0 flex-1">
+											<div class="text-sm font-medium text-ocean-800 truncate">
+												{vacation.userName}
+											</div>
+											<div class="text-xs text-ocean-500">
+												{formatDateRangeShort(vacation.startDate, vacation.endDate)}
+												<span class="text-ocean-400">
+													({vacation.totalDays} day{vacation.totalDays !== 1 ? 's' : ''})
+												</span>
+											</div>
 										</div>
 									</div>
-								</div>
-							{/each}
-						</div>
-					</div>
-				{/if}
+								{/each}
+							</div>
+						</Popover.Content>
+					</Popover.Portal>
+				</Popover.Root>
 			{/if}
 		</div>
 	{/if}

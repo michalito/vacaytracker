@@ -1,9 +1,19 @@
 <script lang="ts">
-	import { createDialog, melt } from '@melt-ui/svelte';
 	import type { EmailTemplateType, EmailPreviewResponse } from '$lib/types';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { Mail, Send, UserPlus, Clock, CheckCircle, XCircle, Bell, Eye, X, Newspaper } from 'lucide-svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
+	import {
+		Mail,
+		Send,
+		UserPlus,
+		Clock,
+		CheckCircle,
+		XCircle,
+		Bell,
+		Eye,
+		Newspaper
+	} from 'lucide-svelte';
 	import { adminApi } from '$lib/api/admin';
 	import { toast } from '$lib/stores/toast.svelte';
 
@@ -63,14 +73,8 @@
 	let sendingTemplate = $state<EmailTemplateType | null>(null);
 	let previewingTemplate = $state<EmailTemplateType | null>(null);
 	let previewData = $state<EmailPreviewResponse | null>(null);
-
-	// Preview Dialog
-	const {
-		elements: { overlay, content, title, close },
-		states: { open: previewOpen }
-	} = createDialog({
-		forceVisible: true
-	});
+	let previewTemplate = $state<EmailTemplateType | null>(null);
+	let previewOpen = $state(false);
 
 	async function sendTestEmail(template: EmailTemplateType) {
 		sendingTemplate = template;
@@ -78,7 +82,9 @@
 			const result = await adminApi.sendTestEmail(template);
 			toast.success(result.message);
 		} catch (error) {
-			toast.error(`Failed to send test email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			toast.error(
+				`Failed to send test email: ${error instanceof Error ? error.message : 'Unknown error'}`
+			);
 		} finally {
 			sendingTemplate = null;
 		}
@@ -88,17 +94,22 @@
 		previewingTemplate = template;
 		try {
 			previewData = await adminApi.previewEmail(template);
-			previewOpen.set(true);
+			previewTemplate = template;
+			previewOpen = true;
 		} catch (error) {
-			toast.error(`Failed to load preview: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			toast.error(
+				`Failed to load preview: ${error instanceof Error ? error.message : 'Unknown error'}`
+			);
 		} finally {
 			previewingTemplate = null;
 		}
 	}
 
-	function closePreview() {
-		previewOpen.set(false);
-		previewData = null;
+	function sendFromPreview() {
+		if (!previewTemplate) return;
+		const template = previewTemplate;
+		previewOpen = false;
+		sendTestEmail(template);
 	}
 </script>
 
@@ -116,9 +127,11 @@
 		</p>
 
 		<div class="grid gap-3">
-			{#each templates as template}
+			{#each templates as template (template.id)}
 				{@const Icon = template.icon}
-				<div class="flex items-center justify-between p-3 bg-sand-50 rounded-lg border border-sand-200">
+				<div
+					class="flex items-center justify-between p-3 bg-sand-50 rounded-lg border border-sand-200"
+				>
 					<div class="flex items-center gap-3">
 						<div class="p-2 bg-white rounded-md shadow-sm">
 							<Icon class="w-5 h-5 {template.color}" />
@@ -161,56 +174,44 @@
 </Card>
 
 <!-- Preview Dialog -->
-{#if $previewOpen && previewData}
-	<div use:melt={$overlay} class="fixed inset-0 z-50 bg-ocean-900/50 backdrop-blur-sm"></div>
-	<div
-		use:melt={$content}
-		class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-	>
-		<!-- Header -->
-		<div class="flex items-center justify-between p-4 border-b border-ocean-100/50">
-			<div>
-				<h3 use:melt={$title} class="text-lg font-semibold text-ocean-800">{previewData.template} Preview</h3>
-				<p class="text-sm text-ocean-600">
-					<strong>Subject:</strong> {previewData.subject}
-				</p>
-			</div>
-			<button
-				use:melt={$close}
-				type="button"
-				aria-label="Close preview"
-				class="p-2 rounded-lg hover:bg-ocean-500/10 transition-all duration-200 cursor-pointer"
-			>
-				<X class="w-5 h-5 text-ocean-600" />
-			</button>
-		</div>
+<Modal
+	bind:open={previewOpen}
+	title={previewData ? `${previewData.template} Preview` : 'Email Preview'}
+	icon={Eye}
+	size="xl"
+	closeLabel="Close preview"
+	onClosed={() => {
+		previewData = null;
+		previewTemplate = null;
+	}}
+>
+	{#snippet description()}
+		{#if previewData}
+			<strong>Subject:</strong> {previewData.subject}
+		{/if}
+	{/snippet}
 
-		<!-- Content -->
-		<div class="flex-1 overflow-auto p-4 bg-ocean-50/30">
-			<div class="bg-white rounded-xl shadow-sm p-4">
-				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-				{@html previewData.htmlBody}
-			</div>
+	{#if previewData}
+		<div class="bg-ocean-50/30 p-4">
+			<!-- Sandboxed: the template is a full HTML document whose styles must not leak into the app -->
+			<iframe
+				title="{previewData.template} email preview"
+				srcdoc={previewData.htmlBody}
+				sandbox=""
+				class="h-[60vh] w-full rounded-xl border-0 bg-white shadow-sm"
+			></iframe>
 		</div>
+	{/if}
 
-		<!-- Footer -->
-		<div class="flex justify-end gap-2 p-4 border-t border-ocean-100/50">
-			<Button variant="outline" onclick={closePreview}>
-				Close
-			</Button>
-			<Button
-				onclick={() => {
-					const templateId = templates.find(t => t.name === previewData?.template)?.id;
-					if (templateId) {
-						closePreview();
-						sendTestEmail(templateId);
-					}
-				}}
-				loading={sendingTemplate !== null}
-			>
-				<Send class="w-4 h-4 mr-1" />
-				Send Test Email
-			</Button>
-		</div>
-	</div>
-{/if}
+	{#snippet footer()}
+		<Button variant="outline" onclick={() => (previewOpen = false)}>Close</Button>
+		<Button
+			onclick={sendFromPreview}
+			loading={sendingTemplate !== null}
+			disabled={!previewTemplate}
+		>
+			<Send class="mr-1 h-4 w-4" aria-hidden="true" />
+			Send Test Email
+		</Button>
+	{/snippet}
+</Modal>

@@ -17,7 +17,8 @@ describe('settingsApi', () => {
 		it('calls request with /settings/public and returns settings', async () => {
 			const settings: PublicSettings = {
 				defaultVacationDays: 25,
-				vacationResetMonth: 1
+				vacationResetMonth: 1,
+				weekendPolicy: { excludeWeekends: true, excludedDays: [0, 6] }
 			};
 			vi.mocked(request).mockResolvedValue(settings);
 

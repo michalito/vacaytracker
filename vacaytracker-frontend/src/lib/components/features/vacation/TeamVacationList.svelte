@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import TeamVacationSection from './TeamVacationSection.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
 	import { ArrowRight } from 'lucide-svelte';
@@ -10,15 +11,13 @@
 		isLoading?: boolean;
 		maxCurrentlyOut?: number;
 		maxUpcoming?: number;
-		calendarLink?: string;
 	}
 
 	let {
 		vacations,
 		isLoading = false,
 		maxCurrentlyOut = 5,
-		maxUpcoming = 4,
-		calendarLink = '/calendar'
+		maxUpcoming = 4
 	}: Props = $props();
 
 	// Categorize vacations into "Currently Out" and "Upcoming"
@@ -46,7 +45,7 @@
 		<div class="space-y-3">
 			<div class="h-4 w-32 bg-sand-200 rounded skeleton-shimmer"></div>
 			<div class="flex gap-4">
-				{#each [1, 2, 3] as _}
+				{#each [1, 2, 3] as n (n)}
 					<div class="flex flex-col items-center gap-2">
 						<Skeleton variant="avatar" />
 						<div class="h-3 w-16 bg-sand-200 rounded skeleton-shimmer"></div>
@@ -58,7 +57,7 @@
 		<div class="space-y-3">
 			<div class="h-4 w-24 bg-sand-200 rounded skeleton-shimmer"></div>
 			<div class="flex -space-x-2">
-				{#each [1, 2, 3, 4] as _}
+				{#each [1, 2, 3, 4] as n (n)}
 					<Skeleton variant="avatar" class="ring-2 ring-white" />
 				{/each}
 			</div>
@@ -87,7 +86,7 @@
 		<!-- View Calendar Link -->
 		{#if totalVacations > 0}
 			<a
-				href={calendarLink}
+				href={resolve('/calendar')}
 				class="inline-flex items-center gap-1.5 text-sm text-ocean-600 hover:text-ocean-700 transition-colors group"
 			>
 				<span>View full calendar</span>

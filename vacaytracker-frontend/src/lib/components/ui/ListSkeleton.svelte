@@ -10,7 +10,7 @@
 </script>
 
 <div class="space-y-{variant === 'compact' ? '3' : '4'} py-{variant === 'compact' ? '2' : '4'}">
-	{#each Array(count) as _}
+	{#each Array(count) as _, i (i)}
 		{#if variant === 'compact'}
 			<div class="flex items-center gap-3 p-2">
 				<Skeleton variant="avatar" />

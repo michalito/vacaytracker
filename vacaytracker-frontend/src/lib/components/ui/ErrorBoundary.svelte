@@ -17,7 +17,7 @@
 
 	let error = $state<Error | null>(null);
 
-	function handleError(e: unknown, reset: () => void) {
+	function handleError(e: unknown) {
 		// Normalize unknown error to Error object
 		const normalizedError = e instanceof Error ? e : new Error(String(e));
 		error = normalizedError;

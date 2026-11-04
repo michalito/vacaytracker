@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { createDialog, melt } from '@melt-ui/svelte';
 	import type { NewsletterConfig } from '$lib/types';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
-	import { Mail, Send, Eye, X } from 'lucide-svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
+	import { Mail, Send, Eye } from 'lucide-svelte';
 	import { admin } from '$lib/stores/admin.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 
@@ -17,19 +17,12 @@
 	let { config, onChange }: Props = $props();
 	let isSending = $state(false);
 	let isLoadingPreview = $state(false);
+	let previewOpen = $state(false);
 
 	const frequencyOptions = [
 		{ value: 'weekly', label: 'Weekly' },
 		{ value: 'monthly', label: 'Monthly' }
 	];
-
-	// Preview Dialog
-	const {
-		elements: { trigger: previewTrigger, overlay, content, title, description, close },
-		states: { open: previewOpen }
-	} = createDialog({
-		forceVisible: true
-	});
 
 	function toggleEnabled() {
 		onChange({
@@ -69,7 +62,7 @@
 		isLoadingPreview = true;
 		try {
 			await admin.fetchNewsletterPreview();
-			previewOpen.set(true);
+			previewOpen = true;
 		} catch (error) {
 			toast.error('Failed to load preview');
 		} finally {
@@ -112,17 +105,13 @@
 	{/snippet}
 
 	<div class="space-y-4">
-		<p class="text-sm text-ocean-600">
-			Configure automatic email digests for your team.
-		</p>
+		<p class="text-sm text-ocean-600">Configure automatic email digests for your team.</p>
 
 		<label class="flex items-center gap-3 cursor-pointer">
 			<Checkbox checked={config.enabled} onchange={toggleEnabled} />
 			<div>
 				<p class="font-medium text-ocean-800">Enable newsletter</p>
-				<p class="text-sm text-ocean-500">
-					Send periodic vacation summaries to all users
-				</p>
+				<p class="text-sm text-ocean-500">Send periodic vacation summaries to all users</p>
 			</div>
 		</label>
 
@@ -154,14 +143,13 @@
 						</p>
 					</div>
 				{:else}
-					<p class="text-sm text-ocean-600">
-						Newsletter will be sent every Monday.
-					</p>
+					<p class="text-sm text-ocean-600">Newsletter will be sent every Monday.</p>
 				{/if}
 
 				<div class="pt-4 border-t border-ocean-100/50">
 					<p class="text-sm text-ocean-600">
-						<strong>Last sent:</strong> {formatLastSent(config.lastSentAt)}
+						<strong>Last sent:</strong>
+						{formatLastSent(config.lastSentAt)}
 					</p>
 				</div>
 			</div>
@@ -170,45 +158,43 @@
 </Card>
 
 <!-- Preview Dialog -->
-{#if $previewOpen && admin.newsletterPreview}
-	<div use:melt={$overlay} class="fixed inset-0 z-50 bg-ocean-900/50 backdrop-blur-sm"></div>
-	<div
-		use:melt={$content}
-		class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-	>
-		<div class="flex items-center justify-between p-4 border-b border-ocean-100/50">
-			<div>
-				<h3 use:melt={$title} class="text-lg font-semibold text-ocean-800">Newsletter Preview</h3>
-				<p use:melt={$description} class="text-sm text-ocean-600">
-					Will be sent to {admin.newsletterPreview.recipientCount} recipient{admin.newsletterPreview.recipientCount !== 1 ? 's' : ''}
-				</p>
-			</div>
-			<button
-				use:melt={$close}
-				type="button"
-				aria-label="Close preview"
-				class="p-1 rounded-lg text-ocean-400 hover:text-ocean-600 hover:bg-ocean-500/10 transition-all duration-200 cursor-pointer"
-			>
-				<X class="w-5 h-5" />
-			</button>
-		</div>
-		<div class="p-4 border-b border-ocean-100/50 bg-ocean-50/30">
+<Modal
+	bind:open={previewOpen}
+	title="Newsletter Preview"
+	icon={Eye}
+	size="xl"
+	closeLabel="Close preview"
+>
+	{#snippet description()}
+		{#if admin.newsletterPreview}
+			Will be sent to {admin.newsletterPreview.recipientCount}
+			recipient{admin.newsletterPreview.recipientCount !== 1 ? 's' : ''}
+		{/if}
+	{/snippet}
+
+	{#if admin.newsletterPreview}
+		<div class="border-b border-ocean-100/50 bg-ocean-50/30 px-4 py-3">
 			<p class="text-sm text-ocean-700">
-				<strong>Subject:</strong> {admin.newsletterPreview.subject}
+				<strong>Subject:</strong>
+				{admin.newsletterPreview.subject}
 			</p>
 		</div>
-		<div class="flex-1 overflow-auto p-4">
-			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-			{@html admin.newsletterPreview.htmlBody}
+		<div class="p-4">
+			<!-- Sandboxed: the newsletter is a full HTML document whose styles must not leak into the app -->
+			<iframe
+				title="Newsletter preview"
+				srcdoc={admin.newsletterPreview.htmlBody}
+				sandbox=""
+				class="h-[60vh] w-full rounded-xl border-0 bg-white shadow-sm"
+			></iframe>
 		</div>
-		<div class="flex justify-end gap-2 p-4 border-t border-ocean-100/50">
-			<Button variant="outline" onclick={() => previewOpen.set(false)}>
-				Close
-			</Button>
-			<Button onclick={handleSendNow} loading={isSending}>
-				<Send class="w-4 h-4 mr-1" />
-				Send Now
-			</Button>
-		</div>
-	</div>
-{/if}
+	{/if}
+
+	{#snippet footer()}
+		<Button variant="outline" onclick={() => (previewOpen = false)}>Close</Button>
+		<Button onclick={handleSendNow} loading={isSending}>
+			<Send class="mr-1 h-4 w-4" aria-hidden="true" />
+			Send Now
+		</Button>
+	{/snippet}
+</Modal>

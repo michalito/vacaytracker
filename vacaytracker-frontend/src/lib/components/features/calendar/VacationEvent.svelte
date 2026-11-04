@@ -52,18 +52,24 @@
 			</div>
 		</div>
 	{/snippet}
-	<div
-		class={clsx(
-			color.combined,
-			borderRadius,
-			compact ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1',
-			'truncate cursor-default shadow-sm',
-			'transition-shadow duration-200 hover:shadow-md',
-			className
-		)}
-	>
-		{#if showName}
-			{vacation.userName}
-		{/if}
-	</div>
+	{#snippet child({ props })}
+		<div
+			{...props}
+			class={clsx(
+				color.combined,
+				borderRadius,
+				compact ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1',
+				'truncate cursor-default shadow-sm',
+				'transition-shadow duration-200 hover:shadow-md',
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-500',
+				className
+			)}
+		>
+			{#if showName}
+				{vacation.userName}
+			{:else}
+				<span class="sr-only">{vacation.userName}</span>
+			{/if}
+		</div>
+	{/snippet}
 </Tooltip>

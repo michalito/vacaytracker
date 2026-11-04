@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { Umbrella, Home, RefreshCw } from 'lucide-svelte';
 
@@ -18,7 +18,7 @@
 		}
 	};
 
-	const statusCode = $derived($page.status);
+	const statusCode = $derived(page.status);
 	const errorInfo = $derived(errorMessages[statusCode] ?? {
 		title: 'Something Went Wrong',
 		message: 'An unexpected error occurred. Please try again.'
@@ -61,12 +61,12 @@
 		</div>
 
 		<!-- Additional help -->
-		{#if $page.error?.message}
-			<details class="mt-8 text-left bg-white/50 rounded-lg p-4">
+		{#if page.error?.message}
+			<details class="mt-8 text-left bg-white/70 backdrop-blur-sm rounded-xl border border-white/40 p-4">
 				<summary class="cursor-pointer text-sm text-ocean-500 hover:text-ocean-700">
 					Technical Details
 				</summary>
-				<pre class="mt-2 text-xs text-ocean-600 whitespace-pre-wrap break-words">{$page.error.message}</pre>
+				<pre class="mt-2 text-xs text-ocean-600 whitespace-pre-wrap break-words">{page.error.message}</pre>
 			</details>
 		{/if}
 	</div>

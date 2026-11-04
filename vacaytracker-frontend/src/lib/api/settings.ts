@@ -1,8 +1,10 @@
 import { request } from './client';
+import type { WeekendPolicy } from '$lib/types';
 
 export interface PublicSettings {
 	defaultVacationDays: number;
 	vacationResetMonth: number;
+	weekendPolicy: WeekendPolicy;
 }
 
 export const settingsApi = {

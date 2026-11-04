@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import type { TeamVacation } from '$lib/types';
-	import { getWeekDays, isDateInRange, parseISODate, type CalendarDay } from '$lib/utils/date';
+	import { getWeekDays, groupByDay, type CalendarDay } from '$lib/utils/date';
 	import DayCell from './DayCell.svelte';
 
 	interface Props {
@@ -15,30 +15,8 @@
 	const weekDays = $derived(getWeekDays(currentDate));
 	const weekDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-	// Pre-compute vacation lookup map: dateString -> TeamVacation[]
-	// This runs once when vacations or weekDays change, instead of O(n*m) per render
-	const vacationsByDay = $derived.by(() => {
-		const map = new Map<string, TeamVacation[]>();
-
-		for (const day of weekDays) {
-			const dayVacations: TeamVacation[] = [];
-
-			for (const v of vacations) {
-				const start = parseISODate(v.startDate);
-				const end = parseISODate(v.endDate);
-
-				if (isDateInRange(day.date, start, end)) {
-					dayVacations.push(v);
-				}
-			}
-
-			if (dayVacations.length > 0) {
-				map.set(day.dateString, dayVacations);
-			}
-		}
-
-		return map;
-	});
+	// Pre-computed lookup (dateString -> vacations), rebuilt only when vacations or days change
+	const vacationsByDay = $derived(groupByDay(weekDays, vacations));
 
 	function getVacationsForDay(day: CalendarDay): TeamVacation[] {
 		return vacationsByDay.get(day.dateString) ?? [];
@@ -50,7 +28,7 @@
 >
 	<!-- Header row with day labels only -->
 	<div class="grid grid-cols-7 gap-px bg-sand-200">
-		{#each weekDayLabels as label, i}
+		{#each weekDayLabels as label, i (label)}
 			{@const day = weekDays[i]}
 			<div
 				class={clsx(

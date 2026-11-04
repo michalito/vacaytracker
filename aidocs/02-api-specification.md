@@ -370,6 +370,44 @@ Content-Type: application/json
 
 ---
 
+### GET /api/settings/public
+
+Non-sensitive application settings for any signed-in user. The request form uses
+`weekendPolicy` to preview the same business-day count the server stores when a
+request is submitted (employees cannot read `/api/admin/settings`).
+
+**Auth Required:** Yes
+
+**Request:**
+```http
+GET /api/settings/public HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "defaultVacationDays": 25,
+  "vacationResetMonth": 1,
+  "weekendPolicy": {
+    "excludeWeekends": true,
+    "excludedDays": [0, 6]
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `defaultVacationDays` | number | Balance given to new employees |
+| `vacationResetMonth` | number | Month (1-12) when balances reset |
+| `weekendPolicy.excludeWeekends` | boolean | Whether `excludedDays` are skipped when counting days |
+| `weekendPolicy.excludedDays` | number[] | Weekdays not counted (0 = Sunday … 6 = Saturday) |
+
+**Implementation File:** `internal/handler/settings.go`
+
+---
+
 ## Employee Endpoints
 
 > Require `Authorization: Bearer <token>` with `employee` or `admin` role

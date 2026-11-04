@@ -78,7 +78,7 @@
 				min="0"
 				max="365"
 				aria-label={`Vacation balance for ${user.name}`}
-				class="w-20 px-2 py-1 text-center rounded border border-ocean-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+				class="w-20 px-2 py-1 text-center rounded-lg border-2 border-ocean-500/40 bg-white text-ocean-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean-500/30 focus:border-ocean-500"
 			/>
 			<Button
 				variant="ghost"

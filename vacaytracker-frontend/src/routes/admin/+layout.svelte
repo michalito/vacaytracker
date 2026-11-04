@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { auth } from '$lib/stores/auth.svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import UnifiedHeader from '$lib/components/layout/UnifiedHeader.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import DecorativeBackground from '$lib/components/layout/DecorativeBackground.svelte';
@@ -9,7 +10,7 @@
 
 	$effect(() => {
 		if (!auth.isLoading && (!auth.isAuthenticated || !auth.isAdmin)) {
-			goto('/');
+			goto(resolve('/'));
 		}
 	});
 </script>

@@ -349,7 +349,7 @@ Foundation  Auth    Vacation   Frontend   Admin     Polish
 | 5.1 | Create employee layout | `src/routes/employee/+layout.svelte` | Medium | Header, nav |
 | 5.2 | Create dashboard page | `src/routes/employee/+page.svelte` | High | Balance + requests |
 | 5.3 | Create BalanceDisplay | `src/lib/components/features/vacation/BalanceDisplay.svelte` | Medium | Progress ring, days |
-| 5.4 | Create RequestModal | `src/lib/components/features/vacation/RequestModal.svelte` | High | Melt Dialog, form |
+| 5.4 | Create RequestModal | `src/lib/components/features/vacation/RequestModal.svelte` | High | Shared `Modal`, Bits UI DateRangePicker |
 | 5.5 | Create DateRangePicker | `src/lib/components/features/vacation/DateRangePicker.svelte` | High | DD/MM/YYYY, validation |
 | 5.6 | Create RequestList | `src/lib/components/features/vacation/RequestList.svelte` | Medium | Status badges |
 | 5.7 | Create RequestCard | `src/lib/components/features/vacation/RequestCard.svelte` | Medium | Details, cancel |
@@ -358,7 +358,7 @@ Foundation  Auth    Vacation   Frontend   Admin     Polish
 | 5.10 | Create password change | `src/lib/components/features/auth/PasswordChange.svelte` | Medium | Form, validation |
 | 5.11 | Create EmailPreferences | `src/lib/components/features/auth/EmailPreferences.svelte` | Low | Toggle switches |
 | 5.12 | Employee header | `src/lib/components/layout/EmployeeHeader.svelte` | Medium | Logo, nav, user menu |
-| 5.13 | User dropdown menu | `src/lib/components/layout/UserMenu.svelte` | Medium | Melt Dropdown |
+| 5.13 | User dropdown menu | `src/lib/components/layout/UserMenu.svelte` | Medium | Bits UI DropdownMenu |
 | 5.14 | Mobile navigation | `src/lib/components/layout/MobileNav.svelte` | Medium | Hamburger, drawer |
 | 5.15 | Vacation store | `src/lib/stores/vacation.svelte.ts` | Medium | Requests cache |
 
@@ -390,12 +390,12 @@ Foundation  Auth    Vacation   Frontend   Admin     Polish
 | 6.2 | Create admin dashboard | `src/routes/admin/+page.svelte` | High | Stats + pending |
 | 6.3 | Create StatsCard | `src/lib/components/features/admin/StatsCard.svelte` | Low | Icon, number, label |
 | 6.4 | Create PendingRequests | `src/lib/components/features/admin/PendingRequests.svelte` | High | List + actions |
-| 6.5 | Create ApprovalModal | `src/lib/components/features/admin/ApprovalModal.svelte` | Medium | Confirm approve |
-| 6.6 | Create RejectionModal | `src/lib/components/features/admin/RejectionModal.svelte` | Medium | Reason input |
+| 6.5 | Approval dialog | `src/lib/components/features/admin/PendingRequests.svelte` | Medium | Shared `Modal`, confirm approve |
+| 6.6 | Rejection dialog | `src/lib/components/features/admin/PendingRequests.svelte` | Medium | Shared `Modal`, reason input (reset per request) |
 | 6.7 | Create users page | `src/routes/admin/users/+page.svelte` | High | Table + CRUD |
 | 6.8 | Create UserTable | `src/lib/components/features/admin/UserTable.svelte` | High | Sort, filter |
 | 6.9 | Create UserModal | `src/lib/components/features/admin/UserModal.svelte` | High | Create/edit form |
-| 6.10 | Create DeleteConfirm | `src/lib/components/features/admin/DeleteConfirm.svelte` | Medium | Warning dialog |
+| 6.10 | Create ConfirmDialog | `src/lib/components/ui/ConfirmDialog.svelte` | Medium | Shared AlertDialog (delete user, reset balances) |
 | 6.11 | Create balance page | `src/routes/admin/balances/+page.svelte` | Medium | Balance editor |
 | 6.12 | Create BalanceEditor | `src/lib/components/features/admin/BalanceEditor.svelte` | Medium | Inline edit |
 | 6.13 | Create settings page | `src/routes/admin/settings/+page.svelte` | Medium | All settings |
@@ -594,7 +594,6 @@ Foundation  Auth    Vacation   Frontend   Admin     Polish
 | JWT token compromise | High | Low | Short expiry, secure secret |
 | Business day calculation edge cases | Medium | Medium | Comprehensive tests |
 | Svelte 5 runes learning curve | Low | Medium | Follow docs strictly |
-| Melt UI breaking changes | Medium | Low | Pin version, check changelog |
 
 ### Schedule Risks
 

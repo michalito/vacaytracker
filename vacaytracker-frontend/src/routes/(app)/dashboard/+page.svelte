@@ -26,7 +26,7 @@
 		// Load employee data (with caching)
 		vacation.fetchRequests();
 
-		// Fetch public settings for vacation balance display
+		// Fetch public settings for balance display and the request form's weekend policy
 		try {
 			publicSettings = await settingsApi.getPublic();
 		} catch (e) {
@@ -89,4 +89,4 @@
 	/>
 </div>
 
-<RequestModal bind:open={isRequestModalOpen} />
+<RequestModal bind:open={isRequestModalOpen} weekendPolicy={publicSettings?.weekendPolicy} />

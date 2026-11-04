@@ -11,7 +11,7 @@ VacayTracker is an employee vacation tracking application with role-based access
 **Frontend (`vacaytracker-frontend/`):**
 - Svelte 5 with Runes (`$state`, `$derived`, `$effect`, `$props`)
 - SvelteKit 2.10.x for routing and SSR
-- @melt-ui/svelte v0.86.x with `@melt-ui/pp` preprocessor for headless accessible components
+- Bits UI v2.x for headless accessible components (compound component API, no preprocessor)
 - Tailwind CSS v4 with CSS-native `@theme` configuration
 - TypeScript 5.x
 - Lucide Svelte for icons
@@ -32,8 +32,9 @@ npm run dev                # Vite dev server at localhost:5173
 npm run check              # svelte-check type checking
 npm run check:watch        # Watch mode
 npm run build              # Production build
-npm run lint               # ESLint
-npm run format             # Prettier
+npm run lint               # ESLint (flat config: eslint.config.js)
+npm run format             # Prettier (.prettierrc: tabs, single quotes, width 100)
+npm test                   # Vitest unit + component tests
 ```
 
 **Backend:**
@@ -78,7 +79,20 @@ The `(app)/+layout.svelte` enforces authentication (redirects to `/` if not auth
 - `$lib` → `./src/lib`
 - `$components` → `./src/lib/components`
 
-**Melt UI** requires the preprocessor in `svelte.config.js`: `sequence([vitePreprocess(), preprocessMeltUI()])`. Components use the `use:melt` directive and data attributes for styling (`data-state`, `data-highlighted`, etc.).
+**Bits UI** provides headless accessible components via a compound component API (e.g., `<Dialog.Root>`, `<Dialog.Content>`). No preprocessor needed. Components use data attributes for styling (`data-[state=open]`, `data-[highlighted]`, etc.) and `bind:open`/`bind:value` for state management. A `<Tooltip.Provider>` wraps the app in the root `+layout.svelte` (component tests wrap tooltip users in `ui/__tests__/TooltipHarness.svelte`).
+
+**Dialogs** use the shared `ui/Modal.svelte` (Dialog) or `ui/ConfirmDialog.svelte` (AlertDialog) rather than raw Bits parts, which gives every dialog the labelled close button, enter/exit transitions and the close contract below:
+- Bits calls `onOpenChange` **only for its own closes** (Escape, overlay, close button), never when code sets `open = false`. Don't put cleanup there.
+- Initialise form state when the dialog **opens** (`$effect.pre(() => { if (open) untrack(reset) })`, or in the function that opens it).
+- Put post-close cleanup in `onClosed`, which wraps Bits `onOpenChangeComplete` and fires after **every** close.
+
+**Other Bits UI conventions:**
+- `ui/Tooltip.svelte` takes a `child` snippet: spread its `props` onto a single element instead of nesting a button inside Bits' trigger button.
+- To combine two triggers on one element (tooltip + popover), render `<Popover.Trigger {...tooltipProps}>` inside `<Tooltip.Trigger>`'s `child` snippet.
+- Floating content inside a dialog (e.g. the date range calendar) must be portalled (`<Portal>`). The dialog's transform and `backdrop-filter` create a containing block that would clip it.
+- Enter/exit transitions use the `presence-pop` (content) and `presence-fade` (overlays) utilities from `app.css`. Bits sets `data-starting-style`/`data-ending-style` and waits for the transition before unmounting.
+
+**Navigation** uses `page` from `$app/state` (not the deprecated `$app/stores`) and wraps internal hrefs and `goto()` targets in `resolve()` from `$app/paths` (enforced by ESLint).
 
 **API proxy** in `vite.config.ts`: `/api` requests proxy to `VITE_API_URL || 'http://localhost:3000'`.
 
@@ -178,8 +192,9 @@ Custom animations are defined in `app.css` (fadeIn, slideUp, scaleIn, wave, floa
 - **API input format**: DD/MM/YYYY (EU) — the backend `parseDDMMYYYY` parses this
 - **HTML date inputs**: YYYY-MM-DD (ISO) — converted via `toEUFormat()` before API calls
 - **Storage/display format**: YYYY-MM-DD (ISO) in database and frontend state
-- Business days calculation respects `excludeWeekends` setting
-- Melt UI date pickers use `@internationalized/date` `DateValue` — converted via `dateValueToAPIFormat()`
+- Business days calculation respects the weekend policy (`excludeWeekends` + `excludedDays`). The frontend preview (`calculateBusinessDays`) mirrors the API and gets the policy from `GET /api/settings/public`, which employees can read (`/api/admin/settings` is admin-only).
+- Parse `YYYY-MM-DD` strings with `parseISODate()` (local) or compare them as strings. `new Date('YYYY-MM-DD')` is UTC midnight and shifts the day in non-UTC timezones.
+- Bits UI date pickers use `@internationalized/date` `DateValue` — converted via `dateValueToApiFormat()`
 
 ## Environment Variables
 
@@ -218,12 +233,11 @@ The `aidocs/` directory contains detailed implementation documentation:
 - `08-security-checklist.md` — Security guidelines
 - `09-deployment-guide.md` — Production deployment
 - `10-development-workflow.md` — Git workflow and branch strategy
-- `melt-ui/` — Melt UI component usage guides
 
 ## Important Guidelines
 
 - If uncertain about Svelte implementation, read the latest Svelte 5 docs first
 - If uncertain about Go implementation, research the latest Go docs first
 - Always ensure our approach aligns with the documentation in `aidocs/`
-- Melt UI uses a preprocessor (`@melt-ui/pp`) — component builders are transformed at build time
+- Bits UI uses compound component patterns — no preprocessor or build transforms needed
 - After changes, ensure to rebuild the containers

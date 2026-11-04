@@ -1,33 +1,36 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { admin } from '$lib/stores/admin.svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import UserTable from '$lib/components/features/admin/UserTable.svelte';
 	import UserModal from '$lib/components/features/admin/UserModal.svelte';
-	import DeleteConfirm from '$lib/components/features/admin/DeleteConfirm.svelte';
+	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
 	import { UserPlus, Search, Users } from 'lucide-svelte';
 	import type { User, Role } from '$lib/types';
 
 	const roleFilterOptions = [
-		{ value: '', label: 'All Roles' },
+		{ value: 'all', label: 'All Roles' },
 		{ value: 'admin', label: 'Admin' },
 		{ value: 'employee', label: 'Employee' }
 	];
 
 	let searchQuery = $state('');
-	let roleFilter = $state('');
+	let roleFilter = $state<'all' | Role>('all');
 	let isUserModalOpen = $state(false);
 	let editingUser = $state<User | null>(null);
 	let deletingUser = $state<User | null>(null);
+	let isDeleteOpen = $state(false);
 	let isDeleting = $state(false);
 
-	$effect(() => {
+	// Load once on mount; searching is explicit (Enter or the Search button), not per keystroke
+	onMount(() => {
 		loadUsers();
+		admin.fetchSettings(); // company default balance for new users
 	});
 
 	function loadUsers(page = 1) {
@@ -35,7 +38,7 @@
 			page,
 			limit: 10,
 			search: searchQuery || undefined,
-			role: (roleFilter as Role) || undefined
+			role: roleFilter === 'all' ? undefined : roleFilter
 		});
 	}
 
@@ -55,6 +58,7 @@
 
 	function openDeleteModal(user: User) {
 		deletingUser = user;
+		isDeleteOpen = true;
 	}
 
 	async function handleDelete() {
@@ -64,7 +68,7 @@
 		try {
 			await admin.deleteUser(deletingUser.id);
 			toast.success('User deleted');
-			deletingUser = null;
+			isDeleteOpen = false;
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Failed to delete user');
 		} finally {
@@ -95,7 +99,8 @@
 				<div class="flex-1 relative">
 					<Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ocean-400" />
 					<input
-						type="text"
+						type="search"
+						aria-label="Search users"
 						placeholder="Search users..."
 						bind:value={searchQuery}
 						onkeydown={(e) => e.key === 'Enter' && handleSearch()}
@@ -106,6 +111,7 @@
 					<Select
 						bind:value={roleFilter}
 						options={roleFilterOptions}
+						aria-label="Filter by role"
 						onchange={() => loadUsers(1)}
 					/>
 				</div>
@@ -118,7 +124,7 @@
 
 		{#if admin.isLoading}
 			<div class="space-y-3 py-4">
-				{#each [1, 2, 3, 4, 5] as _}
+				{#each [1, 2, 3, 4, 5] as n (n)}
 					<div class="flex items-center gap-4 p-4 border border-sand-200 rounded-lg">
 						<Skeleton variant="avatar" />
 						<div class="flex-1 space-y-2">
@@ -160,17 +166,16 @@
 <UserModal
 	bind:open={isUserModalOpen}
 	user={editingUser}
-	onClose={() => {
-		isUserModalOpen = false;
-		editingUser = null;
-	}}
+	defaultVacationDays={admin.settings?.defaultVacationDays}
+	onClosed={() => (editingUser = null)}
 />
 
-<DeleteConfirm
-	open={!!deletingUser}
+<ConfirmDialog
+	bind:open={isDeleteOpen}
 	title="Delete User"
-	message="Are you sure you want to delete {deletingUser?.name}? This will remove all their data and cannot be undone."
+	description="Are you sure you want to delete {deletingUser?.name}? This will remove all their data and cannot be undone."
+	confirmText="Delete"
 	isLoading={isDeleting}
 	onConfirm={handleDelete}
-	onCancel={() => (deletingUser = null)}
+	onClosed={() => (deletingUser = null)}
 />

@@ -21,7 +21,7 @@
 	};
 </script>
 
-<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/30 p-5 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/40 p-5 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
 	<div class="flex items-center gap-4">
 		{#if Icon}
 			<div class={clsx('p-3 rounded-xl', colorStyles[color])}>

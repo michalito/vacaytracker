@@ -31,7 +31,7 @@
 
 	<!-- Summary Stats -->
 	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-		<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/30 p-5 transition-all duration-200 hover:shadow-lg">
+		<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/40 p-5 transition-all duration-200 hover:shadow-lg">
 			<div class="flex items-center gap-4">
 				<div class="p-3 rounded-xl bg-ocean-500/10 text-ocean-600">
 					<Users class="w-6 h-6" />
@@ -43,7 +43,7 @@
 			</div>
 		</div>
 
-		<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/30 p-5 transition-all duration-200 hover:shadow-lg">
+		<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/40 p-5 transition-all duration-200 hover:shadow-lg">
 			<div class="flex items-center gap-4">
 				<div class="p-3 rounded-xl bg-ocean-400/10 text-ocean-500">
 					<Wallet class="w-6 h-6" />
@@ -55,7 +55,7 @@
 			</div>
 		</div>
 
-		<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/30 p-5 transition-all duration-200 hover:shadow-lg">
+		<div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-white/40 p-5 transition-all duration-200 hover:shadow-lg">
 			<div class="flex items-center gap-4">
 				<div class="p-3 rounded-xl bg-coral-400/10 text-coral-500">
 					<Wallet class="w-6 h-6" />

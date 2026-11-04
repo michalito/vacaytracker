@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"vacaytracker-api/internal/domain"
 	"vacaytracker-api/internal/repository"
 )
 
@@ -20,10 +21,13 @@ func NewSettingsHandler(settingsRepo repository.SettingsRepository) *SettingsHan
 	}
 }
 
-// PublicSettingsResponse contains only non-sensitive settings
+// PublicSettingsResponse contains only non-sensitive settings.
+// WeekendPolicy is included so employees can preview the same business-day
+// count the server computes when a request is submitted.
 type PublicSettingsResponse struct {
-	DefaultVacationDays int `json:"defaultVacationDays"`
-	VacationResetMonth  int `json:"vacationResetMonth"`
+	DefaultVacationDays int                  `json:"defaultVacationDays"`
+	VacationResetMonth  int                  `json:"vacationResetMonth"`
+	WeekendPolicy       domain.WeekendPolicy `json:"weekendPolicy"`
 }
 
 // GetPublic handles GET /api/settings/public
@@ -38,5 +42,6 @@ func (h *SettingsHandler) GetPublic(c *gin.Context) {
 	c.JSON(http.StatusOK, PublicSettingsResponse{
 		DefaultVacationDays: settings.DefaultVacationDays,
 		VacationResetMonth:  settings.VacationResetMonth,
+		WeekendPolicy:       settings.WeekendPolicy,
 	})
 }

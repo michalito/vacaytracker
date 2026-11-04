@@ -401,7 +401,7 @@
 - **Click-outside-to-close** behavior
 - **Escape key** closes modal
 - **Focus restoration** after modal closes
-- **Implementation** using Melt UI Dialog builder
+- **Implementation** using Bits UI Dialog component
 
 ### 9.3 Visual Design Theme
 - **Vacation/beach theme** throughout:
@@ -473,7 +473,7 @@
 ### 11.1 Frontend Architecture
 - **Svelte 5** with Runes for reactivity
 - **SvelteKit** for routing and SSR
-- **Melt UI** for headless accessible components
+- **Bits UI** for headless accessible components
 - **Tailwind CSS v4** for utility-first styling
 - **Lucide Svelte** for icons
 

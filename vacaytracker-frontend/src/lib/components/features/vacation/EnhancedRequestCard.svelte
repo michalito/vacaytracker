@@ -137,7 +137,7 @@
 
 	<!-- Date range visualization -->
 	<div class="mt-3 flex items-center gap-1" aria-hidden="true">
-		{#each dateDots as dot}
+		{#each dateDots as dot, i (i)}
 			<div class="w-2 h-2 rounded-full {dotColor}" style="opacity: {dot.opacity}"></div>
 		{/each}
 		{#if request.totalDays > 14}

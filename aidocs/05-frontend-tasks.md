@@ -36,7 +36,7 @@ npm install
 - [ ] **Install required packages** `package.json`
 
 ```bash
-npm install melt lucide-svelte clsx
+npm install bits-ui @internationalized/date lucide-svelte clsx
 npm install -D tailwindcss @tailwindcss/vite
 ```
 
@@ -44,7 +44,8 @@ npm install -D tailwindcss @tailwindcss/vite
 ```json
 {
   "dependencies": {
-    "melt": "^0.42.0",
+    "bits-ui": "^2.20.0",
+    "@internationalized/date": "^3.12.0",
     "lucide-svelte": "^0.300.0",
     "clsx": "^2.1.0"
   },
@@ -1424,7 +1425,7 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state'; // $app/stores is deprecated; read page.url directly
   import { clsx } from 'clsx';
   import {
     Palmtree,
@@ -1461,7 +1462,7 @@ export const vacation = createVacationStore();
   <nav class="flex-1 p-4">
     <ul class="space-y-1">
       {#each navItems as item}
-        {@const isActive = $page.url.pathname === item.href}
+        {@const isActive = page.url.pathname === item.href}
         <li>
           <a
             href={item.href}
@@ -1757,187 +1758,58 @@ export const vacation = createVacationStore();
 
 - [ ] **Create RequestModal.svelte** `src/lib/components/features/vacation/RequestModal.svelte`
 
+Built on the shared `Modal` (`$lib/components/ui/Modal.svelte`, a Bits UI `Dialog`) and the Bits UI
+`DateRangePicker`. Rules that apply to every dialog in the app:
+
+- **Initialise on open; clean up in `onClosed`.** Bits UI calls `onOpenChange` only for its own closes
+  (Escape, overlay click, close button), not when code sets `open = false` (Cancel, after submit).
+  Reset form state when the modal opens (`$effect.pre` on `open`), and put post-close cleanup in
+  `Modal`'s `onClosed`, which wraps Bits `onOpenChangeComplete` and fires for every close.
+- **Weekend policy comes from `GET /api/settings/public`** and is passed in as `weekendPolicy`;
+  `calculateBusinessDays(start, end, excludeWeekends, excludedDays)` mirrors the API's count.
+- **Portal the calendar** with `<Portal>` from `bits-ui`: the dialog's transform and backdrop-filter
+  would otherwise clip and offset it.
+
 ```svelte
 <script lang="ts">
-  import { Dialog } from 'melt/builders';
-  import { vacation } from '$lib/stores/vacation.svelte';
-  import { auth } from '$lib/stores/auth.svelte';
-  import { toast } from '$lib/stores/toast.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
-  import Input from '$lib/components/ui/Input.svelte';
-  import { X, Calendar, Palmtree } from 'lucide-svelte';
+  import { DateRangePicker, Portal, type DateRange } from 'bits-ui';
+  import { untrack } from 'svelte';
+  import Modal from '$lib/components/ui/Modal.svelte';
+  import type { WeekendPolicy } from '$lib/types';
 
   interface Props {
     open: boolean;
+    weekendPolicy?: WeekendPolicy;
   }
 
-  let { open = $bindable(false) }: Props = $props();
+  let { open = $bindable(false), weekendPolicy }: Props = $props();
 
-  let startDate = $state('');
-  let endDate = $state('');
+  let dateRange = $state<DateRange>({ start: undefined, end: undefined });
   let reason = $state('');
-  let isSubmitting = $state(false);
-  let errors = $state<{ startDate?: string; endDate?: string }>({});
 
-  const dialog = new Dialog({
-    open: () => open,
-    onOpenChange: (v) => {
-      open = v;
-      if (!v) resetForm();
-    },
+  // Every opening starts from a clean form, however the previous one was closed
+  $effect.pre(() => {
+    if (open)
+      untrack(() => {
+        dateRange = { start: undefined, end: undefined };
+        reason = '';
+      });
   });
-
-  function resetForm() {
-    startDate = '';
-    endDate = '';
-    reason = '';
-    errors = {};
-  }
-
-  function validate(): boolean {
-    errors = {};
-
-    if (!startDate) {
-      errors.startDate = 'Start date is required';
-    }
-
-    if (!endDate) {
-      errors.endDate = 'End date is required';
-    }
-
-    // Additional date validation can be added here
-
-    return Object.keys(errors).length === 0;
-  }
-
-  async function handleSubmit() {
-    if (!validate()) return;
-
-    isSubmitting = true;
-
-    try {
-      // Convert YYYY-MM-DD to DD/MM/YYYY for API
-      const formatDate = (d: string) => {
-        const [year, month, day] = d.split('-');
-        return `${day}/${month}/${year}`;
-      };
-
-      await vacation.createRequest({
-        startDate: formatDate(startDate),
-        endDate: formatDate(endDate),
-        reason: reason || undefined,
-      });
-
-      // Update user balance
-      auth.updateUser({
-        vacationBalance: (auth.user?.vacationBalance ?? 0) - 1, // Approximate
-      });
-
-      toast.success('Vacation request submitted!');
-      open = false;
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to submit request');
-    } finally {
-      isSubmitting = false;
-    }
-  }
 </script>
 
-{#if dialog.open}
-  <div class="fixed inset-0 z-50">
-    <!-- Overlay -->
-    <div
-      {...dialog.overlay}
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm"
-    ></div>
-
-    <!-- Content -->
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-      <div
-        {...dialog.content}
-        class="bg-white rounded-xl shadow-xl w-full max-w-md"
-      >
-        <!-- Header -->
-        <div class="flex items-center justify-between p-4 border-b border-sand-200">
-          <div class="flex items-center gap-2">
-            <Palmtree class="w-5 h-5 text-ocean-500" />
-            <h2 class="text-lg font-semibold text-ocean-800">
-              Request Vacation
-            </h2>
-          </div>
-          <button
-            {...dialog.close}
-            class="text-ocean-400 hover:text-ocean-600"
-          >
-            <X class="w-5 h-5" />
-          </button>
-        </div>
-
-        <!-- Body -->
-        <form
-          onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-          class="p-4 space-y-4"
-        >
-          <div class="grid grid-cols-2 gap-4">
-            <Input
-              type="date"
-              label="Start Date"
-              bind:value={startDate}
-              error={errors.startDate}
-              required
-            />
-            <Input
-              type="date"
-              label="End Date"
-              bind:value={endDate}
-              error={errors.endDate}
-              required
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-ocean-700 mb-1">
-              Reason (optional)
-            </label>
-            <textarea
-              bind:value={reason}
-              class="w-full px-3 py-2 rounded-md border border-sand-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-              rows="3"
-              placeholder="Family vacation, personal time, etc."
-            ></textarea>
-          </div>
-
-          <!-- Balance Info -->
-          <div class="bg-ocean-50 rounded-lg p-3 text-sm">
-            <p class="text-ocean-700">
-              <strong>Current Balance:</strong> {auth.user?.vacationBalance} days
-            </p>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              class="flex-1"
-              onclick={() => open = false}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              class="flex-1"
-              loading={isSubmitting}
-            >
-              Submit Request
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-{/if}
+<Modal bind:open title="Request Vacation" closeLabel="Close request form">
+  <form class="space-y-4 p-4">
+    <DateRangePicker.Root bind:value={dateRange} locale="en-GB" weekStartsOn={1} numberOfMonths={2}>
+      <!-- Label, start/end Input segments, Trigger with aria-label="Open calendar" -->
+      <Portal>
+        <DateRangePicker.Content class="presence-pop z-[60]">
+          <!-- Calendar grid; each DateRangePicker.Day uses the `calendar-day` class (app.css) -->
+        </DateRangePicker.Content>
+      </Portal>
+    </DateRangePicker.Root>
+    <!-- Reason textarea, balance summary, Cancel (open = false) and Submit -->
+  </form>
+</Modal>
 ```
 
 ### Task 9.4: Create Request List Component
