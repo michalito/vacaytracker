@@ -1,6 +1,6 @@
-import { calendarApi } from '$lib/api/calendar';
-import type { TeamVacation } from '$lib/types';
-import { addWeeks, addMonths, getMonthsForWeek } from '$lib/utils/date';
+import { calendarApi } from '#lib/api/calendar.js';
+import type { TeamVacation } from '#lib/types/index.js';
+import { addWeeks, addMonths, getMonthsForWeek } from '#lib/utils/date.js';
 
 export type CalendarView = 'week' | 'month';
 

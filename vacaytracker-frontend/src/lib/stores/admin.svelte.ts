@@ -1,12 +1,12 @@
 import { untrack } from 'svelte';
-import { adminApi } from '$lib/api/admin';
+import { adminApi } from '#lib/api/admin.js';
 import type {
 	User,
 	Settings,
 	VacationRequest,
 	PaginationInfo,
 	NewsletterPreview
-} from '$lib/types';
+} from '#lib/types/index.js';
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 

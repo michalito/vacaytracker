@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toast } from '$lib/stores/toast.svelte';
+	import { toast } from '#lib/stores/toast.svelte.js';
 	import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-svelte';
 
 	const icons = {

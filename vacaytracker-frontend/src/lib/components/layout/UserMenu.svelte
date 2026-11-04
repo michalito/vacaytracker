@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { DropdownMenu } from 'bits-ui';
-	import { auth } from '$lib/stores/auth.svelte';
+	import { auth } from '#lib/stores/auth.svelte.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import { Settings, LogOut, ChevronDown } from 'lucide-svelte';
 
 	let menuOpen = $state(false);
@@ -49,7 +49,7 @@
 						{#snippet child({ props })}
 							<a
 								{...props}
-								href={resolve('/settings')}
+								href={resolve('settings')}
 								class="flex items-center gap-3 px-4 py-2 text-ocean-700 transition-all duration-200 cursor-pointer
 									data-[highlighted]:bg-ocean-500/10"
 							>

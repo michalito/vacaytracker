@@ -33,7 +33,7 @@ import {
 	isExcludedDay,
 	groupByDay,
 	calendarDaysBetween
-} from '$lib/utils/date';
+} from '#lib/utils/date.js';
 
 describe('parseISODate', () => {
 	it('parses a standard YYYY-MM-DD string correctly', () => {

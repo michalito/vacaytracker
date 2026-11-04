@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Popover } from 'bits-ui';
 	import VacationAvatarItem from './VacationAvatarItem.svelte';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import { formatDateRangeShort } from '$lib/utils/date';
-	import type { TeamVacation } from '$lib/types';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import { formatDateRangeShort } from '#lib/utils/date.js';
+	import type { TeamVacation } from '#lib/types/index.js';
 
 	interface Props {
 		vacations: TeamVacation[];

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Popover } from 'bits-ui';
 	import { clsx } from 'clsx';
-	import { calendar, type UserInfo } from '$lib/stores/calendar.svelte';
-	import { getUserColor } from '$lib/utils/colors';
+	import { calendar, type UserInfo } from '#lib/stores/calendar.svelte.js';
+	import { getUserColor } from '#lib/utils/colors.js';
 	import { Filter, X } from 'lucide-svelte';
-	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import Checkbox from '#lib/components/ui/Checkbox.svelte';
 
 	interface Props {
 		users: UserInfo[];

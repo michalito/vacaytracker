@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { auth } from '$lib/stores/auth.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
+	import { auth } from '#lib/stores/auth.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import Input from '#lib/components/ui/Input.svelte';
 
 	let email = $state('');
 	let password = $state('');
@@ -14,7 +14,7 @@
 	// Redirect if already authenticated
 	$effect(() => {
 		if (auth.isAuthenticated) {
-			goto(resolve('/dashboard'));
+			goto(resolve('dashboard'));
 		}
 	});
 
@@ -51,7 +51,7 @@
 		try {
 			await auth.login(email, password);
 			toast.success('Welcome back!');
-			goto(resolve('/dashboard'));
+			goto(resolve('dashboard'));
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Login failed');
 			hasError = true;

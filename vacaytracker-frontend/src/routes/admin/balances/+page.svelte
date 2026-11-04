@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { admin } from '$lib/stores/admin.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import BalanceEditor from '$lib/components/features/admin/BalanceEditor.svelte';
-	import Pagination from '$lib/components/ui/Pagination.svelte';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import BalanceEditor from '#lib/components/features/admin/BalanceEditor.svelte';
+	import Pagination from '#lib/components/ui/Pagination.svelte';
 	import { Wallet, Users } from 'lucide-svelte';
 
 	$effect(() => {

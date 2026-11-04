@@ -1,4 +1,4 @@
-// Test double for $app/state (the rune-based replacement for $app/stores)
+// Test double for $app/state
 export const page = {
 	url: new URL('http://localhost:5173'),
 	params: {},

@@ -658,8 +658,7 @@ C:\code\vacayv2\vacaytracker\
 │   └── app.d.ts                       # Type declarations
 ├── static/                            # Static assets
 ├── tests/                             # Test files
-├── svelte.config.js                   # Svelte configuration
-├── vite.config.ts                     # Vite configuration
+├── vite.config.ts                     # Vite + SvelteKit config (sveltekit() plugin options)
 ├── package.json                       # Dependencies
 ├── tsconfig.json                      # TypeScript config
 └── README.md                          # Frontend documentation

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
-	import { auth } from '$lib/stores/auth.svelte';
-	import Toaster from '$lib/components/ui/Toaster.svelte';
+	import { auth } from '#lib/stores/auth.svelte.js';
+	import Toaster from '#lib/components/ui/Toaster.svelte';
 	import { Tooltip } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 

@@ -4,18 +4,18 @@
 	import { untrack } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { clsx } from 'clsx';
-	import type { WeekendPolicy } from '$lib/types';
-	import { vacation } from '$lib/stores/vacation.svelte';
-	import { auth } from '$lib/stores/auth.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
+	import type { WeekendPolicy } from '#lib/types/index.js';
+	import { vacation } from '#lib/stores/vacation.svelte.js';
+	import { auth } from '#lib/stores/auth.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
 	import {
 		dateValueToApiFormat,
 		calculateBusinessDays,
 		isExcludedDay,
 		DEFAULT_EXCLUDED_DAYS
-	} from '$lib/utils/date';
-	import Modal from '$lib/components/ui/Modal.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	} from '#lib/utils/date.js';
+	import Modal from '#lib/components/ui/Modal.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import { Palmtree, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-svelte';
 
 	interface Props {

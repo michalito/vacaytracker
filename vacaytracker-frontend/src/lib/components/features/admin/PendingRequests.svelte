@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { VacationRequest } from '$lib/types';
-	import { adminApi } from '$lib/api/admin';
-	import { toast } from '$lib/stores/toast.svelte';
-	import { formatDateShort } from '$lib/utils/date';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import EmptyState from '$lib/components/ui/EmptyState.svelte';
-	import Modal from '$lib/components/ui/Modal.svelte';
+	import type { VacationRequest } from '#lib/types/index.js';
+	import { adminApi } from '#lib/api/admin.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import { formatDateShort } from '#lib/utils/date.js';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import EmptyState from '#lib/components/ui/EmptyState.svelte';
+	import Modal from '#lib/components/ui/Modal.svelte';
 	import { Check, X, Clock, XCircle, CheckCircle, Calendar, Umbrella } from 'lucide-svelte';
 
 	interface Props {

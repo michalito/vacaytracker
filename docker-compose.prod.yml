@@ -27,8 +27,9 @@ services:
     build: ./vacaytracker-frontend
     ports:
       - "3000:3000"  # Random host port -> container 3000
-    environment:
-      - ORIGIN=http://localhost:3000
+    # adapter-node (SvelteKit 3) no longer reads ORIGIN; the origin comes from the Host header.
+    # Behind a TLS-terminating proxy, add PROTOCOL_HEADER=x-forwarded-proto (and HOST_HEADER if
+    # the proxy rewrites Host). A fixed origin, if ever needed, goes in `paths.origin` in vite.config.ts.
     depends_on:
       api:
         condition: service_healthy

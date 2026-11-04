@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	import type { TeamVacation } from '$lib/types';
-	import { getUserColor } from '$lib/utils/colors';
-	import { formatDateRangeShort } from '$lib/utils/date';
-	import Tooltip from '$lib/components/ui/Tooltip.svelte';
+	import type { TeamVacation } from '#lib/types/index.js';
+	import { getUserColor } from '#lib/utils/colors.js';
+	import { formatDateRangeShort } from '#lib/utils/date.js';
+	import Tooltip from '#lib/components/ui/Tooltip.svelte';
 
 	type EventPosition = 'start' | 'middle' | 'end' | 'single';
 

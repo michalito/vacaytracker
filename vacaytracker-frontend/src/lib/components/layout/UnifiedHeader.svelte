@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve, asset } from '$app/paths';
-	import { auth } from '$lib/stores/auth.svelte';
+	import { auth } from '#lib/stores/auth.svelte.js';
 	import { Calendar, LayoutDashboard, Shield } from 'lucide-svelte';
 	import UserMenu from './UserMenu.svelte';
 	import AdminDropdown from './AdminDropdown.svelte';
 	import { clsx } from 'clsx';
 
+	// SvelteKit 3 paths have no leading slash (only route IDs do); resolve() adds it plus any base
 	const navItems = [
-		{ path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-		{ path: '/calendar', icon: Calendar, label: 'Calendar', exact: false }
+		{ path: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+		{ path: 'calendar', icon: Calendar, label: 'Calendar', exact: false }
 	] as const;
 
 	// Compares against resolved hrefs so active states still work under a configured base path
@@ -23,9 +24,9 @@
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex items-center justify-between h-16">
 			<!-- Logo -->
-			<a href={resolve('/dashboard')} class="flex items-center gap-2 group">
+			<a href={resolve('dashboard')} class="flex items-center gap-2 group">
 				<img
-					src={asset('/logo.png')}
+					src={asset('logo.png')}
 					alt=""
 					class="w-8 h-8 transition-transform group-hover:scale-105"
 				/>
@@ -82,9 +83,10 @@
 				</a>
 			{/each}
 			{#if auth.isAdmin}
-				{@const adminActive = isActive(resolve('/admin'))}
+				<!-- /admin is a layout without its own page, so match on the route ID -->
+				{@const adminActive = page.route.id?.startsWith('/admin/') ?? false}
 				<a
-					href={resolve('/admin/users')}
+					href={resolve('admin/users')}
 					aria-current={adminActive ? 'page' : undefined}
 					class={clsx(
 						'flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200',

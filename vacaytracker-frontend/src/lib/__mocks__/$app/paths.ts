@@ -1,11 +1,11 @@
-// Test double for $app/paths: no base path, so resolved routes and assets are unchanged
-export const base = '';
-export const assets = '';
-
-export function resolve(path: string): string {
-	return path;
+// Test double for $app/paths (SvelteKit 3), with no base path.
+// Paths have no leading slash ('dashboard'), route IDs do ('/(app)/dashboard');
+// both resolve to an absolute pathname with route groups removed.
+export function resolve(pathOrRouteId: string): string {
+	const absolute = pathOrRouteId.startsWith('/') ? pathOrRouteId : `/${pathOrRouteId}`;
+	return absolute.replace(/\/\([^/)]+\)/g, '') || '/';
 }
 
-export function asset(path: string): string {
-	return path;
+export function asset(file: string): string {
+	return `/${file}`;
 }

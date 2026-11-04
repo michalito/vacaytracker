@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import type { User, Role } from '$lib/types';
-	import { admin } from '$lib/stores/admin.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import Modal from '$lib/components/ui/Modal.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
+	import type { User, Role } from '#lib/types/index.js';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import Modal from '#lib/components/ui/Modal.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Input from '#lib/components/ui/Input.svelte';
+	import Select from '#lib/components/ui/Select.svelte';
 	import { UserPlus, Edit } from 'lucide-svelte';
 
 	const roleOptions = [

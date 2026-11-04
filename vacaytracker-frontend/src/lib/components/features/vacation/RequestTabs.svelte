@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Tabs, Select } from 'bits-ui';
-	import type { VacationRequest } from '$lib/types';
+	import type { VacationRequest } from '#lib/types/index.js';
 	import EnhancedRequestCard from './EnhancedRequestCard.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import EmptyState from '$lib/components/ui/EmptyState.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Card from '#lib/components/ui/Card.svelte';
+	import EmptyState from '#lib/components/ui/EmptyState.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import {
 		Clock,
 		CalendarCheck,

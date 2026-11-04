@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { admin } from '$lib/stores/admin.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
-	import Pagination from '$lib/components/ui/Pagination.svelte';
-	import UserTable from '$lib/components/features/admin/UserTable.svelte';
-	import UserModal from '$lib/components/features/admin/UserModal.svelte';
-	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
-	import Skeleton from '$lib/components/ui/Skeleton.svelte';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Select from '#lib/components/ui/Select.svelte';
+	import Pagination from '#lib/components/ui/Pagination.svelte';
+	import UserTable from '#lib/components/features/admin/UserTable.svelte';
+	import UserModal from '#lib/components/features/admin/UserModal.svelte';
+	import ConfirmDialog from '#lib/components/ui/ConfirmDialog.svelte';
+	import Skeleton from '#lib/components/ui/Skeleton.svelte';
 	import { UserPlus, Search, Users } from 'lucide-svelte';
-	import type { User, Role } from '$lib/types';
+	import type { User, Role } from '#lib/types/index.js';
 
 	const roleFilterOptions = [
 		{ value: 'all', label: 'All Roles' },

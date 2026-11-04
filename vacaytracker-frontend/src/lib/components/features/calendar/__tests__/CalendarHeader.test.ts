@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { calendar } from '$lib/stores/calendar.svelte';
+import { calendar } from '#lib/stores/calendar.svelte.js';
 import CalendarHeader from '../CalendarHeader.svelte';
 
 function viewToggle(label: 'Week' | 'Month') {

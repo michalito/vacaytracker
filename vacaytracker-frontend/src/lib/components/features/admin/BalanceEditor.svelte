@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { User } from '$lib/types';
-	import { admin } from '$lib/stores/admin.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import type { User } from '#lib/types/index.js';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import { Check, X, Edit2 } from 'lucide-svelte';
 
 	interface Props {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { VacationRequest } from '$lib/types';
+	import type { VacationRequest } from '#lib/types/index.js';
 	import RequestCard from './RequestCard.svelte';
 
 	interface Props {

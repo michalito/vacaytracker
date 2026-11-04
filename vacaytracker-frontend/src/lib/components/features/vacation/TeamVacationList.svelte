@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import TeamVacationSection from './TeamVacationSection.svelte';
-	import Skeleton from '$lib/components/ui/Skeleton.svelte';
+	import Skeleton from '#lib/components/ui/Skeleton.svelte';
 	import { ArrowRight } from 'lucide-svelte';
-	import { formatDateISO } from '$lib/utils/date';
-	import type { TeamVacation } from '$lib/types';
+	import { formatDateISO } from '#lib/utils/date.js';
+	import type { TeamVacation } from '#lib/types/index.js';
 
 	interface Props {
 		vacations: TeamVacation[];
@@ -86,7 +86,7 @@
 		<!-- View Calendar Link -->
 		{#if totalVacations > 0}
 			<a
-				href={resolve('/calendar')}
+				href={resolve('calendar')}
 				class="inline-flex items-center gap-1.5 text-sm text-ocean-600 hover:text-ocean-700 transition-colors group"
 			>
 				<span>View full calendar</span>

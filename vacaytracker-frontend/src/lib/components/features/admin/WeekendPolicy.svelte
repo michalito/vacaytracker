@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { WeekendPolicy } from '$lib/types';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import type { WeekendPolicy } from '#lib/types/index.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Checkbox from '#lib/components/ui/Checkbox.svelte';
 	import { Calendar } from 'lucide-svelte';
 
 	interface Props {

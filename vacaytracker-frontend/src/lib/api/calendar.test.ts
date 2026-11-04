@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { TeamVacation, TeamVacationResponse } from '$lib/types';
+import type { TeamVacation, TeamVacationResponse } from '#lib/types/index.js';
 
 vi.mock('./vacation', () => ({
 	vacationApi: {

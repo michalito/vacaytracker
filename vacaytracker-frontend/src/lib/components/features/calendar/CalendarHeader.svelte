@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { ToggleGroup } from 'bits-ui';
 	import { clsx } from 'clsx';
-	import { calendar } from '$lib/stores/calendar.svelte';
-	import { formatMonthYear, formatWeekRange, getMonday, getWeekDays } from '$lib/utils/date';
+	import { calendar } from '#lib/stores/calendar.svelte.js';
+	import { formatMonthYear, formatWeekRange, getMonday, getWeekDays } from '#lib/utils/date.js';
 	import { ChevronLeft, ChevronRight, Calendar, CalendarDays } from 'lucide-svelte';
 
 	interface Props {

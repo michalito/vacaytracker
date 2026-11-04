@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Popover } from 'bits-ui';
 	import { clsx } from 'clsx';
-	import type { TeamVacation } from '$lib/types';
-	import type { CalendarDay } from '$lib/utils/date';
-	import { formatDateRangeShort } from '$lib/utils/date';
-	import { getUserColor } from '$lib/utils/colors';
+	import type { TeamVacation } from '#lib/types/index.js';
+	import type { CalendarDay } from '#lib/utils/date.js';
+	import { formatDateRangeShort } from '#lib/utils/date.js';
+	import { getUserColor } from '#lib/utils/colors.js';
 	import VacationEvent from './VacationEvent.svelte';
 
 	type EventPosition = 'start' | 'middle' | 'end' | 'single';

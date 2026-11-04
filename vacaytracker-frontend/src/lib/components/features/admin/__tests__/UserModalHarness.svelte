@@ -3,7 +3,7 @@
 	// which makes every prop look changed. A real parent only notifies the props whose value
 	// changed; routing each prop through $derived (which only propagates real changes) restores that,
 	// so tests cannot pass just because an unrelated prop "changed".
-	import type { User } from '$lib/types';
+	import type { User } from '#lib/types/index.js';
 	import UserModal from '../UserModal.svelte';
 
 	interface Props {

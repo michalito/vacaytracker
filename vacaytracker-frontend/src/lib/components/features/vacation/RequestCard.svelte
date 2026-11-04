@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { VacationRequest, VacationStatus } from '$lib/types';
-	import { vacation } from '$lib/stores/vacation.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import { formatDateMedium } from '$lib/utils/date';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import type { VacationRequest, VacationStatus } from '#lib/types/index.js';
+	import { vacation } from '#lib/stores/vacation.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import { formatDateMedium } from '#lib/utils/date.js';
+	import Badge from '#lib/components/ui/Badge.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import { Calendar, Trash2 } from 'lucide-svelte';
 
 	interface Props {

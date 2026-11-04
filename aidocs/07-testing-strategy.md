@@ -506,18 +506,30 @@ func TestAuthHandler_Login_ValidationError(t *testing.T) {
 
 - [ ] **Setup Vitest** `vitest.config.ts`
 
+Components are compiled with the plain Svelte plugin (not `sveltekit()`, which would load the whole
+app config and adapter). `#lib/*` resolves through `package.json` `imports`; SvelteKit's `$app/*`
+modules are replaced by test doubles in `src/lib/__mocks__/$app` (`state`, `paths`, `navigation`, `env`).
+
 ```typescript
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { svelteTesting } from '@testing-library/svelte/vite';
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
-import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
-  plugins: [sveltekit()],
+  plugins: [svelte(), svelteTesting()],
   test: {
     include: ['src/**/*.{test,spec}.{js,ts}'],
     environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./src/tests/setup.ts'],
+    setupFiles: ['./vitest-setup.ts'],
+    alias: {
+      $app: path.resolve('./src/lib/__mocks__/$app')
+    },
+    restoreMocks: true
   },
+  resolve: {
+    conditions: ['browser']
+  }
 });
 ```
 
@@ -1008,7 +1020,7 @@ func TestVacationRequest(overrides ...func(*domain.VacationRequest)) *domain.Vac
 
 ```typescript
 // src/tests/fixtures.ts
-import type { User, VacationRequest } from '$lib/types';
+import type { User, VacationRequest } from '#lib/types/index.js';
 
 export function testUser(overrides: Partial<User> = {}): User {
   return {

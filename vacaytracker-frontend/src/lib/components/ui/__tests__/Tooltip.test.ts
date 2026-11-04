@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, it, expect } from 'vitest';
-import type { TeamVacation } from '$lib/types';
-import VacationEvent from '$lib/components/features/calendar/VacationEvent.svelte';
-import VacationBalanceCard from '$lib/components/features/dashboard/VacationBalanceCard.svelte';
+import type { TeamVacation } from '#lib/types/index.js';
+import VacationEvent from '#lib/components/features/calendar/VacationEvent.svelte';
+import VacationBalanceCard from '#lib/components/features/dashboard/VacationBalanceCard.svelte';
 import TooltipHarness from './TooltipHarness.svelte';
 
 // The Tooltip wrapper hands its trigger props to the consumer's own element

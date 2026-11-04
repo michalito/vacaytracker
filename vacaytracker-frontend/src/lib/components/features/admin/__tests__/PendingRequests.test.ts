@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { VacationRequest } from '$lib/types';
+import type { VacationRequest } from '#lib/types/index.js';
 
-vi.mock('$lib/api/admin', () => ({
+vi.mock('#lib/api/admin.js', () => ({
 	adminApi: { reviewRequest: vi.fn() }
 }));
 
-import { adminApi } from '$lib/api/admin';
+import { adminApi } from '#lib/api/admin.js';
 import PendingRequests from '../PendingRequests.svelte';
 
 function makeRequest(id: string, userName: string): VacationRequest {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Tooltip, Popover } from 'bits-ui';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Badge from '#lib/components/ui/Badge.svelte';
 	import { Calendar, Clock, X, Palmtree } from 'lucide-svelte';
 	import {
 		formatDateRangeShort,
@@ -12,8 +12,8 @@
 		getDaysUntilStart,
 		getDaysUntilEnd,
 		addDays
-	} from '$lib/utils/date';
-	import type { TeamVacation } from '$lib/types';
+	} from '#lib/utils/date.js';
+	import type { TeamVacation } from '#lib/types/index.js';
 
 	interface Props {
 		vacation: TeamVacation;

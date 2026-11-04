@@ -8,7 +8,7 @@ vi.mock('./client', () => ({
 
 import { request, setAuthToken, clearAuthToken } from './client';
 import { authApi } from './auth';
-import type { LoginResponse, User, EmailPreferences } from '$lib/types';
+import type { LoginResponse, User, EmailPreferences } from '#lib/types/index.js';
 
 describe('authApi', () => {
 	beforeEach(() => {

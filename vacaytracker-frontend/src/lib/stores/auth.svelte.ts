@@ -1,5 +1,5 @@
-import { authApi } from '$lib/api/auth';
-import type { User } from '$lib/types';
+import { authApi } from '#lib/api/auth.js';
+import type { User } from '#lib/types/index.js';
 
 function createAuthStore() {
 	let user = $state<User | null>(null);

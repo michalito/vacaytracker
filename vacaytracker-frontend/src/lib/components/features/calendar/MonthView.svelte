@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	import type { TeamVacation } from '$lib/types';
-	import { getCalendarGridDays, groupByDay, type CalendarDay } from '$lib/utils/date';
+	import type { TeamVacation } from '#lib/types/index.js';
+	import { getCalendarGridDays, groupByDay, type CalendarDay } from '#lib/utils/date.js';
 	import DayCell from './DayCell.svelte';
 
 	interface Props {

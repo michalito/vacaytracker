@@ -7,10 +7,11 @@
 
 	let menuOpen = $state(false);
 
+	// SvelteKit 3 paths have no leading slash (only route IDs do); resolve() adds it plus any base
 	const adminNavItems = [
-		{ path: '/admin/users', icon: Users, label: 'Users' },
-		{ path: '/admin/balances', icon: Wallet, label: 'Balances' },
-		{ path: '/admin/settings', icon: Settings, label: 'Settings' }
+		{ path: 'admin/users', icon: Users, label: 'Users' },
+		{ path: 'admin/balances', icon: Wallet, label: 'Balances' },
+		{ path: 'admin/settings', icon: Settings, label: 'Settings' }
 	] as const;
 
 	// Compares against resolved hrefs so active states still work under a configured base path
@@ -19,7 +20,8 @@
 		return current === href || current.startsWith(`${href}/`);
 	}
 
-	const inAdmin = $derived(isActive(resolve('/admin')));
+	// /admin is a layout without its own page, so match on the route ID (base-path independent)
+	const inAdmin = $derived(page.route.id?.startsWith('/admin/') ?? false);
 </script>
 
 <div class="relative">

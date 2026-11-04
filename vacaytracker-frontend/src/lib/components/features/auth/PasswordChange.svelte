@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { authApi } from '$lib/api/auth';
-	import { toast } from '$lib/stores/toast.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
+	import { authApi } from '#lib/api/auth.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Input from '#lib/components/ui/Input.svelte';
+	import Card from '#lib/components/ui/Card.svelte';
 	import { Lock } from 'lucide-svelte';
 
 	let currentPassword = $state('');

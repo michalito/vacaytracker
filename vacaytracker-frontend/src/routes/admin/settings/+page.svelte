@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { admin } from '$lib/stores/admin.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import { adminApi } from '$lib/api/admin';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
-	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
-	import WeekendPolicy from '$lib/components/features/admin/WeekendPolicy.svelte';
-	import NewsletterSettings from '$lib/components/features/admin/NewsletterSettings.svelte';
-	import EmailTestPanel from '$lib/components/features/admin/EmailTestPanel.svelte';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import { adminApi } from '#lib/api/admin.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Select from '#lib/components/ui/Select.svelte';
+	import ConfirmDialog from '#lib/components/ui/ConfirmDialog.svelte';
+	import WeekendPolicy from '#lib/components/features/admin/WeekendPolicy.svelte';
+	import NewsletterSettings from '#lib/components/features/admin/NewsletterSettings.svelte';
+	import EmailTestPanel from '#lib/components/features/admin/EmailTestPanel.svelte';
 	import { Settings, Save, RotateCcw } from 'lucide-svelte';
-	import type { WeekendPolicy as WeekendPolicyType, NewsletterConfig } from '$lib/types';
+	import type { WeekendPolicy as WeekendPolicyType, NewsletterConfig } from '#lib/types/index.js';
 
 	let defaultVacationDays = $state(25);
 	let vacationResetMonth = $state('1');

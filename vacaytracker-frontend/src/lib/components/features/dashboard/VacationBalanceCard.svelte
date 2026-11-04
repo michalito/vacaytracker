@@ -1,9 +1,9 @@
 <script lang="ts">
-	import MultiSegmentRing from '$lib/components/ui/MultiSegmentRing.svelte';
-	import Tooltip from '$lib/components/ui/Tooltip.svelte';
+	import MultiSegmentRing from '#lib/components/ui/MultiSegmentRing.svelte';
+	import Tooltip from '#lib/components/ui/Tooltip.svelte';
 	import { Palmtree, CheckCircle, Plane, Info, Umbrella } from 'lucide-svelte';
-	import { getDaysUntilStart, parseISODate } from '$lib/utils/date';
-	import type { VacationRequest } from '$lib/types';
+	import { getDaysUntilStart, parseISODate } from '#lib/utils/date.js';
+	import type { VacationRequest } from '#lib/types/index.js';
 
 	type Theme = 'healthy' | 'warning' | 'critical';
 

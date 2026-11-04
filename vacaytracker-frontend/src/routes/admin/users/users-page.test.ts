@@ -1,14 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { User } from '$lib/types';
+import type { User } from '#lib/types/index.js';
 
 // Only the HTTP layer is mocked: the real admin store (and its cache) and the real page run
-vi.mock('$lib/api/admin', () => ({
+vi.mock('#lib/api/admin.js', () => ({
 	adminApi: { listUsers: vi.fn(), getSettings: vi.fn() }
 }));
 
-import { adminApi } from '$lib/api/admin';
+import { adminApi } from '#lib/api/admin.js';
 import UsersPage from './+page.svelte';
 
 function makeUser(id: string, name: string, role: User['role']): User {

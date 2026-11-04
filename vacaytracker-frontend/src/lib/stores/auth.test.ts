@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { User, LoginResponse } from '$lib/types';
+import type { User, LoginResponse } from '#lib/types/index.js';
 
 // Mock the API module -- this persists across resetModules because vi.mock is hoisted
-vi.mock('$lib/api/auth', () => ({
+vi.mock('#lib/api/auth.js', () => ({
 	authApi: {
 		login: vi.fn(),
 		logout: vi.fn(),
@@ -34,15 +34,15 @@ const mockAdmin: User = {
 };
 
 describe('auth store', () => {
-	let auth: (typeof import('$lib/stores/auth.svelte'))['auth'];
-	let authApi: (typeof import('$lib/api/auth'))['authApi'];
+	let auth: (typeof import('#lib/stores/auth.svelte.js'))['auth'];
+	let authApi: (typeof import('#lib/api/auth.js'))['authApi'];
 
 	beforeEach(async () => {
 		vi.resetModules();
 		localStorage.clear();
 
-		const storeModule = await import('$lib/stores/auth.svelte');
-		const apiModule = await import('$lib/api/auth');
+		const storeModule = await import('#lib/stores/auth.svelte.js');
+		const apiModule = await import('#lib/api/auth.js');
 		auth = storeModule.auth;
 		authApi = apiModule.authApi;
 	});

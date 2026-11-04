@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { User } from '$lib/types';
+import type { User } from '#lib/types/index.js';
 
-vi.mock('$lib/stores/admin.svelte', () => ({
+vi.mock('#lib/stores/admin.svelte.js', () => ({
 	admin: { createUser: vi.fn(), updateUser: vi.fn() }
 }));
 
-import { admin } from '$lib/stores/admin.svelte';
+import { admin } from '#lib/stores/admin.svelte.js';
 import UserModal from '../UserModal.svelte';
 import UserModalHarness from './UserModalHarness.svelte';
 

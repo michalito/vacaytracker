@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { NewsletterConfig } from '$lib/types';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Checkbox from '$lib/components/ui/Checkbox.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
-	import Modal from '$lib/components/ui/Modal.svelte';
+	import type { NewsletterConfig } from '#lib/types/index.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Checkbox from '#lib/components/ui/Checkbox.svelte';
+	import Select from '#lib/components/ui/Select.svelte';
+	import Modal from '#lib/components/ui/Modal.svelte';
 	import { Mail, Send, Eye } from 'lucide-svelte';
-	import { admin } from '$lib/stores/admin.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
 
 	interface Props {
 		config: NewsletterConfig;

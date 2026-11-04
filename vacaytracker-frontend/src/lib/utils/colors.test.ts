@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { USER_COLOR_PALETTE, getUserColorIndex, getUserColor } from '$lib/utils/colors';
-import type { UserColor } from '$lib/utils/colors';
+import { USER_COLOR_PALETTE, getUserColorIndex, getUserColor } from '#lib/utils/colors.js';
+import type { UserColor } from '#lib/utils/colors.js';
 
 describe('USER_COLOR_PALETTE', () => {
 	it('has exactly 8 entries', () => {

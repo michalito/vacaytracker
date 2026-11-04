@@ -1,11 +1,11 @@
 import { render } from '@testing-library/svelte';
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('$lib/api/admin', () => ({
+vi.mock('#lib/api/admin.js', () => ({
 	adminApi: { listUsers: vi.fn(), getSettings: vi.fn() }
 }));
 
-import { adminApi } from '$lib/api/admin';
+import { adminApi } from '#lib/api/admin.js';
 import { admin } from './admin.svelte';
 import EffectHarness from './__tests__/EffectHarness.svelte';
 

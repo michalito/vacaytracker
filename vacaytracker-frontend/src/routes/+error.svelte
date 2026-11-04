@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import { Umbrella, Home, RefreshCw } from 'lucide-svelte';
 
 	const errorMessages: Record<number, { title: string; message: string }> = {

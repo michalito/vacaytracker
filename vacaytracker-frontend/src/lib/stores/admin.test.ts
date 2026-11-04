@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import type { User, VacationRequest, Settings, NewsletterPreview } from '$lib/types';
+import type { User, VacationRequest, Settings, NewsletterPreview } from '#lib/types/index.js';
 
 // Mock the admin API -- hoisted above resetModules
-vi.mock('$lib/api/admin', () => ({
+vi.mock('#lib/api/admin.js', () => ({
 	adminApi: {
 		listUsers: vi.fn(),
 		createUser: vi.fn(),
@@ -59,8 +59,8 @@ const mockSettings: Settings = {
 };
 
 describe('admin store', () => {
-	let admin: (typeof import('$lib/stores/admin.svelte'))['admin'];
-	let adminApi: (typeof import('$lib/api/admin'))['adminApi'];
+	let admin: (typeof import('#lib/stores/admin.svelte.js'))['admin'];
+	let adminApi: (typeof import('#lib/api/admin.js'))['adminApi'];
 
 	beforeEach(async () => {
 		vi.useFakeTimers();
@@ -68,8 +68,8 @@ describe('admin store', () => {
 		vi.clearAllMocks();
 		vi.resetModules();
 
-		const storeModule = await import('$lib/stores/admin.svelte');
-		const apiModule = await import('$lib/api/admin');
+		const storeModule = await import('#lib/stores/admin.svelte.js');
+		const apiModule = await import('#lib/api/admin.js');
 		admin = storeModule.admin;
 		adminApi = apiModule.adminApi;
 	});

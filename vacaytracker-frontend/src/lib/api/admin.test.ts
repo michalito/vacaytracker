@@ -6,7 +6,7 @@ vi.mock('./client', () => ({
 
 import { request } from './client';
 import { adminApi } from './admin';
-import type { CreateUserForm, Settings } from '$lib/types';
+import type { CreateUserForm, Settings } from '#lib/types/index.js';
 
 const mockRequest = vi.mocked(request);
 

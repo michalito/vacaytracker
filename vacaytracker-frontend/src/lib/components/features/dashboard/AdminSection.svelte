@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { admin } from '$lib/stores/admin.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import StatsCard from '$lib/components/ui/StatsCard.svelte';
-	import StatsCardSkeleton from '$lib/components/ui/StatsCardSkeleton.svelte';
-	import ListSkeleton from '$lib/components/ui/ListSkeleton.svelte';
-	import PendingRequests from '$lib/components/features/admin/PendingRequests.svelte';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import StatsCard from '#lib/components/ui/StatsCard.svelte';
+	import StatsCardSkeleton from '#lib/components/ui/StatsCardSkeleton.svelte';
+	import ListSkeleton from '#lib/components/ui/ListSkeleton.svelte';
+	import PendingRequests from '#lib/components/features/admin/PendingRequests.svelte';
 	import { Users, Umbrella, CalendarDays } from 'lucide-svelte';
-	import type { TeamVacation } from '$lib/types';
+	import type { TeamVacation } from '#lib/types/index.js';
 
 	interface Props {
 		isLoading?: boolean;

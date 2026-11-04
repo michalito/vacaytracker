@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
-import type { TeamVacation } from '$lib/types';
-import TooltipHarness from '$lib/components/ui/__tests__/TooltipHarness.svelte';
+import type { TeamVacation } from '#lib/types/index.js';
+import TooltipHarness from '#lib/components/ui/__tests__/TooltipHarness.svelte';
 import VacationAvatarItem from '../VacationAvatarItem.svelte';
 
 const vacation: TeamVacation = {

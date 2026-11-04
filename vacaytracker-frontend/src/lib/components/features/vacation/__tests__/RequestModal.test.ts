@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('$lib/stores/vacation.svelte', () => ({
+vi.mock('#lib/stores/vacation.svelte.js', () => ({
 	vacation: { createRequest: vi.fn() }
 }));
 

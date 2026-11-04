@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { EmailTemplateType, EmailPreviewResponse } from '$lib/types';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Modal from '$lib/components/ui/Modal.svelte';
+	import type { EmailTemplateType, EmailPreviewResponse } from '#lib/types/index.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Modal from '#lib/components/ui/Modal.svelte';
 	import {
 		Mail,
 		Send,
@@ -14,8 +14,8 @@
 		Eye,
 		Newspaper
 	} from 'lucide-svelte';
-	import { adminApi } from '$lib/api/admin';
-	import { toast } from '$lib/stores/toast.svelte';
+	import { adminApi } from '#lib/api/admin.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
 
 	interface EmailTemplate {
 		id: EmailTemplateType;

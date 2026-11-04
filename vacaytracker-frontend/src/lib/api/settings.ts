@@ -1,5 +1,5 @@
 import { request } from './client';
-import type { WeekendPolicy } from '$lib/types';
+import type { WeekendPolicy } from '#lib/types/index.js';
 
 export interface PublicSettings {
 	defaultVacationDays: number;
