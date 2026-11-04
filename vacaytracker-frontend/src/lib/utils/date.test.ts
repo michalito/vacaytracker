@@ -28,8 +28,12 @@ import {
 	getDaysUntilStart,
 	dateValueToApiFormat,
 	dateValueToISO,
-	calculateBusinessDays
-} from '$lib/utils/date';
+	calculateBusinessDays,
+	getWeekday,
+	isExcludedDay,
+	groupByDay,
+	calendarDaysBetween
+} from '#lib/utils/date.js';
 
 describe('parseISODate', () => {
 	it('parses a standard YYYY-MM-DD string correctly', () => {
@@ -618,6 +622,43 @@ describe('time-dependent functions', () => {
 	});
 });
 
+// EU clocks go back on 2026-10-25 and forward on 2026-03-29. Node re-reads process.env.TZ,
+// so these run in a DST zone regardless of the machine or CI timezone.
+describe('day counts across DST changes', () => {
+	const originalTZ = process.env.TZ;
+
+	beforeEach(() => {
+		process.env.TZ = 'Europe/Athens';
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+		if (originalTZ === undefined) delete process.env.TZ;
+		else process.env.TZ = originalTZ;
+	});
+
+	it('calendarDaysBetween counts whole days when the clocks go back', () => {
+		expect(calendarDaysBetween(new Date(2026, 9, 23, 20, 58), new Date(2026, 9, 26))).toBe(3);
+	});
+
+	it('calendarDaysBetween counts whole days when the clocks go forward', () => {
+		expect(calendarDaysBetween(new Date(2026, 2, 27, 9, 0), new Date(2026, 2, 30))).toBe(3);
+	});
+
+	it('calendarDaysBetween ignores the time of day', () => {
+		expect(calendarDaysBetween(new Date(2026, 5, 1, 23, 59), new Date(2026, 5, 2, 0, 1))).toBe(1);
+		expect(calendarDaysBetween(new Date(2026, 5, 2, 0, 1), new Date(2026, 5, 1, 23, 59))).toBe(-1);
+	});
+
+	it('getDaysUntilStart / getDaysUntilEnd are not off by one around the DST weekend', () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date(2026, 9, 23, 20, 58)); // Friday evening before clocks go back
+
+		expect(getDaysUntilStart('2026-10-26')).toBe(3);
+		expect(getDaysUntilEnd('2026-10-28')).toBe(5);
+	});
+});
+
 describe('dateValueToApiFormat', () => {
 	it('converts a CalendarDate to DD/MM/YYYY format', () => {
 		const dateValue = new CalendarDate(2025, 6, 15);
@@ -696,5 +737,87 @@ describe('calculateBusinessDays', () => {
 		const start = new CalendarDate(2025, 6, 2);
 		const end = new CalendarDate(2025, 6, 8);
 		expect(calculateBusinessDays(start, end)).toBe(5);
+	});
+
+	it('honours a custom excludedDays list like the API', () => {
+		// Mon Jun 2 to Sun Jun 8, 2025 with Friday + Saturday excluded => 5 days (Sun-Thu)
+		const start = new CalendarDate(2025, 6, 2);
+		const end = new CalendarDate(2025, 6, 8);
+		expect(calculateBusinessDays(start, end, true, [5, 6])).toBe(5);
+		expect(
+			calculateBusinessDays(
+				new CalendarDate(2025, 6, 6),
+				new CalendarDate(2025, 6, 7),
+				true,
+				[5, 6]
+			)
+		).toBe(0);
+	});
+
+	it('ignores excludedDays when excludeWeekends is false', () => {
+		const start = new CalendarDate(2025, 6, 2);
+		const end = new CalendarDate(2025, 6, 8);
+		expect(calculateBusinessDays(start, end, false, [0, 1, 2, 3, 4, 5, 6])).toBe(7);
+	});
+
+	it('returns 0 when end is before start', () => {
+		expect(calculateBusinessDays(new CalendarDate(2025, 6, 6), new CalendarDate(2025, 6, 2))).toBe(
+			0
+		);
+	});
+});
+
+describe('getWeekday', () => {
+	it('returns 0 for Sunday and 6 for Saturday', () => {
+		expect(getWeekday(new CalendarDate(2025, 6, 8))).toBe(0);
+		expect(getWeekday(new CalendarDate(2025, 6, 7))).toBe(6);
+	});
+
+	it('does not depend on the local timezone', () => {
+		// Monday 2026-03-30 (around EU DST change) is still Monday
+		expect(getWeekday(new CalendarDate(2026, 3, 30))).toBe(1);
+	});
+});
+
+describe('isExcludedDay', () => {
+	it('excludes Saturday and Sunday by default', () => {
+		expect(isExcludedDay(new CalendarDate(2025, 6, 7))).toBe(true);
+		expect(isExcludedDay(new CalendarDate(2025, 6, 8))).toBe(true);
+		expect(isExcludedDay(new CalendarDate(2025, 6, 9))).toBe(false);
+	});
+
+	it('never excludes when the policy is off', () => {
+		expect(isExcludedDay(new CalendarDate(2025, 6, 7), false)).toBe(false);
+	});
+
+	it('uses the provided excluded days', () => {
+		expect(isExcludedDay(new CalendarDate(2025, 6, 6), true, [5])).toBe(true);
+		expect(isExcludedDay(new CalendarDate(2025, 6, 7), true, [5])).toBe(false);
+	});
+});
+
+describe('groupByDay', () => {
+	// Week of Mon 2025-06-02 .. Sun 2025-06-08
+	const week = getWeekDays(new Date(2025, 5, 4));
+
+	it('maps each covered day to the items spanning it, inclusive of both ends', () => {
+		const a = { id: 'a', startDate: '2025-06-03', endDate: '2025-06-04' };
+		const b = { id: 'b', startDate: '2025-06-04', endDate: '2025-06-10' };
+
+		const byDay = groupByDay(week, [a, b]);
+
+		expect(byDay.get('2025-06-02')).toBeUndefined();
+		expect(byDay.get('2025-06-03')).toEqual([a]);
+		expect(byDay.get('2025-06-04')).toEqual([a, b]);
+		expect(byDay.get('2025-06-08')).toEqual([b]);
+	});
+
+	it('includes items that started before the visible days', () => {
+		const long = { id: 'long', startDate: '2025-05-20', endDate: '2025-06-02' };
+		expect(groupByDay(week, [long]).get('2025-06-02')).toEqual([long]);
+	});
+
+	it('omits days with no items', () => {
+		expect(groupByDay(week, []).size).toBe(0);
 	});
 });

@@ -46,7 +46,7 @@
 	};
 </script>
 
-{#each Array(count) as _, i}
+{#each Array(count) as _, i (i)}
 	<div
 		class={clsx(baseStyles, variantStyles[variant], className)}
 		style={Object.entries(getStyles(i)).map(([k, v]) => `${k}: ${v}`).join('; ')}

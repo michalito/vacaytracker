@@ -94,7 +94,7 @@
 		/>
 
 		<!-- Segment circles (drawn in reverse order so first segment is on top) -->
-		{#each segmentArcs.toReversed() as arc}
+		{#each segmentArcs.toReversed() as arc (arc.label)}
 			<circle
 				cx={size / 2}
 				cy={size / 2}

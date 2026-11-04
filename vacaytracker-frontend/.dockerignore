@@ -1,0 +1,16 @@
+# Installed and generated inside the image; host copies would bring the wrong
+# platform's native binaries (Rolldown, Lightning CSS, Tailwind oxide)
+node_modules
+.svelte-kit
+build
+coverage
+
+# Local secrets and tooling output
+.env
+.env.*
+!.env.example
+npm-debug.log*
+.playwright-mcp
+
+Dockerfile*
+.dockerignore

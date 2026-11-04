@@ -45,7 +45,7 @@
 	</div>
 
 	<!-- Footer Content -->
-	<div class="bg-ocean-700 py-4">
+	<div class="bg-ocean-700 py-4 border-t border-ocean-600/30">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 			<div class="flex flex-col sm:flex-row items-center justify-between gap-2">
 				<div class="flex items-center gap-2">

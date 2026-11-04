@@ -1,5 +1,5 @@
 import { request, setAuthToken, clearAuthToken } from './client';
-import type { User, LoginResponse, EmailPreferences } from '$lib/types';
+import type { User, LoginResponse, EmailPreferences } from '#lib/types/index.js';
 
 export const authApi = {
 	login: async (email: string, password: string): Promise<LoginResponse> => {

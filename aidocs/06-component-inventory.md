@@ -92,6 +92,10 @@
 | **ProgressRing** | `src/lib/components/ui/ProgressRing.svelte` | value, max, size, strokeWidth, class | percentage, radius, circumference, offset, color (all derived) | - |
 | **Toast** | `src/lib/components/ui/Toast.svelte` | - | toasts (from store) | - |
 | **Pagination** | `src/lib/components/ui/Pagination.svelte` | page, totalPages, class | - | onPageChange |
+| **Modal** | `src/lib/components/ui/Modal.svelte` | open (bindable), title, icon, iconClass, description (string or snippet), size (`md`/`xl`), closeLabel, class, children, footer (snippet) | - | onClosed (after any close: button, Escape, overlay, or `open = false`) |
+| **ConfirmDialog** | `src/lib/components/ui/ConfirmDialog.svelte` | open (bindable), title, description (string or snippet), confirmText, cancelText, variant (`danger`/`warning`), isLoading (blocks dismissal) | - | onConfirm, onClosed |
+| **Select** | `src/lib/components/ui/Select.svelte` | value (bindable), options, placeholder, disabled, label (linked via `for`/`id`), aria-label, id | open | onchange (every change) |
+| **Tooltip** | `src/lib/components/ui/Tooltip.svelte` | content (string or snippet), placement, openDelay, disabled, child (snippet receiving `{ props }` to spread on one element) | - | - |
 
 ### Layout Components
 
@@ -108,7 +112,7 @@
 | Component | File | Props | State | Description |
 |-----------|------|-------|-------|-------------|
 | **BalanceDisplay** | `src/lib/components/features/vacation/BalanceDisplay.svelte` | current, total, size | - | Shows vacation balance as progress ring |
-| **RequestModal** | `src/lib/components/features/vacation/RequestModal.svelte` | open (bindable) | startDate, endDate, reason, isSubmitting, errors | Modal form for creating vacation request |
+| **RequestModal** | `src/lib/components/features/vacation/RequestModal.svelte` | open (bindable), weekendPolicy | dateRange, reason, isSubmitting, dateError (reset on every open) | Request form on the shared `Modal`; previews business days with the public weekend policy |
 | **RequestList** | `src/lib/components/features/vacation/RequestList.svelte` | requests | - | List of vacation request cards |
 | **RequestCard** | `src/lib/components/features/vacation/RequestCard.svelte` | request | isCancelling | Individual vacation request display |
 | **DateRangePicker** | `src/lib/components/features/vacation/DateRangePicker.svelte` | startDate, endDate, minDate | - | Date range selection with validation |
@@ -119,11 +123,9 @@
 |-----------|------|-------|-------|-------------|
 | **StatsCard** | `src/lib/components/features/admin/StatsCard.svelte` | title, value, icon, color | - | Dashboard statistics card |
 | **PendingRequests** | `src/lib/components/features/admin/PendingRequests.svelte` | requests, onUpdate | processingId | List of pending requests with approve/reject |
-| **ApprovalModal** | `src/lib/components/features/admin/ApprovalModal.svelte` | open, request, onConfirm | - | Confirmation modal for approval |
-| **RejectionModal** | `src/lib/components/features/admin/RejectionModal.svelte` | open, request, onConfirm | reason | Modal with rejection reason input |
+| **PendingRequests** dialogs | `src/lib/components/features/admin/PendingRequests.svelte` | requests, onUpdate | approvingRequest, rejectingRequest, rejectionReason (cleared each time the reject dialog opens) | Approve and reject dialogs on the shared `Modal` |
 | **UserTable** | `src/lib/components/features/admin/UserTable.svelte` | users, pagination, onEdit, onDelete | sortField, sortDirection | Sortable user list table |
-| **UserModal** | `src/lib/components/features/admin/UserModal.svelte` | open, user, onSave | form, errors, isSubmitting | Create/edit user form |
-| **DeleteConfirm** | `src/lib/components/features/admin/DeleteConfirm.svelte` | open, user, onConfirm | isDeleting | Delete confirmation dialog |
+| **UserModal** | `src/lib/components/features/admin/UserModal.svelte` | open (bindable), user, defaultVacationDays, onClosed | form (reloaded from `user` on every open), errors, isSubmitting | Create/edit user form on the shared `Modal` |
 | **BalanceEditor** | `src/lib/components/features/admin/BalanceEditor.svelte` | users, onUpdate | editingId | Inline balance editing |
 | **WeekendPolicy** | `src/lib/components/features/admin/WeekendPolicy.svelte` | policy, onUpdate | - | Weekend day toggles |
 | **NewsletterSettings** | `src/lib/components/features/admin/NewsletterSettings.svelte` | config, onUpdate | - | Newsletter configuration |
@@ -265,8 +267,8 @@ main.go
     └── admin/users/+page.svelte
         ├── adminApi
         ├── UserTable
-        ├── UserModal
-        ├── DeleteConfirm
+        ├── UserModal (Modal)
+        ├── ConfirmDialog (delete user)
         └── Pagination
 ```
 

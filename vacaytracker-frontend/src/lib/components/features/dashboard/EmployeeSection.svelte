@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { vacation } from '$lib/stores/vacation.svelte';
-	import VacationBalanceCard from '$lib/components/features/dashboard/VacationBalanceCard.svelte';
-	import RequestTabs from '$lib/components/features/vacation/RequestTabs.svelte';
-	import TeamVacationList from '$lib/components/features/vacation/TeamVacationList.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import ListSkeleton from '$lib/components/ui/ListSkeleton.svelte';
+	import { vacation } from '#lib/stores/vacation.svelte.js';
+	import VacationBalanceCard from '#lib/components/features/dashboard/VacationBalanceCard.svelte';
+	import RequestTabs from '#lib/components/features/vacation/RequestTabs.svelte';
+	import TeamVacationList from '#lib/components/features/vacation/TeamVacationList.svelte';
+	import Card from '#lib/components/ui/Card.svelte';
+	import ListSkeleton from '#lib/components/ui/ListSkeleton.svelte';
 	import { Users } from 'lucide-svelte';
-	import type { TeamVacation } from '$lib/types';
+	import type { TeamVacation } from '#lib/types/index.js';
 
 	interface Props {
 		teamVacations?: TeamVacation[];

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { auth } from '$lib/stores/auth.svelte';
-	import { admin } from '$lib/stores/admin.svelte';
-	import { vacation } from '$lib/stores/vacation.svelte';
-	import { calendar } from '$lib/stores/calendar.svelte';
-	import { settingsApi, type PublicSettings } from '$lib/api/settings';
-	import AdminSection from '$lib/components/features/dashboard/AdminSection.svelte';
-	import EmployeeSection from '$lib/components/features/dashboard/EmployeeSection.svelte';
-	import RequestModal from '$lib/components/features/vacation/RequestModal.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { auth } from '#lib/stores/auth.svelte.js';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import { vacation } from '#lib/stores/vacation.svelte.js';
+	import { calendar } from '#lib/stores/calendar.svelte.js';
+	import { settingsApi, type PublicSettings } from '#lib/api/settings.js';
+	import AdminSection from '#lib/components/features/dashboard/AdminSection.svelte';
+	import EmployeeSection from '#lib/components/features/dashboard/EmployeeSection.svelte';
+	import RequestModal from '#lib/components/features/vacation/RequestModal.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import { Plus } from 'lucide-svelte';
 
 	let isRequestModalOpen = $state(false);
@@ -26,7 +26,7 @@
 		// Load employee data (with caching)
 		vacation.fetchRequests();
 
-		// Fetch public settings for vacation balance display
+		// Fetch public settings for balance display and the request form's weekend policy
 		try {
 			publicSettings = await settingsApi.getPublic();
 		} catch (e) {
@@ -89,4 +89,4 @@
 	/>
 </div>
 
-<RequestModal bind:open={isRequestModalOpen} />
+<RequestModal bind:open={isRequestModalOpen} weekendPolicy={publicSettings?.weekendPolicy} />

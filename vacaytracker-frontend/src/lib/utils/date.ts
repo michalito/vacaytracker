@@ -84,6 +84,27 @@ export function isDateInRange(date: Date, start: Date, end: Date): boolean {
 	return d >= s && d <= e;
 }
 
+/**
+ * Group date-ranged items (e.g. vacations) by the calendar days they cover.
+ * ISO date strings compare correctly as plain strings, so no Date parsing or timezone is involved.
+ * @returns dateString (YYYY-MM-DD) -> items, only for days with at least one item
+ */
+export function groupByDay<T extends { startDate: string; endDate: string }>(
+	days: CalendarDay[],
+	items: T[]
+): Map<string, T[]> {
+	return new Map(
+		days
+			.map((day) => {
+				const dayItems = items.filter(
+					(item) => item.startDate <= day.dateString && day.dateString <= item.endDate
+				);
+				return [day.dateString, dayItems] as const;
+			})
+			.filter(([, dayItems]) => dayItems.length > 0)
+	);
+}
+
 // Get Monday of the week containing the given date (EU standard: week starts Monday)
 export function getMonday(date: Date): Date {
 	const d = new Date(date);
@@ -264,7 +285,7 @@ export function fromApiDateFormat(dateStr: string): string {
 // ============================================
 
 import type { DateValue } from '@internationalized/date';
-import { getLocalTimeZone } from '@internationalized/date';
+import { toCalendarDate } from '@internationalized/date';
 
 // ============================================
 // Vacation Status Utilities
@@ -280,17 +301,26 @@ export function isCurrentlyOngoing(startDate: string, endDate: string): boolean 
 	return startDate <= today && endDate >= today;
 }
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Whole calendar days from `from` to `to`, ignoring time of day.
+ * Uses the UTC date parts so a DST change in between (a 23- or 25-hour day) cannot
+ * turn the count into a fraction that rounds the wrong way.
+ */
+export function calendarDaysBetween(from: Date, to: Date): number {
+	const start = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());
+	const end = Date.UTC(to.getFullYear(), to.getMonth(), to.getDate());
+	return Math.round((end - start) / MS_PER_DAY);
+}
+
 /**
  * Get the number of days until a vacation ends
  * @param endDate - ISO date string (YYYY-MM-DD)
  * @returns Number of days (0 if ending today, negative if already ended)
  */
 export function getDaysUntilEnd(endDate: string): number {
-	const today = new Date();
-	today.setHours(0, 0, 0, 0);
-	const end = parseISODate(endDate);
-	const diff = end.getTime() - today.getTime();
-	return Math.ceil(diff / (1000 * 60 * 60 * 24));
+	return calendarDaysBetween(new Date(), parseISODate(endDate));
 }
 
 /**
@@ -299,16 +329,12 @@ export function getDaysUntilEnd(endDate: string): number {
  * @returns Number of days (0 if starting today, negative if already started)
  */
 export function getDaysUntilStart(startDate: string): number {
-	const today = new Date();
-	today.setHours(0, 0, 0, 0);
-	const start = parseISODate(startDate);
-	const diff = start.getTime() - today.getTime();
-	return Math.ceil(diff / (1000 * 60 * 60 * 24));
+	return calendarDaysBetween(new Date(), parseISODate(startDate));
 }
 
 /**
  * Convert @internationalized/date DateValue to API format (DD/MM/YYYY)
- * @param dateValue - DateValue from Melt UI date picker
+ * @param dateValue - DateValue from Bits UI date picker
  */
 export function dateValueToApiFormat(dateValue: DateValue): string {
 	const day = String(dateValue.day).padStart(2, '0');
@@ -318,37 +344,58 @@ export function dateValueToApiFormat(dateValue: DateValue): string {
 
 /**
  * Convert @internationalized/date DateValue to ISO format (YYYY-MM-DD)
- * @param dateValue - DateValue from Melt UI date picker
+ * @param dateValue - DateValue from Bits UI date picker
  */
 export function dateValueToISO(dateValue: DateValue): string {
 	return dateValue.toString(); // DateValue.toString() returns YYYY-MM-DD
 }
 
 /**
- * Calculate business days between two DateValue dates
+ * Weekdays excluded by default (0 = Sunday, 6 = Saturday).
+ * Matches DefaultWeekendPolicy in the API.
+ */
+export const DEFAULT_EXCLUDED_DAYS: readonly number[] = [0, 6];
+
+/**
+ * Day of week for a DateValue (0 = Sunday ... 6 = Saturday).
+ * Computed in UTC so the result never depends on the browser's timezone or DST.
+ */
+export function getWeekday(date: DateValue): number {
+	return toCalendarDate(date).toDate('UTC').getUTCDay();
+}
+
+/**
+ * Whether a date is excluded from business days under the weekend policy.
+ * Mirrors WeekendPolicy.IsDayExcluded in the API.
+ */
+export function isExcludedDay(
+	date: DateValue,
+	excludeWeekends: boolean = true,
+	excludedDays: readonly number[] = DEFAULT_EXCLUDED_DAYS
+): boolean {
+	return excludeWeekends && excludedDays.includes(getWeekday(date));
+}
+
+/**
+ * Calculate business days between two DateValue dates (inclusive).
+ * Mirrors calculateBusinessDays in the API so the preview matches what the server stores.
  * @param start - Start date
  * @param end - End date
- * @param excludeWeekends - Whether to exclude Saturday and Sunday (default: true)
+ * @param excludeWeekends - Whether the weekend policy applies (default: true)
+ * @param excludedDays - Weekdays to skip when the policy applies (default: Saturday and Sunday)
  */
 export function calculateBusinessDays(
 	start: DateValue,
 	end: DateValue,
-	excludeWeekends: boolean = true
+	excludeWeekends: boolean = true,
+	excludedDays: readonly number[] = DEFAULT_EXCLUDED_DAYS
 ): number {
 	let days = 0;
-	let current = start;
 
-	while (current.compare(end) <= 0) {
-		if (!excludeWeekends) {
+	for (let current = start; current.compare(end) <= 0; current = current.add({ days: 1 })) {
+		if (!isExcludedDay(current, excludeWeekends, excludedDays)) {
 			days++;
-		} else {
-			const dayOfWeek = current.toDate(getLocalTimeZone()).getDay();
-			// Sunday = 0, Saturday = 6
-			if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-				days++;
-			}
 		}
-		current = current.add({ days: 1 });
 	}
 
 	return days;

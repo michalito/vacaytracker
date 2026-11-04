@@ -10,11 +10,16 @@ VacayTracker is an employee vacation tracking application with role-based access
 
 **Frontend (`vacaytracker-frontend/`):**
 - Svelte 5 with Runes (`$state`, `$derived`, `$effect`, `$props`)
-- SvelteKit 2.10.x for routing and SSR
-- @melt-ui/svelte v0.86.x with `@melt-ui/pp` preprocessor for headless accessible components
+- SvelteKit 3.x for routing and SSR, built with `@sveltejs/adapter-node` (Node 22.17+ required)
+- Vite 8 (Rolldown) with `@sveltejs/vite-plugin-svelte` 7
+- Bits UI v2.x for headless accessible components (compound component API, no preprocessor)
 - Tailwind CSS v4 with CSS-native `@theme` configuration
-- TypeScript 5.x
+- TypeScript 6.0.x
 - Lucide Svelte for icons
+
+**Dependency pins to keep** (in `package.json`, which can't hold comments):
+- `typescript` is `~6.0.x` because `typescript-eslint` supports TypeScript < 6.1.
+- `overrides.runed` forces runed ^0.38: bits-ui 2.20.x pins `runed ^0.35`, whose optional SvelteKit peer is `^2`. runed 0.38's only breaking change is `runed/kit`, which bits-ui doesn't use. Drop the override once bits-ui depends on runed ≥ 0.38.
 
 **Backend (`vacaytracker-api/`):**
 - Go 1.23+
@@ -32,8 +37,9 @@ npm run dev                # Vite dev server at localhost:5173
 npm run check              # svelte-check type checking
 npm run check:watch        # Watch mode
 npm run build              # Production build
-npm run lint               # ESLint
-npm run format             # Prettier
+npm run lint               # ESLint (flat config: eslint.config.js)
+npm run format             # Prettier (.prettierrc: tabs, single quotes, width 100)
+npm test                   # Vitest unit + component tests
 ```
 
 **Backend:**
@@ -59,7 +65,10 @@ docker compose up --build          # Start full stack (API: localhost:32804, Fro
 docker compose down                # Stop containers
 docker compose logs -f frontend    # Follow frontend logs
 docker compose logs -f api         # Follow API logs
+docker compose -f docker-compose.prod.yml up --build   # Production images (frontend: adapter-node, `node build`)
 ```
+
+Production serves the frontend with `node build` (adapter-node). There is no `/api` proxy in that server: a reverse proxy routes `/api` to the Go service (see `aidocs/09-deployment-guide.md`). adapter-node no longer reads `ORIGIN`; behind a TLS proxy set `PROTOCOL_HEADER=x-forwarded-proto`.
 
 ## Architecture
 
@@ -74,11 +83,27 @@ docker compose logs -f api         # Follow API logs
 
 The `(app)/+layout.svelte` enforces authentication (redirects to `/` if not authenticated) and renders the shared shell (UnifiedHeader, DecorativeBackground, Footer).
 
-**Path aliases** configured in `svelte.config.js`:
-- `$lib` → `./src/lib`
-- `$components` → `./src/lib/components`
+**SvelteKit config** lives in `vite.config.ts` as `sveltekit({ ... })` plugin options (SvelteKit 3 has no `svelte.config.js`; ESLint reads it through `@sveltejs/load-config`). `tsconfig.json` extends `$app/tsconfig`, which `svelte-kit sync` generates into `node_modules/$app`.
 
-**Melt UI** requires the preprocessor in `svelte.config.js`: `sequence([vitePreprocess(), preprocessMeltUI()])`. Components use the `use:melt` directive and data attributes for styling (`data-state`, `data-highlighted`, etc.).
+**Imports** use Node subpath imports instead of the old `$lib` alias: `#lib/*` → `./src/lib/*` (`package.json` `imports`). Always include the extension: `#lib/stores/auth.svelte.js`, `#lib/api/admin.js`, `#lib/types/index.js`, `#lib/components/ui/Button.svelte`.
+
+**Bits UI** provides headless accessible components via a compound component API (e.g., `<Dialog.Root>`, `<Dialog.Content>`). No preprocessor needed. Components use data attributes for styling (`data-[state=open]`, `data-[highlighted]`, etc.) and `bind:open`/`bind:value` for state management. A `<Tooltip.Provider>` wraps the app in the root `+layout.svelte` (component tests wrap tooltip users in `ui/__tests__/TooltipHarness.svelte`).
+
+**Dialogs** use the shared `ui/Modal.svelte` (Dialog) or `ui/ConfirmDialog.svelte` (AlertDialog) rather than raw Bits parts, which gives every dialog the labelled close button, enter/exit transitions and the close contract below:
+- Bits calls `onOpenChange` **only for its own closes** (Escape, overlay, close button), never when code sets `open = false`. Don't put cleanup there.
+- Initialise form state when the dialog **opens** (`$effect.pre(() => { if (open) untrack(reset) })`, or in the function that opens it).
+- Put post-close cleanup in `onClosed`, which wraps Bits `onOpenChangeComplete` and fires after **every** close.
+
+**Other Bits UI conventions:**
+- `ui/Tooltip.svelte` takes a `child` snippet: spread its `props` onto a single element instead of nesting a button inside Bits' trigger button.
+- To combine two triggers on one element (tooltip + popover), render `<Popover.Trigger {...tooltipProps}>` inside `<Tooltip.Trigger>`'s `child` snippet.
+- Floating content inside a dialog (e.g. the date range calendar) must be portalled (`<Portal>`). The dialog's transform and `backdrop-filter` create a containing block that would clip it.
+- Enter/exit transitions use the `presence-pop` (content) and `presence-fade` (overlays) utilities from `app.css`. Bits sets `data-starting-style`/`data-ending-style` and waits for the transition before unmounting.
+
+**Navigation** uses `page` from `$app/state` (`$app/stores` was removed in SvelteKit 3) and wraps internal hrefs and `goto()` targets in `resolve()` from `$app/paths` (enforced by ESLint):
+- Paths have **no leading slash**: `resolve('dashboard')`, `resolve('admin/users')`, `asset('logo.png')`. Only route IDs start with `/` (`resolve('/')`).
+- `resolve()` is typed to real page routes. To ask "is the user inside a section" (e.g. `/admin`, a layout without its own page), match `page.route.id` instead of building a path.
+- `goto()` rejects destinations that aren't app routes; use `window.location.href` for external URLs.
 
 **API proxy** in `vite.config.ts`: `/api` requests proxy to `VITE_API_URL || 'http://localhost:3000'`.
 
@@ -149,7 +174,7 @@ function createAuthStore() {
 export const auth = createAuthStore();
 ```
 
-**Toast notifications**: `import { toast } from '$lib/stores/toast.svelte'` then `toast.success('Title')`, `toast.error('Title', 'Description')`, or `toast.add('info', 'Title', 'Desc', duration)`.
+**Toast notifications**: `import { toast } from '#lib/stores/toast.svelte.js'` then `toast.success('Title')`, `toast.error('Title', 'Description')`, or `toast.add('info', 'Title', 'Desc', duration)`.
 
 ## Tailwind v4
 
@@ -178,8 +203,9 @@ Custom animations are defined in `app.css` (fadeIn, slideUp, scaleIn, wave, floa
 - **API input format**: DD/MM/YYYY (EU) — the backend `parseDDMMYYYY` parses this
 - **HTML date inputs**: YYYY-MM-DD (ISO) — converted via `toEUFormat()` before API calls
 - **Storage/display format**: YYYY-MM-DD (ISO) in database and frontend state
-- Business days calculation respects `excludeWeekends` setting
-- Melt UI date pickers use `@internationalized/date` `DateValue` — converted via `dateValueToAPIFormat()`
+- Business days calculation respects the weekend policy (`excludeWeekends` + `excludedDays`). The frontend preview (`calculateBusinessDays`) mirrors the API and gets the policy from `GET /api/settings/public`, which employees can read (`/api/admin/settings` is admin-only).
+- Parse `YYYY-MM-DD` strings with `parseISODate()` (local) or compare them as strings. `new Date('YYYY-MM-DD')` is UTC midnight and shifts the day in non-UTC timezones.
+- Bits UI date pickers use `@internationalized/date` `DateValue` — converted via `dateValueToApiFormat()`
 
 ## Environment Variables
 
@@ -218,12 +244,11 @@ The `aidocs/` directory contains detailed implementation documentation:
 - `08-security-checklist.md` — Security guidelines
 - `09-deployment-guide.md` — Production deployment
 - `10-development-workflow.md` — Git workflow and branch strategy
-- `melt-ui/` — Melt UI component usage guides
 
 ## Important Guidelines
 
 - If uncertain about Svelte implementation, read the latest Svelte 5 docs first
 - If uncertain about Go implementation, research the latest Go docs first
 - Always ensure our approach aligns with the documentation in `aidocs/`
-- Melt UI uses a preprocessor (`@melt-ui/pp`) — component builders are transformed at build time
+- Bits UI uses compound component patterns — no preprocessor or build transforms needed
 - After changes, ensure to rebuild the containers

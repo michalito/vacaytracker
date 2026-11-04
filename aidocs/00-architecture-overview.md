@@ -70,7 +70,7 @@ VacayTracker is an employee vacation tracking application with:
 |------------|---------|---------|
 | **Svelte** | 5.x | UI framework with runes-based reactivity |
 | **SvelteKit** | 2.49.x | Full-stack framework (routing, SSR) |
-| **Melt UI** | 0.42.x (`melt`) | Headless accessible components |
+| **Bits UI** | 2.x | Headless accessible components (compound API) |
 | **Tailwind CSS** | 4.x | Utility-first styling with `@theme` |
 | **TypeScript** | 5.x | Type safety |
 | **Vite** | 6.x | Build tool and dev server |
@@ -351,7 +351,7 @@ main.go
     │
     └── +page.svelte (Login) ──► LoginForm
                                     │
-                                    ├── Tabs (Melt UI)
+                                    ├── Tabs (Bits UI)
                                     ├── Input
                                     └── Button
 
@@ -360,7 +360,7 @@ main.go
     ├── +page.svelte (Dashboard)
     │       │
     │       ├── BalanceDisplay ──► ProgressRing
-    │       ├── RequestModal ──► Dialog (Melt UI)
+    │       ├── RequestModal ──► Dialog (Bits UI)
     │       │       │               ├── Input (date)
     │       │       │               ├── Button
     │       │       │               └── Textarea
@@ -388,11 +388,11 @@ main.go
     │       │       └── Avatar, Badge, Button
     │       └── UserModal (add/edit)
     │               ├── Input[]
-    │               ├── Select (Melt UI)
+    │               ├── Select (Bits UI)
     │               └── Button
     │
     ├── /calendar/+page.svelte
-    │       └── Calendar (Melt UI)
+    │       └── Calendar (Bits UI)
     │
     └── /settings/+page.svelte
             ├── Toggle (weekend policy)
@@ -596,6 +596,8 @@ C:\code\vacayv2\vacaytracker\
 │   │   │   │   ├── Badge.svelte
 │   │   │   │   ├── Avatar.svelte
 │   │   │   │   ├── ProgressRing.svelte
+│   │   │   │   ├── Modal.svelte        # Shared Bits UI Dialog shell
+│   │   │   │   ├── ConfirmDialog.svelte # Shared Bits UI AlertDialog
 │   │   │   │   ├── ToastProvider.svelte
 │   │   │   │   └── index.ts           # Barrel export
 │   │   │   ├── layout/                # Layout components
@@ -656,8 +658,7 @@ C:\code\vacayv2\vacaytracker\
 │   └── app.d.ts                       # Type declarations
 ├── static/                            # Static assets
 ├── tests/                             # Test files
-├── svelte.config.js                   # Svelte configuration
-├── vite.config.ts                     # Vite configuration
+├── vite.config.ts                     # Vite + SvelteKit config (sveltekit() plugin options)
 ├── package.json                       # Dependencies
 ├── tsconfig.json                      # TypeScript config
 └── README.md                          # Frontend documentation
@@ -675,7 +676,7 @@ C:\code\vacayv2\vacaytracker\
 | **Auth** | JWT (HS256, 24h expiry) | Stateless, industry standard, simple implementation |
 | **Password** | bcrypt (cost 10) | Secure, battle-tested, configurable difficulty |
 | **Frontend Framework** | Svelte 5 with SvelteKit | Minimal bundle, excellent DX, runes-based reactivity |
-| **Component Library** | Melt UI (headless) | Accessible by default, full styling control |
+| **Component Library** | Bits UI (headless) | Accessible by default, full styling control |
 | **Styling** | Tailwind CSS v4 | Utility-first, @theme configuration, Vite plugin |
 | **Email** | Resend API | Simple API, reliable delivery, good DX |
 
@@ -688,7 +689,7 @@ C:\code\vacayv2\vacaytracker\
 | **DTO Pattern** | Request/Response | Type-safe API contracts |
 | **Middleware Chain** | Cross-cutting concerns | Clean separation of auth, CORS, errors |
 | **Store Pattern** | Frontend state | Reactive, centralized state management |
-| **Builder Pattern** | Melt UI components | Flexible, accessible component composition |
+| **Compound Component Pattern** | Bits UI components | Flexible, accessible component composition |
 
 ### 7.3 Security Decisions
 
@@ -723,7 +724,8 @@ C:\code\vacayv2\vacaytracker\
 |------|------|---------|
 | **Features Spec** | `docs/features.md` | Complete feature specifications |
 | **Go Guide** | `docs/go.md` | Backend implementation patterns |
-| **Svelte Guide** | `docs/svelte-melt.md` | Frontend implementation patterns |
+| **Component Specs** | `aidocs/06-component-inventory.md` | Frontend components, incl. shared `Modal` / `ConfirmDialog` |
+| **Bits UI Reference** | https://bits-ui.com/docs | Headless component API (Dialog, Popover, Select, ...) |
 | **Project Config** | `CLAUDE.md` | Development commands, conventions |
 
 ---

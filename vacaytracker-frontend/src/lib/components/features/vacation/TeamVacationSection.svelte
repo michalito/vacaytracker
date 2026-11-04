@@ -1,8 +1,8 @@
 <script lang="ts">
 	import AvatarRow from './AvatarRow.svelte';
-	import EmptyState from '$lib/components/ui/EmptyState.svelte';
+	import EmptyState from '#lib/components/ui/EmptyState.svelte';
 	import { Users, Calendar } from 'lucide-svelte';
-	import type { TeamVacation } from '$lib/types';
+	import type { TeamVacation } from '#lib/types/index.js';
 
 	interface Props {
 		title: string;

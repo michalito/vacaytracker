@@ -203,14 +203,40 @@ body {
 	@apply transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md;
 }
 
-/* Modal backdrop animation */
-.backdrop-fade {
-	animation: fadeIn 0.15s ease-out;
+/*
+ * Enter/exit transitions for Bits UI layers (dialogs, popovers, menus, selects, tooltips).
+ * Bits sets data-starting-style while mounting and data-ending-style while closing,
+ * and waits for the running transition before it unmounts the element.
+ */
+@utility presence-fade {
+	transition-property: opacity;
+	transition-duration: 200ms;
+	transition-timing-function: ease-out;
+
+	&[data-starting-style],
+	&[data-ending-style] {
+		opacity: 0;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
 }
 
-/* Modal content animation */
-.modal-enter {
-	animation: scaleIn 0.2s ease-out;
+@utility presence-pop {
+	transition-property: opacity, scale;
+	transition-duration: 150ms;
+	transition-timing-function: ease-out;
+
+	&[data-starting-style],
+	&[data-ending-style] {
+		opacity: 0;
+		scale: 0.95;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: none;
+	}
 }
 
 /* Wave animation for login page */
@@ -289,7 +315,7 @@ body {
 }
 
 /* Tab panel transitions */
-[data-melt-tabs-content] {
+[data-tabs-content] {
 	animation: tabFadeIn 0.2s ease-out;
 }
 
@@ -352,24 +378,82 @@ body {
 	}
 }
 
-@keyframes toastOut {
-	from {
-		opacity: 1;
-		transform: translateY(0) scale(1);
-	}
-	to {
-		opacity: 0;
-		transform: translateY(100%) scale(0.95);
-	}
-}
-
 .animate-toast-in {
 	animation: toastIn 0.3s ease-out forwards;
 }
 
-/* Melt-UI toast exit animation via data attribute */
-[data-melt-toast-content][data-state='closed'] {
-	animation: toastOut 0.2s ease-in forwards;
+/* ============================================
+   Range Calendar Days (Bits UI DateRangePicker.Day)
+   One cascade for every state so selection colours always win
+   over the "excluded day" (weekend policy) styling.
+   ============================================ */
+
+.calendar-day {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 0.5rem;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: var(--color-ocean-800);
+	cursor: pointer;
+	transition: background-color 150ms, color 150ms;
+}
+
+.calendar-day:focus-visible {
+	outline: 2px solid var(--color-ocean-500);
+	outline-offset: -2px;
+}
+
+.calendar-day[data-today] {
+	font-weight: 700;
+	box-shadow: inset 0 0 0 1px var(--color-ocean-400);
+}
+
+/* Days the weekend policy excludes from the business-day count */
+.calendar-day[data-excluded] {
+	color: var(--color-ocean-400);
+	font-style: italic;
+}
+
+.calendar-day:hover:not([data-selected], [data-disabled]) {
+	background-color: var(--color-ocean-100);
+}
+
+/* Range body: the selected middle, and the hover preview while picking an end date */
+.calendar-day[data-range-middle],
+.calendar-day[data-highlighted]:not([data-range-start], [data-range-end]) {
+	border-radius: 0;
+	background-color: var(--color-ocean-100);
+}
+
+.calendar-day[data-range-start],
+.calendar-day[data-range-end] {
+	background-color: var(--color-ocean-500);
+	color: white;
+}
+
+.calendar-day[data-range-start]:not([data-range-end]) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.calendar-day[data-range-end]:not([data-range-start]) {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.calendar-day[data-disabled] {
+	opacity: 0.35;
+	text-decoration: line-through;
+	cursor: not-allowed;
+}
+
+/* Neighbouring months already show these dates; keep the grid shape without duplicates */
+.calendar-day[data-outside-month] {
+	visibility: hidden;
 }
 
 /* ============================================
@@ -394,7 +478,7 @@ body {
 }
 
 /* Enhance the avatar shadow on hover for depth */
-.stacked-avatar-wrapper:hover :global(.ring-white) {
+.stacked-avatar-wrapper:hover .ring-white {
 	box-shadow:
 		0 8px 20px -4px rgba(0, 56, 79, 0.25),
 		0 4px 8px -2px rgba(0, 56, 79, 0.15);

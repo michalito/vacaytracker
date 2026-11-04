@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { auth } from '$lib/stores/auth.svelte';
-	import { authApi } from '$lib/api/auth';
-	import { toast } from '$lib/stores/toast.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import { auth } from '#lib/stores/auth.svelte.js';
+	import { authApi } from '#lib/api/auth.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Checkbox from '#lib/components/ui/Checkbox.svelte';
 	import { Mail } from 'lucide-svelte';
 
 	let vacationUpdates = $state(auth.user?.emailPreferences?.vacationUpdates ?? true);

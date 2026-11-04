@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the calendar API -- hoisted above resetModules
-vi.mock('$lib/api/calendar', () => ({
+vi.mock('#lib/api/calendar.js', () => ({
 	calendarApi: {
 		getMonth: vi.fn(),
 		getMonths: vi.fn()
@@ -10,7 +10,7 @@ vi.mock('$lib/api/calendar', () => ({
 
 // Mock date utilities -- real implementations are pure functions, but we need
 // getMonthsForWeek to return predictable values when testing week view
-vi.mock('$lib/utils/date', async (importOriginal) => {
+vi.mock('#lib/utils/date.js', async (importOriginal) => {
 	const actual = (await importOriginal()) as Record<string, unknown>;
 	return {
 		...actual
@@ -28,8 +28,8 @@ const mockVacation = (overrides = {}) => ({
 });
 
 describe('calendar store', () => {
-	let calendar: (typeof import('$lib/stores/calendar.svelte'))['calendar'];
-	let calendarApi: (typeof import('$lib/api/calendar'))['calendarApi'];
+	let calendar: (typeof import('#lib/stores/calendar.svelte.js'))['calendar'];
+	let calendarApi: (typeof import('#lib/api/calendar.js'))['calendarApi'];
 
 	beforeEach(async () => {
 		vi.useFakeTimers();
@@ -37,8 +37,8 @@ describe('calendar store', () => {
 		vi.clearAllMocks();
 		vi.resetModules();
 
-		const storeModule = await import('$lib/stores/calendar.svelte');
-		const apiModule = await import('$lib/api/calendar');
+		const storeModule = await import('#lib/stores/calendar.svelte.js');
+		const apiModule = await import('#lib/api/calendar.js');
 		calendar = storeModule.calendar;
 		calendarApi = apiModule.calendarApi;
 	});

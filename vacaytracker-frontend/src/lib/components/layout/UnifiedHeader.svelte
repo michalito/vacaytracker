@@ -1,39 +1,45 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { auth } from '$lib/stores/auth.svelte';
-	import { Calendar, LayoutDashboard } from 'lucide-svelte';
+	import { page } from '$app/state';
+	import { resolve, asset } from '$app/paths';
+	import { auth } from '#lib/stores/auth.svelte.js';
+	import { Calendar, LayoutDashboard, Shield } from 'lucide-svelte';
 	import UserMenu from './UserMenu.svelte';
 	import AdminDropdown from './AdminDropdown.svelte';
 	import { clsx } from 'clsx';
 
+	// SvelteKit 3 paths have no leading slash (only route IDs do); resolve() adds it plus any base
 	const navItems = [
-		{ href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-		{ href: '/calendar', icon: Calendar, label: 'Calendar' }
-	];
+		{ path: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+		{ path: 'calendar', icon: Calendar, label: 'Calendar', exact: false }
+	] as const;
 
+	// Compares against resolved hrefs so active states still work under a configured base path
 	function isActive(href: string, exact = false): boolean {
-		if (exact) {
-			return $page.url.pathname === href;
-		}
-		return $page.url.pathname.startsWith(href);
+		const current = page.url.pathname;
+		return exact ? current === href : current === href || current.startsWith(`${href}/`);
 	}
 </script>
 
-<header class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-white/30 shadow-sm">
+<header class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-white/40 shadow-sm">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex items-center justify-between h-16">
 			<!-- Logo -->
-			<a href="/dashboard" class="flex items-center gap-2 group">
-				<img src="/logo.png" alt="VacayTracker" class="w-8 h-8 transition-transform group-hover:scale-105" />
+			<a href={resolve('dashboard')} class="flex items-center gap-2 group">
+				<img
+					src={asset('logo.png')}
+					alt=""
+					class="w-8 h-8 transition-transform group-hover:scale-105"
+				/>
 				<span class="text-xl font-bold text-ocean-700">VacayTracker</span>
 			</a>
 
 			<!-- Navigation -->
-			<nav class="hidden md:flex items-center gap-1">
-				{#each navItems as item}
-					{@const active = isActive(item.href, item.exact)}
+			<nav aria-label="Main" class="hidden md:flex items-center gap-1">
+				{#each navItems as item (item.path)}
+					{@const active = isActive(resolve(item.path), item.exact)}
 					<a
-						href={item.href}
+						href={resolve(item.path)}
+						aria-current={active ? 'page' : undefined}
 						class={clsx(
 							'flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200',
 							active
@@ -41,7 +47,7 @@
 								: 'text-ocean-600 hover:text-ocean-800 hover:bg-ocean-500/10'
 						)}
 					>
-						<item.icon class="w-4 h-4" />
+						<item.icon class="w-4 h-4" aria-hidden="true" />
 						{item.label}
 					</a>
 				{/each}
@@ -58,12 +64,13 @@
 	</div>
 
 	<!-- Mobile Navigation -->
-	<nav class="md:hidden border-t border-ocean-200/30 bg-white/50 backdrop-blur-sm">
+	<nav aria-label="Main" class="md:hidden border-t border-white/40 bg-white/50 backdrop-blur-sm">
 		<div class="flex justify-around py-2">
-			{#each navItems as item}
-				{@const active = isActive(item.href, item.exact)}
+			{#each navItems as item (item.path)}
+				{@const active = isActive(resolve(item.path), item.exact)}
 				<a
-					href={item.href}
+					href={resolve(item.path)}
+					aria-current={active ? 'page' : undefined}
 					class={clsx(
 						'flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200',
 						active
@@ -71,34 +78,24 @@
 							: 'text-ocean-500 hover:text-ocean-700 hover:bg-ocean-500/5'
 					)}
 				>
-					<item.icon class="w-5 h-5" />
+					<item.icon class="w-5 h-5" aria-hidden="true" />
 					{item.label}
 				</a>
 			{/each}
 			{#if auth.isAdmin}
+				<!-- /admin is a layout without its own page, so match on the route ID -->
+				{@const adminActive = page.route.id?.startsWith('/admin/') ?? false}
 				<a
-					href="/admin/users"
+					href={resolve('admin/users')}
+					aria-current={adminActive ? 'page' : undefined}
 					class={clsx(
 						'flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200',
-						$page.url.pathname.startsWith('/admin')
+						adminActive
 							? 'text-ocean-700 bg-ocean-500/10'
 							: 'text-ocean-500 hover:text-ocean-700 hover:bg-ocean-500/5'
 					)}
 				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="w-5 h-5"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<path
-							d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-						/>
-					</svg>
+					<Shield class="w-5 h-5" aria-hidden="true" />
 					Admin
 				</a>
 			{/if}

@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { createDialog, melt } from '@melt-ui/svelte';
-	import { admin } from '$lib/stores/admin.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import { adminApi } from '$lib/api/admin';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
-	import WeekendPolicy from '$lib/components/features/admin/WeekendPolicy.svelte';
-	import NewsletterSettings from '$lib/components/features/admin/NewsletterSettings.svelte';
-	import EmailTestPanel from '$lib/components/features/admin/EmailTestPanel.svelte';
-	import { Settings, Save, RotateCcw, AlertTriangle, X } from 'lucide-svelte';
-	import type { WeekendPolicy as WeekendPolicyType, NewsletterConfig } from '$lib/types';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import { adminApi } from '#lib/api/admin.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Select from '#lib/components/ui/Select.svelte';
+	import ConfirmDialog from '#lib/components/ui/ConfirmDialog.svelte';
+	import WeekendPolicy from '#lib/components/features/admin/WeekendPolicy.svelte';
+	import NewsletterSettings from '#lib/components/features/admin/NewsletterSettings.svelte';
+	import EmailTestPanel from '#lib/components/features/admin/EmailTestPanel.svelte';
+	import { Settings, Save, RotateCcw } from 'lucide-svelte';
+	import type { WeekendPolicy as WeekendPolicyType, NewsletterConfig } from '#lib/types/index.js';
 
 	let defaultVacationDays = $state(25);
 	let vacationResetMonth = $state('1');
@@ -26,15 +26,10 @@
 	let isSaving = $state(false);
 	let hasChanges = $state(false);
 	let isResetting = $state(false);
+	let resetDialogOpen = $state(false);
 
-	// Reset Confirmation Dialog
-	const {
-		elements: { overlay, content, title, description, close },
-		states: { open: resetDialogOpen }
-	} = createDialog({
-		forceVisible: true,
-		role: 'alertdialog'
-	});
+	// The server resets to the saved default, not to an unsaved edit on this page
+	const savedDefaultDays = $derived(admin.settings?.defaultVacationDays ?? defaultVacationDays);
 
 	$effect(() => {
 		admin.fetchSettings();
@@ -78,7 +73,7 @@
 		try {
 			const result = await adminApi.resetAllBalances();
 			toast.success(`Reset ${result.usersUpdated} employee balances to ${result.newBalance} days`);
-			resetDialogOpen.set(false);
+			resetDialogOpen = false;
 		} catch (error) {
 			toast.error('Failed to reset balances');
 		} finally {
@@ -171,10 +166,10 @@
 
 		<div class="space-y-4">
 			<p class="text-sm text-ocean-600">
-				Reset all employee vacation balances to the default value ({defaultVacationDays} days).
-				This is typically done at the start of a new year.
+				Reset all employee vacation balances to the saved default ({savedDefaultDays} days). This is typically
+				done at the start of a new year.
 			</p>
-			<Button variant="outline" onclick={() => resetDialogOpen.set(true)}>
+			<Button variant="outline" onclick={() => (resetDialogOpen = true)}>
 				<RotateCcw class="w-4 h-4 mr-2" />
 				Reset All Balances
 			</Button>
@@ -204,39 +199,16 @@
 </div>
 
 <!-- Reset Confirmation Dialog -->
-{#if $resetDialogOpen}
-	<div use:melt={$overlay} class="fixed inset-0 z-50 bg-ocean-900/50 backdrop-blur-sm"></div>
-	<div
-		use:melt={$content}
-		class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/30 w-full max-w-md p-6"
-	>
-		<div class="flex items-center justify-between mb-4">
-			<div class="flex items-center gap-3">
-				<div class="p-2 bg-warning/10 rounded-full">
-					<AlertTriangle class="w-6 h-6 text-warning" />
-				</div>
-				<h3 use:melt={$title} class="text-lg font-semibold text-ocean-800">Reset All Balances</h3>
-			</div>
-			<button
-				use:melt={$close}
-				type="button"
-				aria-label="Close dialog"
-				class="p-1 rounded-lg text-ocean-400 hover:text-ocean-600 hover:bg-ocean-500/10 transition-all cursor-pointer"
-			>
-				<X class="w-5 h-5" />
-			</button>
-		</div>
-		<p use:melt={$description} class="text-ocean-600 mb-6">
-			This will reset vacation balances for <strong>all employees</strong> to{' '}
-			<strong>{defaultVacationDays} days</strong>. This action cannot be undone.
-		</p>
-		<div class="flex gap-3">
-			<Button variant="outline" class="flex-1" onclick={() => resetDialogOpen.set(false)}>
-				Cancel
-			</Button>
-			<Button variant="primary" class="flex-1" onclick={resetAllBalances} loading={isResetting}>
-				Reset Balances
-			</Button>
-		</div>
-	</div>
-{/if}
+<ConfirmDialog
+	bind:open={resetDialogOpen}
+	title="Reset All Balances"
+	confirmText="Reset Balances"
+	variant="warning"
+	isLoading={isResetting}
+	onConfirm={resetAllBalances}
+>
+	{#snippet description()}
+		This will reset vacation balances for <strong>all employees</strong> to
+		<strong>{savedDefaultDays} days</strong>. This action cannot be undone.
+	{/snippet}
+</ConfirmDialog>

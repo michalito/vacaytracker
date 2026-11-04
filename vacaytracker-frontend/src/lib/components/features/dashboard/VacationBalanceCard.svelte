@@ -1,8 +1,9 @@
 <script lang="ts">
-	import MultiSegmentRing from '$lib/components/ui/MultiSegmentRing.svelte';
-	import Tooltip from '$lib/components/ui/Tooltip.svelte';
+	import MultiSegmentRing from '#lib/components/ui/MultiSegmentRing.svelte';
+	import Tooltip from '#lib/components/ui/Tooltip.svelte';
 	import { Palmtree, CheckCircle, Plane, Info, Umbrella } from 'lucide-svelte';
-	import type { VacationRequest } from '$lib/types';
+	import { getDaysUntilStart, parseISODate } from '#lib/utils/date.js';
+	import type { VacationRequest } from '#lib/types/index.js';
 
 	type Theme = 'healthy' | 'warning' | 'critical';
 
@@ -55,22 +56,15 @@
 		used: 'text-stone-400'
 	});
 
-	// Calculate days until next vacation
-	const daysUntilVacation = $derived.by(() => {
-		if (!nextVacation) return null;
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const startDate = new Date(nextVacation.startDate);
-		const diffTime = startDate.getTime() - today.getTime();
-		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-		return diffDays;
-	});
+	// Days until next vacation. Dates are parsed as local days: `new Date('YYYY-MM-DD')` is UTC
+	// midnight, which made the count one too high east of UTC.
+	const daysUntilVacation = $derived(nextVacation ? getDaysUntilStart(nextVacation.startDate) : null);
 
 	// Format date range for display (e.g., "Dec 23-27")
 	const formattedDateRange = $derived.by(() => {
 		if (!nextVacation) return '';
-		const start = new Date(nextVacation.startDate);
-		const end = new Date(nextVacation.endDate);
+		const start = parseISODate(nextVacation.startDate);
+		const end = parseISODate(nextVacation.endDate);
 		const startMonth = start.toLocaleDateString('en-US', { month: 'short' });
 		const endMonth = end.toLocaleDateString('en-US', { month: 'short' });
 		const startDay = start.getDate();
@@ -111,12 +105,16 @@
 			content="Your vacation balance shows how many days you have available this year. Days reset annually."
 			placement="left"
 		>
-			<button
-				type="button"
-				class="p-1.5 rounded-full text-ocean-400 hover:text-ocean-600 hover:bg-ocean-100 transition-colors"
-			>
-				<Info class="w-4 h-4" />
-			</button>
+			{#snippet child({ props })}
+				<button
+					type="button"
+					{...props}
+					aria-label="About your vacation balance"
+					class="p-1.5 rounded-full text-ocean-400 hover:text-ocean-600 hover:bg-ocean-100 transition-colors cursor-pointer"
+				>
+					<Info class="w-4 h-4" aria-hidden="true" />
+				</button>
+			{/snippet}
 		</Tooltip>
 	</div>
 

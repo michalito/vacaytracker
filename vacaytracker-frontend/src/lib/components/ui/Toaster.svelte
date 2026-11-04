@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toast } from '$lib/stores/toast.svelte';
+	import { toast } from '#lib/stores/toast.svelte.js';
 	import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-svelte';
 
 	const icons = {
@@ -46,7 +46,7 @@
 		<div
 			role="alert"
 			aria-live="polite"
-			class="flex items-start gap-3 p-4 rounded-lg border-l-4 shadow-lg bg-white pointer-events-auto animate-toast-in {style.container}"
+			class="flex items-start gap-3 p-4 rounded-xl border-l-4 shadow-xl bg-white/95 backdrop-blur-md pointer-events-auto animate-toast-in {style.container}"
 		>
 			<Icon class="w-5 h-5 flex-shrink-0 mt-0.5 {style.icon}" aria-hidden="true" />
 			<div class="flex-1 min-w-0">

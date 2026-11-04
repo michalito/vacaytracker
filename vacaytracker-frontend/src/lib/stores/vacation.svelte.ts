@@ -1,6 +1,6 @@
-import { vacationApi } from '$lib/api/vacation';
-import type { VacationRequest, VacationStatus } from '$lib/types';
-import { formatDateISO } from '$lib/utils/date';
+import { vacationApi } from '#lib/api/vacation.js';
+import type { VacationRequest, VacationStatus } from '#lib/types/index.js';
+import { formatDateISO } from '#lib/utils/date.js';
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 

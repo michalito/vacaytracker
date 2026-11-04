@@ -1,6 +1,6 @@
-import { calendarApi, type MonthKey } from '$lib/api/calendar';
-import type { TeamVacation } from '$lib/types';
-import { addWeeks, addMonths, getMonthsForWeek } from '$lib/utils/date';
+import { calendarApi } from '#lib/api/calendar.js';
+import type { TeamVacation } from '#lib/types/index.js';
+import { addWeeks, addMonths, getMonthsForWeek } from '#lib/utils/date.js';
 
 export type CalendarView = 'week' | 'month';
 
@@ -31,17 +31,17 @@ function createCalendarStore() {
 	const currentMonth = $derived(currentDate.getMonth() + 1);
 	const currentYear = $derived(currentDate.getFullYear());
 
+	// Collections below are rebuilt (never mutated) so plain Map/Set stay correct under runes;
+	// state updates reassign a new instance instead.
+
 	// Get all unique users from cached data (for filter panel)
 	const availableUsers = $derived.by(() => {
-		const userMap = new Map<string, UserInfo>();
-		for (const [, cached] of monthCache) {
-			for (const v of cached.vacations) {
-				if (!userMap.has(v.userId)) {
-					userMap.set(v.userId, { id: v.userId, name: v.userName });
-				}
-			}
-		}
-		return Array.from(userMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+		const users = new Map<string, UserInfo>(
+			[...monthCache.values()]
+				.flatMap((cached) => cached.vacations)
+				.map((v) => [v.userId, { id: v.userId, name: v.userName }])
+		);
+		return [...users.values()].sort((a, b) => a.name.localeCompare(b.name));
 	});
 
 	// Get vacations for current view
@@ -49,26 +49,15 @@ function createCalendarStore() {
 		if (viewType === 'month') {
 			const key = getCacheKey(currentMonth, currentYear);
 			return monthCache.get(key)?.vacations ?? [];
-		} else {
-			// Week view might span two months
-			const months = getMonthsForWeek(currentDate);
-			const vacations: TeamVacation[] = [];
-			const seen = new Set<string>();
-
-			for (const m of months) {
-				const key = getCacheKey(m.month, m.year);
-				const cached = monthCache.get(key);
-				if (cached) {
-					for (const v of cached.vacations) {
-						if (!seen.has(v.id)) {
-							seen.add(v.id);
-							vacations.push(v);
-						}
-					}
-				}
-			}
-			return vacations;
 		}
+
+		// Week view might span two months; a vacation crossing the boundary appears in both
+		const byId = new Map<string, TeamVacation>(
+			getMonthsForWeek(currentDate)
+				.flatMap((m) => monthCache.get(getCacheKey(m.month, m.year))?.vacations ?? [])
+				.map((v) => [v.id, v])
+		);
+		return [...byId.values()];
 	});
 
 	// Filtered vacations based on showAll flag and selectedUserIds
@@ -103,17 +92,12 @@ function createCalendarStore() {
 		const key = getCacheKey(month, year);
 		if (isCacheValid(key)) return;
 
-		try {
-			const response = await calendarApi.getMonth(month, year);
-			monthCache.set(key, {
-				vacations: response.vacations,
-				fetchedAt: Date.now()
-			});
-			// Trigger reactivity by reassigning
-			monthCache = new Map(monthCache);
-		} catch (e) {
-			throw e;
-		}
+		const response = await calendarApi.getMonth(month, year);
+		// Reassign a new Map so dependents re-run (Maps in $state are not deeply reactive)
+		monthCache = new Map([
+			...monthCache,
+			[key, { vacations: response.vacations, fetchedAt: Date.now() }]
+		]);
 	}
 
 	// Ensure data is loaded for current view
@@ -177,13 +161,10 @@ function createCalendarStore() {
 		// Always switch to custom filtering mode
 		showAll = false;
 
-		const newSet = new Set(selectedUserIds);
-		if (newSet.has(userId)) {
-			newSet.delete(userId);
-		} else {
-			newSet.add(userId);
-		}
-		selectedUserIds = newSet;
+		const ids = selectedUserIds.has(userId)
+			? [...selectedUserIds].filter((id) => id !== userId)
+			: [...selectedUserIds, userId];
+		selectedUserIds = new Set(ids);
 	}
 
 	function clearFilters(): void {

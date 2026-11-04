@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import type { VacationRequest } from '$lib/types';
+import type { VacationRequest } from '#lib/types/index.js';
 
-vi.mock('$lib/api/vacation', () => ({
+vi.mock('#lib/api/vacation.js', () => ({
 	vacationApi: {
 		list: vi.fn(),
 		create: vi.fn(),
@@ -26,16 +26,16 @@ function mockRequest(overrides: Partial<VacationRequest> = {}): VacationRequest 
 }
 
 describe('vacation store', () => {
-	let vacation: (typeof import('$lib/stores/vacation.svelte'))['vacation'];
-	let vacationApi: (typeof import('$lib/api/vacation'))['vacationApi'];
+	let vacation: (typeof import('#lib/stores/vacation.svelte.js'))['vacation'];
+	let vacationApi: (typeof import('#lib/api/vacation.js'))['vacationApi'];
 
 	beforeEach(async () => {
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date(2025, 5, 15)); // June 15, 2025
 		vi.resetModules();
 
-		const storeModule = await import('$lib/stores/vacation.svelte');
-		const apiModule = await import('$lib/api/vacation');
+		const storeModule = await import('#lib/stores/vacation.svelte.js');
+		const apiModule = await import('#lib/api/vacation.js');
 		vacation = storeModule.vacation;
 		vacationApi = apiModule.vacationApi;
 

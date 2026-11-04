@@ -25,8 +25,8 @@
 - [ ] **Create SvelteKit project**
 
 ```bash
-npm create svelte@latest vacaytracker-frontend
-# Select: Skeleton project, TypeScript, ESLint, Prettier
+npx sv create vacaytracker-frontend
+# Select: SvelteKit minimal, TypeScript, ESLint, Prettier (requires Node 22.17+)
 cd vacaytracker-frontend
 npm install
 ```
@@ -35,52 +35,79 @@ npm install
 
 - [ ] **Install required packages** `package.json`
 
+Add the dependencies **and the `runed` override** to `package.json` first (below), then install.
+Installing bits-ui before the override exists fails with `ERESOLVE` under SvelteKit 3 (see the note on `runed`).
+
 ```bash
-npm install melt lucide-svelte clsx
-npm install -D tailwindcss @tailwindcss/vite
+npm install
 ```
 
-**package.json dependencies:**
+**package.json (SvelteKit 3):**
 ```json
 {
+  "type": "module",
+  "engines": { "node": ">=22.17" },
+  "imports": {
+    "#lib/*": "./src/lib/*"
+  },
   "dependencies": {
-    "melt": "^0.42.0",
-    "lucide-svelte": "^0.300.0",
-    "clsx": "^2.1.0"
+    "bits-ui": "^2.20.4",
+    "@internationalized/date": "^3.12.4",
+    "lucide-svelte": "^0.469.0",
+    "clsx": "^2.1.1"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^3.0.0",
-    "@sveltejs/kit": "^2.49.0",
-    "@sveltejs/vite-plugin-svelte": "^4.0.0",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/vite": "^4.0.0",
-    "typescript": "^5.0.0",
-    "vite": "^6.0.0"
+    "@sveltejs/adapter-node": "^6.0.1",
+    "@sveltejs/kit": "^3.1.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.8",
+    "tailwindcss": "^4.3.4",
+    "@tailwindcss/vite": "^4.3.4",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.5"
+  },
+  "overrides": {
+    "runed": "^0.38.0"
   }
 }
 ```
 
-### Task 1.3: Configure Vite
+- `#lib/*` (Node subpath imports) replaces SvelteKit 2's `$lib` alias. Imports need the file
+  extension: `#lib/stores/auth.svelte.js`, `#lib/api/admin.js`, `#lib/types/index.js`.
+- `typescript` stays on 6.0.x because `typescript-eslint` supports TypeScript < 6.1.
+- The `runed` override exists because bits-ui 2.20.x pins `runed ^0.35`, whose optional SvelteKit
+  peer is `^2`; runed 0.38 accepts Kit 3 and its only breaking change (`runed/kit`) is unused by bits-ui.
+
+### Task 1.3: Configure Vite (and SvelteKit)
 
 - [ ] **Update vite.config.ts** `vite.config.ts`
 
+SvelteKit 3 has no `svelte.config.js`: Kit options are passed to the `sveltekit()` plugin.
+
 ```typescript
+import adapter from '@sveltejs/adapter-node';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [tailwindcss(), sveltekit()],
+  plugins: [
+    tailwindcss(),
+    sveltekit({
+      preprocess: [vitePreprocess()],
+      adapter: adapter()
+    })
+  ],
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
-    },
-  },
+        target: process.env.VITE_API_URL || 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
+  }
 });
 ```
 
@@ -88,18 +115,17 @@ export default defineConfig({
 
 - [ ] **Update tsconfig.json** `tsconfig.json`
 
-```json
+`svelte-kit sync` generates the base config into `node_modules/$app`. Overriding `types`
+replaces its list, so keep `$app/types`.
+
+```jsonc
 {
-  "extends": "./.svelte-kit/tsconfig.json",
+  "extends": "$app/tsconfig",
   "compilerOptions": {
     "strict": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "paths": {
-      "$lib/*": ["./src/lib/*"],
-      "$components/*": ["./src/lib/components/*"]
-    }
-  }
+    "types": ["$app/types", "node"]
+  },
+  "include": ["src", "vite.config.ts", "vitest.config.ts", "vitest-setup.ts"]
 }
 ```
 
@@ -346,7 +372,7 @@ export interface UpdateUserForm {
 - [ ] **Create api/client.ts** `src/lib/api/client.ts`
 
 ```typescript
-import type { ApiError } from '$lib/types';
+import type { ApiError } from '#lib/types/index.js';
 
 const API_BASE = '/api';
 
@@ -428,7 +454,7 @@ export async function request<T>(
 
 ```typescript
 import { request, setAuthToken, clearAuthToken } from './client';
-import type { User, LoginResponse, EmailPreferences } from '$lib/types';
+import type { User, LoginResponse, EmailPreferences } from '#lib/types/index.js';
 
 export const authApi = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
@@ -475,7 +501,7 @@ import type {
   VacationListResponse,
   TeamVacationResponse,
   CreateVacationForm,
-} from '$lib/types';
+} from '#lib/types/index.js';
 
 export const vacationApi = {
   create: (data: CreateVacationForm): Promise<VacationRequest> => {
@@ -521,7 +547,7 @@ import type {
   Settings,
   CreateUserForm,
   UpdateUserForm,
-} from '$lib/types';
+} from '#lib/types/index.js';
 
 export const adminApi = {
   // Users
@@ -610,8 +636,8 @@ export const adminApi = {
 - [ ] **Create stores/auth.svelte.ts** `src/lib/stores/auth.svelte.ts`
 
 ```typescript
-import { authApi } from '$lib/api/auth';
-import type { User } from '$lib/types';
+import { authApi } from '#lib/api/auth.js';
+import type { User } from '#lib/types/index.js';
 
 interface AuthState {
   user: User | null;
@@ -755,8 +781,8 @@ export const toast = createToastStore();
 - [ ] **Create stores/vacation.svelte.ts** `src/lib/stores/vacation.svelte.ts`
 
 ```typescript
-import { vacationApi } from '$lib/api/vacation';
-import type { VacationRequest, VacationStatus } from '$lib/types';
+import { vacationApi } from '#lib/api/vacation.js';
+import type { VacationRequest, VacationStatus } from '#lib/types/index.js';
 
 function createVacationStore() {
   let requests = $state<VacationRequest[]>([]);
@@ -1206,7 +1232,7 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { toast, type Toast } from '$lib/stores/toast.svelte';
+  import { toast, type Toast } from '#lib/stores/toast.svelte.js';
   import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-svelte';
   import { clsx } from 'clsx';
 
@@ -1259,8 +1285,8 @@ export const vacation = createVacationStore();
 ```svelte
 <script lang="ts">
   import '../app.css';
-  import { auth } from '$lib/stores/auth.svelte';
-  import Toast from '$lib/components/ui/Toast.svelte';
+  import { auth } from '#lib/stores/auth.svelte.js';
+  import Toast from '#lib/components/ui/Toast.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -1291,9 +1317,9 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { auth } from '$lib/stores/auth.svelte';
+  import { auth } from '#lib/stores/auth.svelte.js';
   import { goto } from '$app/navigation';
-  import EmployeeHeader from '$lib/components/layout/EmployeeHeader.svelte';
+  import EmployeeHeader from '#lib/components/layout/EmployeeHeader.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -1325,10 +1351,10 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { auth } from '$lib/stores/auth.svelte';
+  import { auth } from '#lib/stores/auth.svelte.js';
   import { goto } from '$app/navigation';
-  import AdminSidebar from '$lib/components/layout/AdminSidebar.svelte';
-  import AdminHeader from '$lib/components/layout/AdminHeader.svelte';
+  import AdminSidebar from '#lib/components/layout/AdminSidebar.svelte';
+  import AdminHeader from '#lib/components/layout/AdminHeader.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -1363,10 +1389,10 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { auth } from '$lib/stores/auth.svelte';
+  import { auth } from '#lib/stores/auth.svelte.js';
   import { goto } from '$app/navigation';
-  import Avatar from '$lib/components/ui/Avatar.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
+  import Avatar from '#lib/components/ui/Avatar.svelte';
+  import Button from '#lib/components/ui/Button.svelte';
   import { Palmtree, Calendar, User, LogOut, Settings } from 'lucide-svelte';
 
   function handleLogout() {
@@ -1424,7 +1450,7 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state'; // $app/stores was removed in SvelteKit 3; read page.url directly
   import { clsx } from 'clsx';
   import {
     Palmtree,
@@ -1461,7 +1487,7 @@ export const vacation = createVacationStore();
   <nav class="flex-1 p-4">
     <ul class="space-y-1">
       {#each navItems as item}
-        {@const isActive = $page.url.pathname === item.href}
+        {@const isActive = page.url.pathname === item.href}
         <li>
           <a
             href={item.href}
@@ -1498,11 +1524,11 @@ export const vacation = createVacationStore();
 ```svelte
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { auth } from '$lib/stores/auth.svelte';
-  import { toast } from '$lib/stores/toast.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
-  import Input from '$lib/components/ui/Input.svelte';
-  import Card from '$lib/components/ui/Card.svelte';
+  import { auth } from '#lib/stores/auth.svelte.js';
+  import { toast } from '#lib/stores/toast.svelte.js';
+  import Button from '#lib/components/ui/Button.svelte';
+  import Input from '#lib/components/ui/Input.svelte';
+  import Card from '#lib/components/ui/Card.svelte';
   import { Palmtree, Waves } from 'lucide-svelte';
 
   let email = $state('');
@@ -1623,13 +1649,13 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { auth } from '$lib/stores/auth.svelte';
-  import { vacation } from '$lib/stores/vacation.svelte';
-  import BalanceDisplay from '$lib/components/features/vacation/BalanceDisplay.svelte';
-  import RequestList from '$lib/components/features/vacation/RequestList.svelte';
-  import RequestModal from '$lib/components/features/vacation/RequestModal.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
-  import Card from '$lib/components/ui/Card.svelte';
+  import { auth } from '#lib/stores/auth.svelte.js';
+  import { vacation } from '#lib/stores/vacation.svelte.js';
+  import BalanceDisplay from '#lib/components/features/vacation/BalanceDisplay.svelte';
+  import RequestList from '#lib/components/features/vacation/RequestList.svelte';
+  import RequestModal from '#lib/components/features/vacation/RequestModal.svelte';
+  import Button from '#lib/components/ui/Button.svelte';
+  import Card from '#lib/components/ui/Card.svelte';
   import { Plus, Umbrella } from 'lucide-svelte';
 
   let isRequestModalOpen = $state(false);
@@ -1739,7 +1765,7 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import ProgressRing from '$lib/components/ui/ProgressRing.svelte';
+  import ProgressRing from '#lib/components/ui/ProgressRing.svelte';
 
   interface Props {
     current: number;
@@ -1757,187 +1783,58 @@ export const vacation = createVacationStore();
 
 - [ ] **Create RequestModal.svelte** `src/lib/components/features/vacation/RequestModal.svelte`
 
+Built on the shared `Modal` (`#lib/components/ui/Modal.svelte`, a Bits UI `Dialog`) and the Bits UI
+`DateRangePicker`. Rules that apply to every dialog in the app:
+
+- **Initialise on open; clean up in `onClosed`.** Bits UI calls `onOpenChange` only for its own closes
+  (Escape, overlay click, close button), not when code sets `open = false` (Cancel, after submit).
+  Reset form state when the modal opens (`$effect.pre` on `open`), and put post-close cleanup in
+  `Modal`'s `onClosed`, which wraps Bits `onOpenChangeComplete` and fires for every close.
+- **Weekend policy comes from `GET /api/settings/public`** and is passed in as `weekendPolicy`;
+  `calculateBusinessDays(start, end, excludeWeekends, excludedDays)` mirrors the API's count.
+- **Portal the calendar** with `<Portal>` from `bits-ui`: the dialog's transform and backdrop-filter
+  would otherwise clip and offset it.
+
 ```svelte
 <script lang="ts">
-  import { Dialog } from 'melt/builders';
-  import { vacation } from '$lib/stores/vacation.svelte';
-  import { auth } from '$lib/stores/auth.svelte';
-  import { toast } from '$lib/stores/toast.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
-  import Input from '$lib/components/ui/Input.svelte';
-  import { X, Calendar, Palmtree } from 'lucide-svelte';
+  import { DateRangePicker, Portal, type DateRange } from 'bits-ui';
+  import { untrack } from 'svelte';
+  import Modal from '#lib/components/ui/Modal.svelte';
+  import type { WeekendPolicy } from '#lib/types/index.js';
 
   interface Props {
     open: boolean;
+    weekendPolicy?: WeekendPolicy;
   }
 
-  let { open = $bindable(false) }: Props = $props();
+  let { open = $bindable(false), weekendPolicy }: Props = $props();
 
-  let startDate = $state('');
-  let endDate = $state('');
+  let dateRange = $state<DateRange>({ start: undefined, end: undefined });
   let reason = $state('');
-  let isSubmitting = $state(false);
-  let errors = $state<{ startDate?: string; endDate?: string }>({});
 
-  const dialog = new Dialog({
-    open: () => open,
-    onOpenChange: (v) => {
-      open = v;
-      if (!v) resetForm();
-    },
+  // Every opening starts from a clean form, however the previous one was closed
+  $effect.pre(() => {
+    if (open)
+      untrack(() => {
+        dateRange = { start: undefined, end: undefined };
+        reason = '';
+      });
   });
-
-  function resetForm() {
-    startDate = '';
-    endDate = '';
-    reason = '';
-    errors = {};
-  }
-
-  function validate(): boolean {
-    errors = {};
-
-    if (!startDate) {
-      errors.startDate = 'Start date is required';
-    }
-
-    if (!endDate) {
-      errors.endDate = 'End date is required';
-    }
-
-    // Additional date validation can be added here
-
-    return Object.keys(errors).length === 0;
-  }
-
-  async function handleSubmit() {
-    if (!validate()) return;
-
-    isSubmitting = true;
-
-    try {
-      // Convert YYYY-MM-DD to DD/MM/YYYY for API
-      const formatDate = (d: string) => {
-        const [year, month, day] = d.split('-');
-        return `${day}/${month}/${year}`;
-      };
-
-      await vacation.createRequest({
-        startDate: formatDate(startDate),
-        endDate: formatDate(endDate),
-        reason: reason || undefined,
-      });
-
-      // Update user balance
-      auth.updateUser({
-        vacationBalance: (auth.user?.vacationBalance ?? 0) - 1, // Approximate
-      });
-
-      toast.success('Vacation request submitted!');
-      open = false;
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to submit request');
-    } finally {
-      isSubmitting = false;
-    }
-  }
 </script>
 
-{#if dialog.open}
-  <div class="fixed inset-0 z-50">
-    <!-- Overlay -->
-    <div
-      {...dialog.overlay}
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm"
-    ></div>
-
-    <!-- Content -->
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-      <div
-        {...dialog.content}
-        class="bg-white rounded-xl shadow-xl w-full max-w-md"
-      >
-        <!-- Header -->
-        <div class="flex items-center justify-between p-4 border-b border-sand-200">
-          <div class="flex items-center gap-2">
-            <Palmtree class="w-5 h-5 text-ocean-500" />
-            <h2 class="text-lg font-semibold text-ocean-800">
-              Request Vacation
-            </h2>
-          </div>
-          <button
-            {...dialog.close}
-            class="text-ocean-400 hover:text-ocean-600"
-          >
-            <X class="w-5 h-5" />
-          </button>
-        </div>
-
-        <!-- Body -->
-        <form
-          onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-          class="p-4 space-y-4"
-        >
-          <div class="grid grid-cols-2 gap-4">
-            <Input
-              type="date"
-              label="Start Date"
-              bind:value={startDate}
-              error={errors.startDate}
-              required
-            />
-            <Input
-              type="date"
-              label="End Date"
-              bind:value={endDate}
-              error={errors.endDate}
-              required
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-ocean-700 mb-1">
-              Reason (optional)
-            </label>
-            <textarea
-              bind:value={reason}
-              class="w-full px-3 py-2 rounded-md border border-sand-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
-              rows="3"
-              placeholder="Family vacation, personal time, etc."
-            ></textarea>
-          </div>
-
-          <!-- Balance Info -->
-          <div class="bg-ocean-50 rounded-lg p-3 text-sm">
-            <p class="text-ocean-700">
-              <strong>Current Balance:</strong> {auth.user?.vacationBalance} days
-            </p>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              class="flex-1"
-              onclick={() => open = false}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              class="flex-1"
-              loading={isSubmitting}
-            >
-              Submit Request
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-{/if}
+<Modal bind:open title="Request Vacation" closeLabel="Close request form">
+  <form class="space-y-4 p-4">
+    <DateRangePicker.Root bind:value={dateRange} locale="en-GB" weekStartsOn={1} numberOfMonths={2}>
+      <!-- Label, start/end Input segments, Trigger with aria-label="Open calendar" -->
+      <Portal>
+        <DateRangePicker.Content class="presence-pop z-[60]">
+          <!-- Calendar grid; each DateRangePicker.Day uses the `calendar-day` class (app.css) -->
+        </DateRangePicker.Content>
+      </Portal>
+    </DateRangePicker.Root>
+    <!-- Reason textarea, balance summary, Cancel (open = false) and Submit -->
+  </form>
+</Modal>
 ```
 
 ### Task 9.4: Create Request List Component
@@ -1946,7 +1843,7 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import type { VacationRequest } from '$lib/types';
+  import type { VacationRequest } from '#lib/types/index.js';
   import RequestCard from './RequestCard.svelte';
 
   interface Props {
@@ -1969,11 +1866,11 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import type { VacationRequest } from '$lib/types';
-  import { vacation } from '$lib/stores/vacation.svelte';
-  import { toast } from '$lib/stores/toast.svelte';
-  import Badge from '$lib/components/ui/Badge.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
+  import type { VacationRequest } from '#lib/types/index.js';
+  import { vacation } from '#lib/stores/vacation.svelte.js';
+  import { toast } from '#lib/stores/toast.svelte.js';
+  import Badge from '#lib/components/ui/Badge.svelte';
+  import Button from '#lib/components/ui/Button.svelte';
   import { Calendar, Trash2 } from 'lucide-svelte';
 
   interface Props {
@@ -2055,12 +1952,12 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { adminApi } from '$lib/api/admin';
-  import Card from '$lib/components/ui/Card.svelte';
-  import StatsCard from '$lib/components/features/admin/StatsCard.svelte';
-  import PendingRequests from '$lib/components/features/admin/PendingRequests.svelte';
+  import { adminApi } from '#lib/api/admin.js';
+  import Card from '#lib/components/ui/Card.svelte';
+  import StatsCard from '#lib/components/features/admin/StatsCard.svelte';
+  import PendingRequests from '#lib/components/features/admin/PendingRequests.svelte';
   import { Users, Clock, CheckCircle, XCircle } from 'lucide-svelte';
-  import type { VacationRequest, User } from '$lib/types';
+  import type { VacationRequest, User } from '#lib/types/index.js';
 
   let pendingRequests = $state<VacationRequest[]>([]);
   let totalUsers = $state(0);
@@ -2185,12 +2082,12 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import type { VacationRequest } from '$lib/types';
-  import { adminApi } from '$lib/api/admin';
-  import { toast } from '$lib/stores/toast.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
-  import Badge from '$lib/components/ui/Badge.svelte';
-  import Avatar from '$lib/components/ui/Avatar.svelte';
+  import type { VacationRequest } from '#lib/types/index.js';
+  import { adminApi } from '#lib/api/admin.js';
+  import { toast } from '#lib/stores/toast.svelte.js';
+  import Button from '#lib/components/ui/Button.svelte';
+  import Badge from '#lib/components/ui/Badge.svelte';
+  import Avatar from '#lib/components/ui/Avatar.svelte';
   import { Check, X, Clock } from 'lucide-svelte';
 
   interface Props {
@@ -2297,12 +2194,12 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import { vacationApi } from '$lib/api/vacation';
-  import Card from '$lib/components/ui/Card.svelte';
-  import Button from '$lib/components/ui/Button.svelte';
-  import MonthView from '$lib/components/features/calendar/MonthView.svelte';
+  import { vacationApi } from '#lib/api/vacation.js';
+  import Card from '#lib/components/ui/Card.svelte';
+  import Button from '#lib/components/ui/Button.svelte';
+  import MonthView from '#lib/components/features/calendar/MonthView.svelte';
   import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-svelte';
-  import type { TeamVacation } from '$lib/types';
+  import type { TeamVacation } from '#lib/types/index.js';
 
   let currentDate = $state(new Date());
   let vacations = $state<TeamVacation[]>([]);
@@ -2387,7 +2284,7 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import type { TeamVacation } from '$lib/types';
+  import type { TeamVacation } from '#lib/types/index.js';
   import DayCell from './DayCell.svelte';
 
   interface Props {
@@ -2460,7 +2357,7 @@ export const vacation = createVacationStore();
 
 ```svelte
 <script lang="ts">
-  import type { TeamVacation } from '$lib/types';
+  import type { TeamVacation } from '#lib/types/index.js';
   import { clsx } from 'clsx';
 
   interface Props {

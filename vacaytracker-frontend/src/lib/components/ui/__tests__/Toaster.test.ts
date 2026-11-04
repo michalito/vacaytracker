@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { toast } from '$lib/stores/toast.svelte';
+import { toast } from '#lib/stores/toast.svelte.js';
 import Toaster from '../Toaster.svelte';
 
 describe('Toaster', () => {

@@ -11,7 +11,7 @@ import type {
 	TestEmailResponse,
 	EmailTemplateType,
 	EmailPreviewResponse
-} from '$lib/types';
+} from '#lib/types/index.js';
 
 export const adminApi = {
 	// Users

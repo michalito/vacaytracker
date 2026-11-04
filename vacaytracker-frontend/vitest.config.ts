@@ -1,6 +1,6 @@
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { svelteTesting } from '@testing-library/svelte/vite';
-import path from 'path';
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -10,9 +10,8 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		setupFiles: ['./vitest-setup.ts'],
 		css: false,
+		// `#lib/*` resolves through package.json "imports"; only SvelteKit's $app modules need doubles
 		alias: {
-			$lib: path.resolve('./src/lib'),
-			$components: path.resolve('./src/lib/components'),
 			$app: path.resolve('./src/lib/__mocks__/$app')
 		},
 		restoreMocks: true

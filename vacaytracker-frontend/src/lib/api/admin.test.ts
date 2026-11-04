@@ -6,6 +6,7 @@ vi.mock('./client', () => ({
 
 import { request } from './client';
 import { adminApi } from './admin';
+import type { CreateUserForm, Settings } from '#lib/types/index.js';
 
 const mockRequest = vi.mocked(request);
 
@@ -39,8 +40,18 @@ describe('adminApi', () => {
 
 	describe('createUser', () => {
 		it('sends POST to /admin/users with body', async () => {
-			const userData = { email: 'test@example.com', name: 'Test User', role: 'employee' };
-			const mockResponse = { id: 'user-1', ...userData };
+			const userData: CreateUserForm = {
+				email: 'test@example.com',
+				password: 'password123',
+				name: 'Test User',
+				role: 'employee'
+			};
+			const mockResponse = {
+				id: 'user-1',
+				email: userData.email,
+				name: userData.name,
+				role: userData.role
+			};
 			mockRequest.mockResolvedValueOnce(mockResponse);
 
 			const result = await adminApi.createUser(userData);
@@ -181,8 +192,10 @@ describe('adminApi', () => {
 
 	describe('updateSettings', () => {
 		it('sends PUT to /admin/settings with body', async () => {
-			const settingsData = { excludeWeekends: false };
-			const mockResponse = { excludeWeekends: false, defaultBalance: 25 };
+			const settingsData: Partial<Settings> = {
+				weekendPolicy: { excludeWeekends: false, excludedDays: [0, 6] }
+			};
+			const mockResponse = { ...settingsData, defaultVacationDays: 25 };
 			mockRequest.mockResolvedValueOnce(mockResponse);
 
 			const result = await adminApi.updateSettings(settingsData);

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { WeekendPolicy } from '$lib/types';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import type { WeekendPolicy } from '#lib/types/index.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Checkbox from '#lib/components/ui/Checkbox.svelte';
 	import { Calendar } from 'lucide-svelte';
 
 	interface Props {
@@ -67,7 +67,7 @@
 			<div class="pt-4 border-t border-sand-200">
 				<p class="text-sm font-medium text-ocean-700 mb-3">Excluded Days</p>
 				<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-					{#each weekDays as day}
+					{#each weekDays as day (day.value)}
 						<label
 							class="flex items-center gap-2 p-2 rounded-lg border border-sand-200 cursor-pointer hover:bg-sand-50 transition-colors {policy.excludedDays.includes(
 								day.value

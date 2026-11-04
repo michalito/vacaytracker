@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { User } from '$lib/types';
-	import { formatDateMedium } from '$lib/utils/date';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import type { User } from '#lib/types/index.js';
+	import { formatDateMedium } from '#lib/utils/date.js';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Badge from '#lib/components/ui/Badge.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import { Edit, Trash2 } from 'lucide-svelte';
 
 	interface Props {

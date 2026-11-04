@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { createTabs, createSelect, melt } from '@melt-ui/svelte';
-	import { fade, fly } from 'svelte/transition';
-	import type { VacationRequest } from '$lib/types';
+	import { Tabs, Select } from 'bits-ui';
+	import type { VacationRequest } from '#lib/types/index.js';
 	import EnhancedRequestCard from './EnhancedRequestCard.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import EmptyState from '$lib/components/ui/EmptyState.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Card from '#lib/components/ui/Card.svelte';
+	import EmptyState from '#lib/components/ui/EmptyState.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import {
 		Clock,
 		CalendarCheck,
@@ -53,32 +52,28 @@
 	// Year Filter Logic (for Past tab)
 	// ===================
 
+	// Year straight from the ISO date string; `new Date('YYYY-MM-DD')` is UTC and can
+	// land in the previous year for users west of UTC
+	function yearOf(isoDate: string): number {
+		return Number(isoDate.slice(0, 4));
+	}
+
 	// Extract unique years from past requests, sorted descending
 	const availableYears = $derived(
-		Array.from(new Set(pastRequests.map((r) => new Date(r.endDate).getFullYear()))).sort(
-			(a, b) => b - a
-		)
+		Array.from(new Set(pastRequests.map((r) => yearOf(r.endDate)))).sort((a, b) => b - a)
 	);
 
-	// Default to most recent year with data, fallback to current year
-	const mostRecentYear = $derived(availableYears[0] ?? new Date().getFullYear());
-
-	// Selected year state (initialized lazily)
+	// Selected year; falls back to the most recent year with data
 	let selectedYear = $state<number | null>(null);
-
-	// Active year: user selection or default
-	const activeYear = $derived(selectedYear ?? mostRecentYear);
-
-	// Initialize on first render when data is available
-	$effect(() => {
-		if (selectedYear === null && availableYears.length > 0) {
-			selectedYear = mostRecentYear;
-		}
-	});
+	const activeYear = $derived(
+		selectedYear !== null && availableYears.includes(selectedYear)
+			? selectedYear
+			: (availableYears[0] ?? new Date().getFullYear())
+	);
 
 	// Filtered past requests by year
 	const filteredPastRequests = $derived(
-		pastRequests.filter((r) => new Date(r.endDate).getFullYear() === activeYear)
+		pastRequests.filter((r) => yearOf(r.endDate) === activeYear)
 	);
 
 	// Year options for select dropdown
@@ -86,31 +81,11 @@
 		availableYears.map((year) => ({ value: year.toString(), label: year.toString() }))
 	);
 
-	// ===================
-	// Melt UI: Year Select
-	// ===================
-	const {
-		elements: { trigger: yearTrigger, menu: yearMenu, option: yearOption },
-		states: { open: yearSelectOpen, selected: yearSelected },
-		helpers: { isSelected: isYearSelected }
-	} = createSelect<string>({
-		forceVisible: true,
-		portal: null,
-		onSelectedChange: ({ next }) => {
-			if (next) {
-				selectedYear = parseInt(next.value);
-			}
-			return next;
-		}
-	});
+	let yearSelectOpen = $state(false);
 
-	// Sync select display with activeYear
-	$effect(() => {
-		const yearStr = activeYear.toString();
-		if (!$yearSelected || $yearSelected.value !== yearStr) {
-			yearSelected.set({ value: yearStr, label: yearStr });
-		}
-	});
+	function handleYearChange(next: string) {
+		if (next) selectedYear = Number(next);
+	}
 
 	// ===================
 	// Tab Configuration
@@ -142,25 +117,17 @@
 		}
 	]);
 
-	// Default tab: pending if any, then upcoming, then past
+	// Default tab follows the data (pending, then upcoming, then past) until the user picks one,
+	// so it is still right when requests arrive after the first render
+	let chosenTab = $state<TabId | null>(null);
 	const defaultTab = $derived<TabId>(
 		pendingRequests.length > 0 ? 'pending' : upcomingRequests.length > 0 ? 'upcoming' : 'past'
 	);
+	const activeTab = $derived<TabId>(chosenTab ?? defaultTab);
 
-	// ===================
-	// Melt UI: Tabs
-	// ===================
-	const {
-		elements: { root, list, trigger, content },
-		states: { value: activeTab }
-	} = createTabs({
-		defaultValue: defaultTab,
-		loop: true,
-		activateOnFocus: true
-	});
-
-	// Get current tab config
-	const currentTab = $derived(tabs.find((t) => t.id === $activeTab) ?? tabs[0]);
+	function isTabId(value: string): value is TabId {
+		return value === 'pending' || value === 'upcoming' || value === 'past';
+	}
 </script>
 
 <Card padding="none">
@@ -171,17 +138,21 @@
 		</div>
 	{/snippet}
 
-	<div use:melt={$root} class="w-full">
+	<Tabs.Root
+		bind:value={
+			() => activeTab,
+			(next) => {
+				if (isTabId(next)) chosenTab = next;
+			}
+		}
+		class="w-full"
+	>
 		<!-- Tab List -->
 		<div class="px-4 pt-4">
-			<div
-				use:melt={$list}
-				class="inline-flex p-1 bg-sand-100 rounded-lg"
-				aria-label="Request categories"
-			>
+			<Tabs.List class="inline-flex p-1 bg-sand-100 rounded-lg" aria-label="Request categories">
 				{#each tabs as tab (tab.id)}
-					<button
-						use:melt={$trigger(tab.id)}
+					<Tabs.Trigger
+						value={tab.id}
 						class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer
 							data-[state=active]:bg-white data-[state=active]:text-ocean-700 data-[state=active]:shadow-sm
 							data-[state=inactive]:text-ocean-500 data-[state=inactive]:hover:text-ocean-700"
@@ -191,108 +162,117 @@
 						{#if tab.count > 0}
 							<span
 								class="px-1.5 py-0.5 text-xs rounded-md transition-colors
-									data-[state=active]:bg-ocean-100 data-[state=active]:text-ocean-700
-									data-[state=inactive]:bg-sand-200 data-[state=inactive]:text-ocean-500"
-								data-state={$activeTab === tab.id ? 'active' : 'inactive'}
+									{activeTab === tab.id ? 'bg-ocean-100 text-ocean-700' : 'bg-sand-200 text-ocean-500'}"
 							>
 								{tab.count}
 							</span>
 						{/if}
-					</button>
+					</Tabs.Trigger>
 				{/each}
-			</div>
+			</Tabs.List>
 		</div>
 
-		<!-- Tab Content with Transitions -->
+		<!-- Tab panels (the fade-in comes from the [data-tabs-content] rule in app.css) -->
 		{#each tabs as tab (tab.id)}
-			<div use:melt={$content(tab.id)} class="focus:outline-none">
-				{#key tab.id === $activeTab ? $activeTab : null}
-					{#if tab.id === $activeTab}
-						<div class="p-4" in:fly={{ y: 8, duration: 200, delay: 50 }} out:fade={{ duration: 100 }}>
-							{#if tab.requests.length === 0}
-								<!-- Empty States -->
-								{#if tab.id === 'pending'}
-									<EmptyState icon={Plane} message="No requests in the queue" iconSize="lg">
-										<p class="text-sm text-ocean-400 -mt-2">Time to dream up your next getaway?</p>
-									</EmptyState>
-								{:else if tab.id === 'upcoming'}
-									<EmptyState icon={CalendarCheck} message="No upcoming vacations" iconSize="lg">
-										{#if onRequestVacation}
-											<Button variant="outline" onclick={onRequestVacation}>
-												Plan your next getaway
-											</Button>
-										{/if}
-									</EmptyState>
-								{:else}
-									<EmptyState icon={Archive} message="No vacation history yet" iconSize="lg">
-										<p class="text-sm text-ocean-400 -mt-2">
-											Your completed requests will appear here
-										</p>
-									</EmptyState>
-								{/if}
+			<Tabs.Content value={tab.id} class="focus:outline-none">
+				{#if tab.id === activeTab}
+					<div class="p-4">
+						{#if tab.requests.length === 0}
+							<!-- Empty States -->
+							{#if tab.id === 'pending'}
+								<EmptyState icon={Plane} message="No requests in the queue" iconSize="lg">
+									<p class="text-sm text-ocean-400 -mt-2">Time to dream up your next getaway?</p>
+								</EmptyState>
+							{:else if tab.id === 'upcoming'}
+								<EmptyState icon={CalendarCheck} message="No upcoming vacations" iconSize="lg">
+									{#if onRequestVacation}
+										<Button variant="outline" onclick={onRequestVacation}>
+											Plan your next getaway
+										</Button>
+									{/if}
+								</EmptyState>
 							{:else}
-								<!-- Year Filter (Past tab only) -->
-								{#if tab.id === 'past' && availableYears.length > 0}
-									<div class="flex items-center justify-between mb-4">
-										<p class="text-sm text-ocean-500">
-											{filteredPastRequests.length} request{filteredPastRequests.length !== 1
-												? 's'
-												: ''}
-										</p>
-										<div class="relative inline-block">
-											<button
-												use:melt={$yearTrigger}
-												class="flex items-center p-1 text-sm font-medium rounded-lg bg-sand-100 focus:outline-none cursor-pointer"
+								<EmptyState icon={Archive} message="No vacation history yet" iconSize="lg">
+									<p class="text-sm text-ocean-400 -mt-2">
+										Your completed requests will appear here
+									</p>
+								</EmptyState>
+							{/if}
+						{:else}
+							<!-- Year Filter (Past tab only) -->
+							{#if tab.id === 'past' && availableYears.length > 0}
+								<div class="flex items-center justify-between mb-4">
+									<p class="text-sm text-ocean-500">
+										{filteredPastRequests.length} request{filteredPastRequests.length !== 1
+											? 's'
+											: ''}
+									</p>
+									<div class="relative inline-block">
+										<Select.Root
+											type="single"
+											items={yearOptions}
+											value={activeYear.toString()}
+											onValueChange={handleYearChange}
+											bind:open={yearSelectOpen}
+										>
+											<Select.Trigger
+												aria-label="Filter past requests by year"
+												class="flex items-center p-1 text-sm font-medium rounded-lg bg-sand-100 cursor-pointer
+														focus:outline-none focus-visible:ring-2 focus-visible:ring-ocean-500"
 											>
 												<span
 													class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white text-ocean-700 shadow-sm"
 												>
-													{$yearSelected?.label ?? activeYear}
+													{activeYear}
 													<ChevronDown
-														class="w-4 h-4 transition-transform duration-200 {$yearSelectOpen
+														class="w-4 h-4 transition-transform duration-200 {yearSelectOpen
 															? 'rotate-180'
 															: ''}"
+														aria-hidden="true"
 													/>
 												</span>
-											</button>
+											</Select.Trigger>
 
-											{#if $yearSelectOpen}
-												<div
-													use:melt={$yearMenu}
-													class="absolute right-0 top-full z-50 mt-1 w-max rounded-lg bg-sand-100 p-1 shadow-lg"
-													transition:fly={{ y: -4, duration: 150 }}
+											<Select.Portal>
+												<Select.Content
+													class="presence-pop z-50 w-max rounded-lg bg-sand-100 p-1 shadow-lg"
+													sideOffset={4}
+													align="end"
 												>
 													{#each yearOptions as opt (opt.value)}
-														<div
-															use:melt={$yearOption({ value: opt.value, label: opt.label })}
+														<Select.Item
+															value={opt.value}
+															label={opt.label}
 															class="flex items-center justify-between gap-3 rounded-md px-3 py-1.5 text-sm cursor-pointer outline-none whitespace-nowrap
 																text-ocean-500
 																data-[highlighted]:bg-white data-[highlighted]:text-ocean-700 data-[highlighted]:shadow-sm
 																data-[selected]:font-medium"
 														>
-															<span>{opt.label}</span>
-															{#if $isYearSelected(opt.value)}
-																<Check class="w-4 h-4 text-ocean-500" />
-															{/if}
-														</div>
+															{#snippet children({ selected })}
+																<span>{opt.label}</span>
+																{#if selected}
+																	<Check class="w-4 h-4 text-ocean-500" />
+																{/if}
+															{/snippet}
+														</Select.Item>
 													{/each}
-												</div>
-											{/if}
-										</div>
+												</Select.Content>
+											</Select.Portal>
+										</Select.Root>
 									</div>
-								{/if}
-
-								<!-- Request Cards -->
-								<div class="space-y-3">
-									{#each tab.requests as request (request.id)}
-										<EnhancedRequestCard {request} variant={tab.variant} />
-									{/each}
 								</div>
 							{/if}
-						</div>
-					{/if}
-				{/key}
-			</div>
+
+							<!-- Request Cards -->
+							<div class="space-y-3">
+								{#each tab.requests as request (request.id)}
+									<EnhancedRequestCard {request} variant={tab.variant} />
+								{/each}
+							</div>
+						{/if}
+					</div>
+				{/if}
+			</Tabs.Content>
 		{/each}
-	</div>
+	</Tabs.Root>
 </Card>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createAvatar, melt } from '@melt-ui/svelte';
+	import { Avatar } from 'bits-ui';
 	import { clsx } from 'clsx';
 
 	interface Props {
@@ -10,12 +10,6 @@
 	}
 
 	let { name = '', src, size = 'md', class: className = '' }: Props = $props();
-
-	const {
-		elements: { image, fallback }
-	} = createAvatar({
-		src: src ?? ''
-	});
 
 	const initials = $derived(
 		name
@@ -41,21 +35,19 @@
 	);
 </script>
 
-<div class={containerClasses}>
+<Avatar.Root class={containerClasses}>
 	{#if src}
-		<img
-			use:melt={$image}
+		<Avatar.Image
 			{src}
 			alt={name}
 			class="h-full w-full object-cover transition-opacity duration-200
-				data-[state=loading]:opacity-0 data-[state=loaded]:opacity-100 data-[state=error]:opacity-0"
+				data-[status=loading]:opacity-0 data-[status=loaded]:opacity-100 data-[status=error]:opacity-0"
 		/>
 	{/if}
-	<span
-		use:melt={$fallback}
+	<Avatar.Fallback
 		class="absolute inset-0 flex items-center justify-center text-white font-medium
-			data-[state=loaded]:hidden"
+			data-[status=loaded]:hidden"
 	>
 		{initials || '?'}
-	</span>
-</div>
+	</Avatar.Fallback>
+</Avatar.Root>

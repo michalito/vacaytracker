@@ -8,7 +8,7 @@
 	let { count = 4 }: Props = $props();
 </script>
 
-{#each Array(count) as _}
+{#each Array(count) as _, i (i)}
 	<div class="bg-white rounded-lg shadow-sm p-6 border border-sand-200">
 		<div class="flex items-center justify-between">
 			<div class="space-y-2 flex-1">

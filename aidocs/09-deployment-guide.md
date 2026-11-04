@@ -21,7 +21,7 @@
 |------|---------|---------|
 | Docker | 24+ | Container runtime |
 | Docker Compose | 2.20+ | Multi-container orchestration |
-| Node.js | 20+ | Frontend development |
+| Node.js | 22.17+ | Frontend development (SvelteKit 3 minimum) |
 | Go | 1.23+ | Backend development (optional, for non-Docker) |
 
 ### Quick Start
@@ -122,7 +122,7 @@ CMD ["./server"]
 
 ```dockerfile
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -139,7 +139,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -232,7 +232,7 @@ CMD ["air", "-c", ".air.toml"]
 - [ ] **Create Dockerfile.dev** `vacaytracker-frontend/Dockerfile.dev`
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -288,7 +288,9 @@ services:
       - "80:3000"
     environment:
       - NODE_ENV=production
-      - ORIGIN=${APP_URL}
+      # adapter-node no longer reads ORIGIN (SvelteKit 3). Behind the TLS proxy below, tell it
+      # which header carries the original scheme; set paths.origin in vite.config.ts if a fixed origin is needed.
+      - PROTOCOL_HEADER=x-forwarded-proto
     depends_on:
       backend:
         condition: service_healthy

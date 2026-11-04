@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { auth } from '$lib/stores/auth.svelte';
-	import { formatDateLong } from '$lib/utils/date';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import PasswordChange from '$lib/components/features/auth/PasswordChange.svelte';
-	import EmailPreferences from '$lib/components/features/auth/EmailPreferences.svelte';
+	import { auth } from '#lib/stores/auth.svelte.js';
+	import { formatDateLong } from '#lib/utils/date.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import PasswordChange from '#lib/components/features/auth/PasswordChange.svelte';
+	import EmailPreferences from '#lib/components/features/auth/EmailPreferences.svelte';
 	import { User, Calendar, Briefcase } from 'lucide-svelte';
 </script>
 

@@ -1,5 +1,5 @@
 import { vacationApi } from './vacation';
-import type { TeamVacation, TeamVacationResponse } from '$lib/types';
+import type { TeamVacation, TeamVacationResponse } from '#lib/types/index.js';
 
 export interface MonthKey {
 	month: number;

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { Clock, Sun, Palmtree, CloudRain } from 'lucide-svelte';
-	import type { VacationStatus } from '$lib/types';
+	import type { VacationStatus } from '#lib/types/index.js';
 
 	type StatusVariant = VacationStatus | 'upcoming' | 'completed';
 

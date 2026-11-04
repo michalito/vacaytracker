@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { TeamVacationResponse } from '$lib/types';
+import type { TeamVacation, TeamVacationResponse } from '#lib/types/index.js';
 
 vi.mock('./vacation', () => ({
 	vacationApi: {
@@ -12,6 +12,21 @@ import { calendarApi } from './calendar';
 
 const mockTeam = vi.mocked(vacationApi.team);
 
+function makeVacation(overrides: Partial<TeamVacation> & Pick<TeamVacation, 'id'>): TeamVacation {
+	return {
+		userId: `user-${overrides.id}`,
+		userName: 'Alice',
+		startDate: '2025-06-01',
+		endDate: '2025-06-05',
+		totalDays: 5,
+		...overrides
+	};
+}
+
+function teamResponse(month: number, vacations: TeamVacation[]): TeamVacationResponse {
+	return { vacations, month, year: 2025 };
+}
+
 describe('calendarApi', () => {
 	beforeEach(() => {
 		mockTeam.mockReset();
@@ -19,7 +34,7 @@ describe('calendarApi', () => {
 
 	describe('getMonth', () => {
 		it('delegates to vacationApi.team with month and year', async () => {
-			const mockResponse: TeamVacationResponse = { vacations: [] };
+			const mockResponse = teamResponse(6, []);
 			mockTeam.mockResolvedValueOnce(mockResponse);
 
 			const result = await calendarApi.getMonth(6, 2025);
@@ -31,14 +46,8 @@ describe('calendarApi', () => {
 
 	describe('getMonths', () => {
 		it('fetches a single month and returns vacations', async () => {
-			const vacation = {
-				id: 'v-1',
-				userName: 'Alice',
-				startDate: '2025-06-01',
-				endDate: '2025-06-05',
-				status: 'approved'
-			};
-			mockTeam.mockResolvedValueOnce({ vacations: [vacation] });
+			const vacation = makeVacation({ id: 'v-1' });
+			mockTeam.mockResolvedValueOnce(teamResponse(6, [vacation]));
 
 			const result = await calendarApi.getMonths([{ month: 6, year: 2025 }]);
 
@@ -48,22 +57,16 @@ describe('calendarApi', () => {
 		});
 
 		it('fetches multiple months and merges vacations', async () => {
-			const vacation1 = {
-				id: 'v-1',
-				userName: 'Alice',
-				startDate: '2025-06-01',
-				endDate: '2025-06-05',
-				status: 'approved'
-			};
-			const vacation2 = {
+			const vacation1 = makeVacation({ id: 'v-1' });
+			const vacation2 = makeVacation({
 				id: 'v-2',
 				userName: 'Bob',
 				startDate: '2025-07-10',
 				endDate: '2025-07-15',
-				status: 'pending'
-			};
-			mockTeam.mockResolvedValueOnce({ vacations: [vacation1] });
-			mockTeam.mockResolvedValueOnce({ vacations: [vacation2] });
+				totalDays: 4
+			});
+			mockTeam.mockResolvedValueOnce(teamResponse(6, [vacation1]));
+			mockTeam.mockResolvedValueOnce(teamResponse(7, [vacation2]));
 
 			const result = await calendarApi.getMonths([
 				{ month: 6, year: 2025 },
@@ -77,22 +80,21 @@ describe('calendarApi', () => {
 		});
 
 		it('deduplicates vacations with the same id across months', async () => {
-			const sharedVacation = {
+			const sharedVacation = makeVacation({
 				id: 'v-shared',
-				userName: 'Alice',
 				startDate: '2025-06-28',
 				endDate: '2025-07-05',
-				status: 'approved'
-			};
-			const uniqueVacation = {
+				totalDays: 6
+			});
+			const uniqueVacation = makeVacation({
 				id: 'v-unique',
 				userName: 'Bob',
 				startDate: '2025-07-10',
 				endDate: '2025-07-12',
-				status: 'approved'
-			};
-			mockTeam.mockResolvedValueOnce({ vacations: [sharedVacation] });
-			mockTeam.mockResolvedValueOnce({ vacations: [sharedVacation, uniqueVacation] });
+				totalDays: 3
+			});
+			mockTeam.mockResolvedValueOnce(teamResponse(6, [sharedVacation]));
+			mockTeam.mockResolvedValueOnce(teamResponse(7, [sharedVacation, uniqueVacation]));
 
 			const result = await calendarApi.getMonths([
 				{ month: 6, year: 2025 },

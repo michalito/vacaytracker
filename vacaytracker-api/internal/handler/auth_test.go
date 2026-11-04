@@ -582,6 +582,7 @@ func TestGetPublicSettings_Success(t *testing.T) {
 			s := domain.DefaultSettings()
 			s.DefaultVacationDays = 30
 			s.VacationResetMonth = 4
+			s.WeekendPolicy = domain.WeekendPolicy{ExcludeWeekends: true, ExcludedDays: []int{5, 6}}
 			return &s, nil
 		},
 	}
@@ -600,10 +601,16 @@ func TestGetPublicSettings_Success(t *testing.T) {
 	var resp struct {
 		DefaultVacationDays int `json:"defaultVacationDays"`
 		VacationResetMonth  int `json:"vacationResetMonth"`
+		WeekendPolicy       struct {
+			ExcludeWeekends bool  `json:"excludeWeekends"`
+			ExcludedDays    []int `json:"excludedDays"`
+		} `json:"weekendPolicy"`
 	}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 	assert.Equal(t, 30, resp.DefaultVacationDays)
 	assert.Equal(t, 4, resp.VacationResetMonth)
+	assert.True(t, resp.WeekendPolicy.ExcludeWeekends)
+	assert.Equal(t, []int{5, 6}, resp.WeekendPolicy.ExcludedDays)
 }
 
 func TestGetPublicSettings_RepoError(t *testing.T) {

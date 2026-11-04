@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import type { User, VacationRequest, Settings, NewsletterPreview } from '$lib/types';
+import type { User, VacationRequest, Settings, NewsletterPreview } from '#lib/types/index.js';
 
 // Mock the admin API -- hoisted above resetModules
-vi.mock('$lib/api/admin', () => ({
+vi.mock('#lib/api/admin.js', () => ({
 	adminApi: {
 		listUsers: vi.fn(),
 		createUser: vi.fn(),
@@ -59,8 +59,8 @@ const mockSettings: Settings = {
 };
 
 describe('admin store', () => {
-	let admin: (typeof import('$lib/stores/admin.svelte'))['admin'];
-	let adminApi: (typeof import('$lib/api/admin'))['adminApi'];
+	let admin: (typeof import('#lib/stores/admin.svelte.js'))['admin'];
+	let adminApi: (typeof import('#lib/api/admin.js'))['adminApi'];
 
 	beforeEach(async () => {
 		vi.useFakeTimers();
@@ -68,8 +68,8 @@ describe('admin store', () => {
 		vi.clearAllMocks();
 		vi.resetModules();
 
-		const storeModule = await import('$lib/stores/admin.svelte');
-		const apiModule = await import('$lib/api/admin');
+		const storeModule = await import('#lib/stores/admin.svelte.js');
+		const apiModule = await import('#lib/api/admin.js');
 		admin = storeModule.admin;
 		adminApi = apiModule.adminApi;
 	});
@@ -141,6 +141,34 @@ describe('admin store', () => {
 			expect(adminApi.listUsers).toHaveBeenCalledTimes(3);
 		});
 
+		it('refetches the unfiltered list after a filtered fetch replaced it', async () => {
+			const everyone = [mockUser({ id: '1' }), mockUser({ id: '2', role: 'admin' })];
+			const admins = [everyone[1]];
+			const pagination = { page: 1, limit: 10, total: 2, totalPages: 1 };
+			vi.mocked(adminApi.listUsers)
+				.mockResolvedValueOnce({ users: everyone, pagination })
+				.mockResolvedValueOnce({ users: admins, pagination: { ...pagination, total: 1 } })
+				.mockResolvedValueOnce({ users: everyone, pagination });
+
+			await admin.fetchUsers({ page: 1, limit: 10 });
+			await admin.fetchUsers({ page: 1, limit: 10, role: 'admin' });
+			// Back to "All Roles": must not be answered from the stale cache
+			await admin.fetchUsers({ page: 1, limit: 10 });
+
+			expect(adminApi.listUsers).toHaveBeenCalledTimes(3);
+			expect(admin.users).toEqual(everyone);
+		});
+
+		it('does not reuse a cached list fetched with a different page size', async () => {
+			const pagination = { page: 1, limit: 1, total: 2, totalPages: 2 };
+			vi.mocked(adminApi.listUsers).mockResolvedValue({ users: [mockUser()], pagination });
+
+			await admin.fetchUsers({ limit: 1 }); // dashboard summary
+			await admin.fetchUsers({ page: 1, limit: 10 }); // users page
+
+			expect(adminApi.listUsers).toHaveBeenCalledTimes(2);
+		});
+
 		it('handles error and clears users', async () => {
 			vi.mocked(adminApi.listUsers).mockRejectedValue(new Error('Network failure'));
 
@@ -208,9 +236,7 @@ describe('admin store', () => {
 		});
 
 		it('handles error and sets settings to null', async () => {
-			vi.mocked(adminApi.getSettings).mockRejectedValue(
-				new Error('Failed to fetch settings')
-			);
+			vi.mocked(adminApi.getSettings).mockRejectedValue(new Error('Failed to fetch settings'));
 
 			await admin.fetchSettings();
 
@@ -314,10 +340,7 @@ describe('admin store', () => {
 
 	describe('reviewRequest', () => {
 		it('calls API and removes request from pendingRequests', async () => {
-			const requests = [
-				mockVacationRequest({ id: 'req1' }),
-				mockVacationRequest({ id: 'req2' })
-			];
+			const requests = [mockVacationRequest({ id: 'req1' }), mockVacationRequest({ id: 'req2' })];
 
 			vi.mocked(adminApi.pendingRequests).mockResolvedValue({
 				requests,

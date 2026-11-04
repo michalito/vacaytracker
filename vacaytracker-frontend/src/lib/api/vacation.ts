@@ -4,7 +4,7 @@ import type {
 	VacationListResponse,
 	TeamVacationResponse,
 	CreateVacationForm
-} from '$lib/types';
+} from '#lib/types/index.js';
 
 export const vacationApi = {
 	create: (data: CreateVacationForm): Promise<VacationRequest> => {

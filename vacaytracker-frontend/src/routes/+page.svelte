@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { auth } from '$lib/stores/auth.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
+	import { resolve } from '$app/paths';
+	import { auth } from '#lib/stores/auth.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import Input from '#lib/components/ui/Input.svelte';
 
 	let email = $state('');
 	let password = $state('');
@@ -13,7 +14,7 @@
 	// Redirect if already authenticated
 	$effect(() => {
 		if (auth.isAuthenticated) {
-			goto('/dashboard');
+			goto(resolve('dashboard'));
 		}
 	});
 
@@ -50,7 +51,7 @@
 		try {
 			await auth.login(email, password);
 			toast.success('Welcome back!');
-			goto('/dashboard');
+			goto(resolve('dashboard'));
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : 'Login failed');
 			hasError = true;
@@ -114,7 +115,7 @@
 		style="animation-duration: 0.4s;"
 	>
 		<div
-			class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl shadow-ocean-900/10 border border-white/20 overflow-hidden"
+			class="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl shadow-ocean-900/10 border border-white/40 overflow-hidden"
 		>
 			<!-- Header -->
 			<div class="px-8 pt-8 pb-4 text-center">
@@ -169,7 +170,7 @@
 			</form>
 
 			<!-- Footer -->
-			<div class="px-8 py-4 bg-ocean-50/50 border-t border-ocean-100">
+			<div class="px-8 py-4 bg-ocean-50/50 border-t border-ocean-100/50">
 				<p class="text-center text-sm text-ocean-600">
 					Contact your administrator if you need access
 				</p>

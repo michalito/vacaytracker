@@ -1,4 +1,4 @@
-import type { ApiError } from '$lib/types';
+import type { ApiError } from '#lib/types/index.js';
 
 const API_BASE = '/api';
 

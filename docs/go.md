@@ -4,7 +4,7 @@
 >
 > **Related Documentation**
 > - [Features Documentation](./FEATURES.md) — Complete feature specifications
-> - [Frontend Implementation Guide](./vacaytracker-frontend-guide.md) — Svelte 5 + Melt UI technical guide
+> - [Frontend Implementation Guide](./vacaytracker-frontend-guide.md) — Svelte 5 + Bits UI technical guide
 
 ---
 

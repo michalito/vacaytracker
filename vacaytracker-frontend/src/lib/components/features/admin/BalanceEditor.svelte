@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { User } from '$lib/types';
-	import { admin } from '$lib/stores/admin.svelte';
-	import { toast } from '$lib/stores/toast.svelte';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import type { User } from '#lib/types/index.js';
+	import { admin } from '#lib/stores/admin.svelte.js';
+	import { toast } from '#lib/stores/toast.svelte.js';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 	import { Check, X, Edit2 } from 'lucide-svelte';
 
 	interface Props {
@@ -78,7 +78,7 @@
 				min="0"
 				max="365"
 				aria-label={`Vacation balance for ${user.name}`}
-				class="w-20 px-2 py-1 text-center rounded border border-ocean-300 focus:ring-2 focus:ring-ocean-500 focus:border-transparent"
+				class="w-20 px-2 py-1 text-center rounded-lg border-2 border-ocean-500/40 bg-white text-ocean-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ocean-500/30 focus:border-ocean-500"
 			/>
 			<Button
 				variant="ghost"

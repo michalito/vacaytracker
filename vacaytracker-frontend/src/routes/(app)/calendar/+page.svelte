@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { calendar } from '$lib/stores/calendar.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import CalendarHeader from '$lib/components/features/calendar/CalendarHeader.svelte';
-	import WeekView from '$lib/components/features/calendar/WeekView.svelte';
-	import MonthView from '$lib/components/features/calendar/MonthView.svelte';
-	import FilterPanel from '$lib/components/features/calendar/FilterPanel.svelte';
+	import { calendar } from '#lib/stores/calendar.svelte.js';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import CalendarHeader from '#lib/components/features/calendar/CalendarHeader.svelte';
+	import WeekView from '#lib/components/features/calendar/WeekView.svelte';
+	import MonthView from '#lib/components/features/calendar/MonthView.svelte';
+	import FilterPanel from '#lib/components/features/calendar/FilterPanel.svelte';
 	import { Calendar as CalendarIcon, RefreshCw } from 'lucide-svelte';
 
 	// Fetch data when component mounts and when view/date changes

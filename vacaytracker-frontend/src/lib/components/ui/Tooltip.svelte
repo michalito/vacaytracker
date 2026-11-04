@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { createTooltip, melt } from '@melt-ui/svelte';
-	import { clsx } from 'clsx';
+	import { Tooltip } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 
 	type Placement = 'top' | 'bottom' | 'left' | 'right';
@@ -9,57 +8,44 @@
 		content: string | Snippet;
 		placement?: Placement;
 		openDelay?: number;
-		closeDelay?: number;
 		disabled?: boolean;
-		class?: string;
-		children: Snippet;
+		/**
+		 * Renders the trigger. Spread `props` onto exactly one element, e.g.
+		 * `{#snippet child({ props })}<button type="button" {...props}>…</button>{/snippet}`,
+		 * so the tooltip attaches to that element instead of wrapping it in another button.
+		 */
+		child: Snippet<[{ props: Record<string, unknown> }]>;
 	}
 
 	let {
 		content,
 		placement = 'top',
 		openDelay = 300,
-		closeDelay = 150,
 		disabled = false,
-		class: className = '',
-		children
+		child: childSnippet
 	}: Props = $props();
-
-	const {
-		elements: { trigger, content: tooltipContent, arrow },
-		states: { open }
-	} = createTooltip({
-		forceVisible: true,
-		positioning: { placement },
-		openDelay,
-		closeDelay
-	});
 </script>
 
-<span use:melt={$trigger} class={clsx('inline-flex', className)}>
-	{@render children()}
-</span>
-
-{#if $open && !disabled}
-	<div
-		use:melt={$tooltipContent}
-		class="z-50 px-3 py-2 rounded-lg bg-ocean-800 text-white text-sm shadow-lg
-			transition-opacity duration-150
-			data-[state=open]:opacity-100
-			data-[state=closed]:opacity-0"
-	>
-		<div
-			use:melt={$arrow}
-			class="absolute h-2 w-2 bg-ocean-800 rotate-45
-				data-[side=top]:bottom-[-4px]
-				data-[side=bottom]:top-[-4px]
-				data-[side=left]:right-[-4px]
-				data-[side=right]:left-[-4px]"
-		></div>
-		{#if typeof content === 'string'}
-			{content}
-		{:else}
-			{@render content()}
-		{/if}
-	</div>
-{/if}
+<Tooltip.Root delayDuration={openDelay} {disabled}>
+	<Tooltip.Trigger>
+		{#snippet child({ props })}
+			<!-- Bits adds type="button" for its default <button>; the consumer chooses the element -->
+			{@const { type: _type, ...triggerProps } = props}
+			{@render childSnippet({ props: triggerProps })}
+		{/snippet}
+	</Tooltip.Trigger>
+	<Tooltip.Portal>
+		<Tooltip.Content
+			side={placement}
+			sideOffset={8}
+			class="presence-pop z-50 rounded-lg bg-ocean-800 px-3 py-2 text-sm text-white shadow-lg"
+		>
+			<Tooltip.Arrow class="text-ocean-800" />
+			{#if typeof content === 'string'}
+				{content}
+			{:else}
+				{@render content()}
+			{/if}
+		</Tooltip.Content>
+	</Tooltip.Portal>
+</Tooltip.Root>
